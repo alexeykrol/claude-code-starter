@@ -10,7 +10,7 @@
 > - For complete beginners: [Free AI Intro Course](https://alexeykrol.com/courses/ai_intro/) (Russian)
 
 [![GitHub](https://img.shields.io/badge/GitHub-claude--code--starter-blue)](https://github.com/alexeykrol/claude-code-starter)
-[![Version](https://img.shields.io/badge/version-1.0-orange.svg)](https://github.com/alexeykrol/claude-code-starter/releases)
+[![Version](https://img.shields.io/badge/version-1.1-orange.svg)](https://github.com/alexeykrol/claude-code-starter/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
 ---
@@ -20,6 +20,32 @@
 > **📁 Шаблоны доступны на двух языках:**
 > - `Init/` — русские шаблоны (Russian templates)
 > - `init_eng/` — английские шаблоны (English templates)
+
+---
+
+## 🆕 What's New in v1.1
+
+### 🔄 Migration System for Existing Projects
+
+The framework now supports **automatic migration of legacy projects**!
+
+**New Features:**
+- **`/migrate`** - automatic migration of documentation from legacy project
+- **`/migrate-finalize`** - finalization after review
+- **Two-stage process with pause** for safety
+- **Automatic conflict detection** (critical/medium/low priority)
+- **Legacy files archiving** (not deletion)
+- **Detailed reports** (MIGRATION_REPORT.md, CONFLICTS.md)
+
+**Documentation:**
+- Full guide: [`init_eng/MIGRATION.md`](init_eng/MIGRATION.md) (900+ lines)
+- See section [🔄 Migrating Existing Projects](#-migrating-existing-projects) below
+
+**Also:**
+- `/migrate` now for project migration
+- `/db-migrate` for database migrations (renamed)
+
+📋 [Full changelog](CHANGELOG.md)
 
 ---
 
