@@ -1,347 +1,363 @@
 # Claude Code Starter
 
-> Фреймворк мета-документации для эффективной разработки с Claude Code и AI-агентами
+> Meta-documentation framework for effective development with Claude Code and AI agents
+
+> **⚠️ Important Note:**
+> This framework is designed for **beginners practicing vibe-coding**, not professional developers. It covers a tiny fraction of AI coding agents' capabilities and will evolve and be modified as practical experience accumulates.
+>
+> **🎓 Created to support students of the AI Agents course for beginners:**
+> - Full course: [AI Agents Full Course](https://alexeykrol.com/courses/ai_full/) (Russian)
+> - For complete beginners: [Free AI Intro Course](https://alexeykrol.com/courses/ai_intro/) (Russian)
 
 [![GitHub](https://img.shields.io/badge/GitHub-claude--code--starter-blue)](https://github.com/alexeykrol/claude-code-starter)
+[![Version](https://img.shields.io/badge/version-1.0-orange.svg)](https://github.com/alexeykrol/claude-code-starter/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
 ---
 
-## 🎯 Что это?
+> **🇷🇺 Русская версия:** [README_RU.md](README_RU.md)
+>
+> **📁 Шаблоны доступны на двух языках:**
+> - `Init/` — русские шаблоны (Russian templates)
+> - `init_eng/` — английские шаблоны (English templates)
 
-**Claude Code Starter** — это ready-to-use фреймворк мета-документации, который превращает хаос разработки с AI в структурированный и эффективный процесс.
+---
 
-### Проблема
+## 🎯 What is this?
 
-Когда вы работаете с Claude Code или другими AI-агентами:
-- 🔥 AI не понимает контекст проекта → делает неправильные архитектурные решения
-- 💸 Загружает весь проект в контекст → тратит токены и деньги
-- 🔄 Каждый раз объясняете одно и то же → теряете время
-- 🎲 Непредсказуемые результаты → нет единого источника истины
-- 🚫 Проблемы с безопасностью → AI не знает правила
+**Claude Code Starter** is a ready-to-use meta-documentation framework that transforms chaotic AI-assisted development into a structured and efficient process.
 
-### Решение
+### The Problem
 
-Фреймворк предоставляет **11 готовых шаблонов документации**, которые:
-- ✅ **Автоматически загружаются** в контекст Claude Code (через `CLAUDE.md`)
-- ✅ **Экономят токены** через модульную архитектуру
-- ✅ **Единый источник истины** для AI и команды
-- ✅ **Встроенная безопасность** (SECURITY.md)
-- ✅ **Slash-команды** для автоматизации (/commit, /pr, /migrate и др.)
-- ✅ **Стандартизированные процессы** через Makefile
+When working with Claude Code or other AI agents:
+- 🔥 AI doesn't understand project context → makes wrong architectural decisions
+- 💸 Loads entire project into context → wastes tokens and money
+- 🔄 You explain the same things repeatedly → waste time
+- 🎲 Unpredictable results → no single source of truth
+- 🚫 Security issues → AI doesn't know the rules
+
+### The Solution
+
+The framework provides **11 ready-made documentation templates** that:
+- ✅ **Auto-load** into Claude Code context (via `CLAUDE.md`)
+- ✅ **Save tokens** through modular architecture
+- ✅ **Single source of truth** for AI and team
+- ✅ **Built-in security** (SECURITY.md)
+- ✅ **Slash commands** for automation (/commit, /pr, /migrate, etc.)
+- ✅ **Standardized processes** via Makefile
 
 ---
 
 ## 🚀 Quick Start
 
-### 1. Клонируйте репозиторий
+### 1. Clone the repository
 
 ```bash
 git clone https://github.com/alexeykrol/claude-code-starter.git
 cd claude-code-starter
 ```
 
-### 2. Скопируйте шаблоны в свой проект
+### 2. Copy templates to your project
 
 ```bash
-# Создайте новый проект или перейдите в существующий
+# Create new project or navigate to existing one
 mkdir my-new-project
 cd my-new-project
 
-# Скопируйте все файлы из Init/
+# Copy all files from Init/
 cp -r ../claude-code-starter/Init/* .
 cp -r ../claude-code-starter/Init/.claude .
 ```
 
-### 3. Заполните PROJECT_INTAKE.md
+### 3. Fill in PROJECT_INTAKE.md
 
-Это самый важный файл - начните с него:
+This is the most important file - start here:
 
 ```bash
-# Откройте в редакторе
+# Open in editor
 code PROJECT_INTAKE.md
 
-# Или используйте Claude Code
+# Or use Claude Code
 claude PROJECT_INTAKE.md
 ```
 
-Заполните ключевые секции:
-1. **Проблема → Решение → Ценность** - зачем ваш проект?
-2. **User Personas** - кто ваши пользователи?
-3. **User Flows** - как они будут взаимодействовать?
-4. **Уникальные vs Стандартные функции** - что писать, что подключать готовым?
-5. **Модульная структура** - как разбить на модули?
+Fill in key sections:
+1. **Problem → Solution → Value** - why does your project exist?
+2. **User Personas** - who are your users?
+3. **User Flows** - how will they interact?
+4. **Unique vs Standard Features** - what to build vs what to integrate?
+5. **Modular Structure** - how to break into modules?
 
-### 4. Запустите Claude Code
+### 4. Launch Claude Code
 
 ```bash
-# В корне вашего проекта
+# In your project root
 claude
 
-# Claude автоматически загрузит CLAUDE.md в контекст
-# И прочитает все необходимые файлы
+# Claude will automatically load CLAUDE.md into context
+# And read all necessary files
 ```
 
-### 5. Начните диалог с AI
+### 5. Start dialogue with AI
 
 ```
-"Прочитай PROJECT_INTAKE.md и задай все уточняющие вопросы"
+"Read PROJECT_INTAKE.md and ask all clarifying questions"
 ```
 
 ---
 
-## 📦 Что входит в Init/
+## 📦 What's in Init/
 
-### Основные файлы документации
+### Main Documentation Files
 
-| Файл | Назначение | Когда заполнять |
-|------|-----------|----------------|
-| **CLAUDE.md** | 🤖 Автоматически загружается в Claude Code | Сразу, минимальные правки |
-| **PROJECT_INTAKE.md** | ⭐ НАЧНИ ЗДЕСЬ - требования к проекту | Первый день, основа всего |
-| **SECURITY.md** | 🔐 Правила безопасности | Сразу, критично! |
-| **ARCHITECTURE.md** | 🏗️ Архитектурные решения | По мере принятия решений |
-| **BACKLOG.md** | 📋 Single source of truth статуса | Обновлять каждый спринт |
-| **AGENTS.md** | 🎯 Детальные инструкции для AI | По мере появления паттернов |
-| **WORKFLOW.md** | 🔄 Процессы разработки | Редко, при изменении процессов |
-| **PLAN_TEMPLATE.md** | 📝 Шаблон для планирования | Использовать как шаблон |
-| **README-TEMPLATE.md** | 📖 Шаблон README для проекта | Заполнить и переименовать в README.md |
+| File | Purpose | When to Fill |
+|------|---------|-------------|
+| **CLAUDE.md** | 🤖 Auto-loads in Claude Code | Immediately, minimal edits |
+| **PROJECT_INTAKE.md** | ⭐ START HERE - project requirements | Day 1, foundation of everything |
+| **SECURITY.md** | 🔐 Security rules | Immediately, critical! |
+| **ARCHITECTURE.md** | 🏗️ Architectural decisions | As decisions are made |
+| **BACKLOG.md** | 📋 Single source of truth for status | Update each sprint |
+| **AGENTS.md** | 🎯 Detailed AI instructions | As patterns emerge |
+| **WORKFLOW.md** | 🔄 Development processes | Rarely, when processes change |
+| **PLAN_TEMPLATE.md** | 📝 Planning template | Use as template |
+| **README-TEMPLATE.md** | 📖 README template for project | Fill and rename to README.md |
 
-### Автоматизация
+### Automation
 
-| Файл/Папка | Назначение |
-|------------|-----------|
-| **Makefile** | Стандартизированные команды (`make dev`, `make build`, etc) |
-| **.claude/commands/** | Slash-команды: `/commit`, `/pr`, `/migrate`, `/security`, etc |
-| **.claude/settings.json** | Права доступа для Claude Code |
-| **.env.example** | Шаблон переменных окружения |
-
----
-
-## 🧩 Философия: Модульная архитектура
-
-### Почему модули критичны для работы с AI?
-
-**Проблема монолитного подхода:**
-```
-Claude загружает весь проект (5000 строк) →
-Тратит токены на чтение всего →
-Дорого и медленно →
-Может запутаться в большом контексте
-```
-
-**Решение через модули:**
-```
-Claude загружает только нужный модуль (200 строк) →
-Меньше токенов →
-Быстрее и дешевле →
-Точнее понимает задачу
-```
-
-### Правило модульности
-
-**Приложение = Набор маленьких LEGO-кубиков**
-
-Каждый модуль:
-- Решает **одну узкую задачу**
-- Имеет **чёткий вход и выход**
-- Может быть **протестирован отдельно**
-- **Не зависит** от других модулей
-
-Подробнее читайте в `Init/ARCHITECTURE.md` (секция "Module Architecture")
+| File/Folder | Purpose |
+|------------|---------|
+| **Makefile** | Standardized commands (`make dev`, `make build`, etc) |
+| **.claude/commands/** | Slash commands: `/commit`, `/pr`, `/migrate`, `/security`, etc |
+| **.claude/settings.json** | Access permissions for Claude Code |
+| **.env.example** | Environment variables template |
 
 ---
 
-## 🎓 Как работать с фреймворком
+## 🧩 Philosophy: Modular Architecture
 
-### Этап 1: Инициализация проекта
+### Why modules are critical for AI work?
 
-1. **Скопируйте шаблоны** из `Init/` в свой проект
-2. **Заполните PROJECT_INTAKE.md** - это фундамент
-3. **Прочитайте SECURITY.md** - встройте правила безопасности в голову
-4. **Настройте Makefile** под свой стек (React/Vue/Node/etc)
+**Monolithic approach problem:**
+```
+Claude loads entire project (5000 lines) →
+Wastes tokens reading everything →
+Expensive and slow →
+May get confused in large context
+```
 
-### Этап 2: Работа с Claude Code
+**Solution through modules:**
+```
+Claude loads only needed module (200 lines) →
+Fewer tokens →
+Faster and cheaper →
+Better understanding of task
+```
 
-1. **Запустите** `claude` в корне проекта
-2. **CLAUDE.md автоматически загрузится** в контекст
-3. **Попросите AI прочитать PROJECT_INTAKE.md** и задать вопросы
-4. **Работайте модульно**: один модуль → тестирование → следующий модуль
+### Modularity Principle
 
-### Этап 3: Поддержка и развитие
+**Application = Set of small LEGO blocks**
 
-1. **Обновляйте BACKLOG.md** после каждого спринта
-2. **Дополняйте ARCHITECTURE.md** при архитектурных решениях
-3. **Пополняйте AGENTS.md** новыми паттернами
-4. **Используйте slash-команды** для автоматизации рутины
+Each module:
+- Solves **one narrow task**
+- Has **clear input and output**
+- Can be **tested separately**
+- **Doesn't depend** on other modules
+
+Read more in `Init/ARCHITECTURE.md` (section "Module Architecture")
+
+---
+
+## 🎓 How to Work with the Framework
+
+### Stage 1: Project Initialization
+
+1. **Copy templates** from `Init/` to your project
+2. **Fill PROJECT_INTAKE.md** - this is the foundation
+3. **Read SECURITY.md** - internalize security rules
+4. **Configure Makefile** for your stack (React/Vue/Node/etc)
+
+### Stage 2: Working with Claude Code
+
+1. **Launch** `claude` in project root
+2. **CLAUDE.md auto-loads** into context
+3. **Ask AI to read PROJECT_INTAKE.md** and ask questions
+4. **Work modularly**: one module → testing → next module
+
+### Stage 3: Maintenance and Evolution
+
+1. **Update BACKLOG.md** after each sprint
+2. **Enhance ARCHITECTURE.md** with architectural decisions
+3. **Expand AGENTS.md** with new patterns
+4. **Use slash commands** to automate routine tasks
 
 ---
 
 ## 💡 Best Practices
 
-### Для PROJECT_INTAKE.md
+### For PROJECT_INTAKE.md
 
 ✅ **DO:**
-- Начните с вопроса "**ЗАЧЕМ?**" - проблема → решение → ценность
-- Создайте 2-3 User Personas с именами и болями
-- Опишите User Flows по шагам (не абстракции!)
-- Разделите функции на **уникальные** (писать) vs **стандартные** (подключать готовым)
-- Спланируйте модульную структуру
+- Start with "**WHY?**" - problem → solution → value
+- Create 2-3 User Personas with names and pain points
+- Describe User Flows step-by-step (not abstractions!)
+- Separate features into **unique** (build) vs **standard** (integrate ready-made)
+- Plan modular structure
 
 ❌ **DON'T:**
-- Оставлять [ЗАПОЛНИТЬ] без заполнения
-- Писать абстрактно без конкретики
-- Планировать писать стандартные функции с нуля (Auth, Payments, etc)
+- Leave [FILL IN] without filling
+- Write abstractly without specifics
+- Plan to build standard features from scratch (Auth, Payments, etc)
 
-### Для работы с Claude Code
+### For working with Claude Code
 
 ✅ **DO:**
-- Используйте `/commit` вместо ручных коммитов
-- Загружайте контекст через TodoWrite для отслеживания задач
-- Работайте модулями: Auth → API → Screens → Business Logic
-- Просите AI обновлять документацию при изменениях
+- Use `/commit` instead of manual commits
+- Load context via TodoWrite for task tracking
+- Work by modules: Auth → API → Screens → Business Logic
+- Ask AI to update documentation with changes
 
 ❌ **DON'T:**
-- Не загружайте весь проект в контекст сразу
-- Не пропускайте SECURITY.md
-- Не игнорируйте архитектурные решения из ARCHITECTURE.md
+- Don't load entire project into context at once
+- Don't skip SECURITY.md
+- Don't ignore architectural decisions from ARCHITECTURE.md
 
-### Для безопасности
+### For security
 
 ✅ **ALWAYS:**
-- Читайте SECURITY.md перед началом кодирования
-- Используйте `.env.example` → `.env.local`
-- Валидируйте все входные данные
-- Используйте slash-команду `/security` для аудита
+- Read SECURITY.md before coding
+- Use `.env.example` → `.env.local`
+- Validate all input data
+- Use `/security` slash command for audits
 
 ❌ **NEVER:**
-- Коммитить `.env` файлы
-- Hardcode секретов в коде
-- Игнорировать предупреждения безопасности
+- Commit `.env` files
+- Hardcode secrets in code
+- Ignore security warnings
 
 ---
 
-## 📊 Структура проекта с фреймворком
+## 📊 Project Structure with Framework
 
-После копирования шаблонов ваш проект будет выглядеть так:
+After copying templates, your project will look like this:
 
 ```
 your-project/
 ├── .claude/
-│   ├── commands/           # Slash-команды (/commit, /pr, etc)
-│   └── settings.json       # Права доступа Claude Code
+│   ├── commands/           # Slash commands (/commit, /pr, etc)
+│   └── settings.json       # Claude Code access permissions
 │
-├── src/                    # Ваш код
-│   ├── features/           # Модули по фичам
-│   ├── lib/               # Утилиты и сервисы
+├── src/                    # Your code
+│   ├── features/           # Feature modules
+│   ├── lib/               # Utilities and services
 │   └── ...
 │
-├── CLAUDE.md              # 🤖 Автозагружается в Claude Code
-├── PROJECT_INTAKE.md      # ⭐ Требования к проекту
-├── SECURITY.md            # 🔐 Правила безопасности
-├── ARCHITECTURE.md        # 🏗️ Архитектурные решения
-├── BACKLOG.md            # 📋 Статус реализации
-├── AGENTS.md             # 🎯 Инструкции для AI
-├── WORKFLOW.md           # 🔄 Процессы разработки
-├── Makefile              # 🛠️ Стандартные команды
-├── .env.example          # 🔒 Шаблон переменных
-└── README.md             # 📖 Документация проекта (из README-TEMPLATE.md)
+├── CLAUDE.md              # 🤖 Auto-loads in Claude Code
+├── PROJECT_INTAKE.md      # ⭐ Project requirements
+├── SECURITY.md            # 🔐 Security rules
+├── ARCHITECTURE.md        # 🏗️ Architectural decisions
+├── BACKLOG.md            # 📋 Implementation status
+├── AGENTS.md             # 🎯 AI instructions
+├── WORKFLOW.md           # 🔄 Development processes
+├── Makefile              # 🛠️ Standard commands
+├── .env.example          # 🔒 Variables template
+└── README.md             # 📖 Project documentation (from README-TEMPLATE.md)
 ```
 
 ---
 
-## 🔄 Обновление фреймворка
+## 🔄 Framework Updates
 
-Фреймворк живой и развивается. Чтобы получить обновления:
+The framework is alive and evolving. To get updates:
 
 ```bash
-# В папке с claude-code-starter
+# In claude-code-starter folder
 git pull origin main
 
-# Сравните изменения и обновите свои проекты вручную
+# Compare changes and update your projects manually
 diff Init/CLAUDE.md your-project/CLAUDE.md
 ```
 
-**Рекомендация:** Не перезаписывайте свои заполненные файлы - копируйте только новые секции.
+**Recommendation:** Don't overwrite your filled files - copy only new sections.
 
 ---
 
 ## 🤝 Contributing
 
-Фреймворк создан для сообщества и открыт для улучшений!
+The framework is created for the community and open to improvements!
 
-### Как внести вклад:
+### How to contribute:
 
-1. **Fork** репозиторий
-2. **Создайте feature branch** (`git checkout -b feature/AmazingFeature`)
-3. **Commit изменения** (`git commit -m 'Add some AmazingFeature'`)
-4. **Push в branch** (`git push origin feature/AmazingFeature`)
-5. **Откройте Pull Request**
+1. **Fork** the repository
+2. **Create feature branch** (`git checkout -b feature/AmazingFeature`)
+3. **Commit changes** (`git commit -m 'Add some AmazingFeature'`)
+4. **Push to branch** (`git push origin feature/AmazingFeature`)
+5. **Open Pull Request**
 
-### Что можно улучшить:
+### What can be improved:
 
-- 📝 Новые секции в шаблонах
-- 🔧 Новые slash-команды
-- 🎨 Примеры для популярных стеков (Next.js, Vue, etc)
-- 🌍 Переводы (English version welcome!)
-- 📖 Туториалы и кейсы использования
+- 📝 New sections in templates
+- 🔧 New slash commands
+- 🎨 Examples for popular stacks (Next.js, Vue, etc)
+- 🌍 Translations (already have Russian version!)
+- 📖 Tutorials and use cases
 
 ---
 
-## 📚 Полезные ссылки
+## 📚 Useful Links
 
-- **[Claude Code Documentation](https://docs.claude.com/en/docs/claude-code)** - официальная документация
-- **[GitHub Repository](https://github.com/alexeykrol/claude-code-starter)** - исходный код фреймворка
-- **[Issues](https://github.com/alexeykrol/claude-code-starter/issues)** - сообщить о проблеме или предложить улучшение
+- **[Claude Code Documentation](https://docs.claude.com/en/docs/claude-code)** - official documentation
+- **[GitHub Repository](https://github.com/alexeykrol/claude-code-starter)** - framework source code
+- **[Issues](https://github.com/alexeykrol/claude-code-starter/issues)** - report problem or suggest improvement
 
 ---
 
 ## 📜 License
 
-MIT License - используйте свободно в своих проектах!
+MIT License - use freely in your projects!
 
 ---
 
 ## 🙏 Acknowledgments
 
-Фреймворк вдохновлен:
-- Официальными best practices Claude Code
-- Опытом разработки с AI-агентами
-- Принципами модульной архитектуры
-- Сообществом разработчиков
+Framework inspired by:
+- Official Claude Code best practices
+- Experience developing with AI agents
+- Modular architecture principles
+- Developer community
 
 ---
 
 ## ⭐ Roadmap
 
 ### v1.0 (Current)
-- ✅ Базовые шаблоны документации
-- ✅ Slash-команды для git и security
-- ✅ Makefile для стандартизации
-- ✅ Модульная архитектура
+- ✅ Basic documentation templates
+- ✅ Slash commands for git and security
+- ✅ Makefile for standardization
+- ✅ Modular architecture
 
 ### v1.1 (Planned)
-- [ ] Примеры для Next.js
-- [ ] Примеры для Vue 3
-- [ ] English version
+- [ ] Examples for Next.js
+- [ ] Examples for Vue 3
+- [x] English version
 - [ ] Video tutorials
 
 ### v2.0 (Future)
-- [ ] CLI для автоматической инициализации
-- [ ] Интеграция с популярными шаблонами
-- [ ] Плагины для VS Code
+- [ ] CLI for automatic initialization
+- [ ] Integration with popular templates
+- [ ] VS Code plugins
 - [ ] AI-powered code review templates
 
 ---
 
-## 💬 Вопросы?
+## 💬 Questions?
 
-Если что-то непонятно:
-1. Прочитайте `Init/PROJECT_INTAKE.md` - там подробные комментарии
-2. Изучите `Init/CLAUDE.md` - там Quick Start
-3. Откройте [Issue](https://github.com/alexeykrol/claude-code-starter/issues)
+If something is unclear:
+1. Read `Init/PROJECT_INTAKE.md` - detailed comments there
+2. Study `Init/CLAUDE.md` - Quick Start there
+3. Open [Issue](https://github.com/alexeykrol/claude-code-starter/issues)
 
 ---
 
 **Happy coding with Claude! 🤖✨**
 
-*Фреймворк создан для того, чтобы разработка с AI была не хаосом, а структурированным процессом.*
+*This framework turns AI-assisted development from chaos into a structured process.*
