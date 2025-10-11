@@ -698,28 +698,46 @@ project/
 
 ### Problem: "Want to rollback migration"
 
-**Solution (before finalization):**
-```bash
-# Just delete Init/ and archive/
-rm -rf Init/ archive/ MIGRATION_REPORT.md CONFLICTS.md
+**Solution: Use `/migrate-rollback`**
 
-# Restore from git (if commit was made before migration)
-git checkout HEAD~1 -- .
+```bash
+/migrate-rollback
 ```
 
-**Solution (after finalization):**
-```bash
-# Rollback last commit
-git reset --soft HEAD~1
+This command automatically:
+- Determines migration status (before or after finalization)
+- Restores legacy files from archive/
+- Deletes or restores Init/
+- Reverts git commit (if any)
+- Creates backup copy in case of issues
 
-# Restore legacy files from archive/
-mv archive/docs/* docs/
-mv archive/notes/* notes/
-# etc...
+**Supported scenarios:**
 
-# Delete Init/
-rm -rf Init/ archive/
+#### Before finalization (after `/migrate`)
 ```
+✅ Quick rollback:
+- Restores legacy from archive/
+- Deletes Init/, MIGRATION_REPORT.md, CONFLICTS.md
+- Deletes archive/ (optional)
+```
+
+#### After finalization (after `/migrate-finalize`)
+```
+✅ Rollback with git:
+- Uses git revert to rollback commit
+- Restores legacy from archive/
+- Deletes or restores Init/ to pre-migration state
+- Creates rollback commit
+```
+
+**Safety:**
+- ⚠️ Backup copy created in `.rollback_backup/`
+- ⚠️ Asks for confirmation before actions
+- ⚠️ Can be interrupted at any stage
+
+**Manual rollback:**
+
+If command doesn't work, see details in `.claude/commands/migrate-rollback.md`
 
 ### Problem: "After migration team doesn't know where to look for information"
 

@@ -195,7 +195,7 @@ Full migration guide: `init_eng/MIGRATION.md`
 **Safety:**
 - All legacy files archived (not deleted)
 - Two-stage process with pause for review
-- Can rollback before finalization
+- `/migrate-rollback` - automatic rollback at any stage
 
 ---
 

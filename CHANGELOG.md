@@ -7,6 +7,45 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.1.1] - 2025-01-11
+
+### Added
+
+#### 🔄 Migration Rollback Command
+- **Slash Command:**
+  - `/migrate-rollback` - Rollback migration at any stage (before or after finalization)
+
+#### Rollback Features
+- **Automatic Status Detection:**
+  - Detects whether migration is before or after finalization
+  - Different rollback strategies for each status
+- **Safety Features:**
+  - Creates backup copy in `.rollback_backup/`
+  - Asks for confirmation before destructive actions
+  - Can be interrupted at any stage
+- **Two Rollback Scenarios:**
+  - **Before finalization**: Quick rollback (delete Init/, restore from archive/)
+  - **After finalization**: Git-aware rollback (revert commit, restore files)
+- **Restoration:**
+  - Restores all legacy files from archive/
+  - Deletes or restores Init/ to pre-migration state
+  - Cleans up migration reports
+
+### Changed
+- Updated `CLAUDE.md` (both languages) with `/migrate-rollback` command reference
+- Updated `MIGRATION.md` (both languages) with rollback section
+- Updated README files with rollback safety note
+
+### Documentation
+- Added comprehensive rollback guide in `.claude/commands/migrate-rollback.md`
+- Updated "Troubleshooting" section in MIGRATION.md to reference `/migrate-rollback`
+- Examples of rollback scenarios and safety checks
+
+### Why This Matters
+Provides safe exit strategy from migration at any point, increasing confidence when trying the framework on existing projects.
+
+---
+
 ## [1.1.0] - 2025-01-11
 
 ### Added
