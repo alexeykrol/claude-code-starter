@@ -7,6 +7,64 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.1.2] - 2025-01-11
+
+### Added
+
+#### 🤖 Interactive Conflict Resolution Command
+- **Slash Command:**
+  - `/migrate-resolve` - Interactive AI-guided conflict resolution for migration
+
+#### Resolution Features
+- **Interactive Process:**
+  - Reads each conflict from CONFLICTS.md one by one
+  - AI analyzes both legacy and Init/ files
+  - Proposes smart merge solution for each conflict
+  - User chooses: [A]uto-resolve / [M]anual / [S]kip / [Q]uit
+- **Smart Merge Strategy:**
+  - AI provides concrete step-by-step solution
+  - Specifies exact sections to copy and where to insert
+  - Transforms legacy content to framework format
+  - Preserves important information
+- **Safety Features:**
+  - Creates timestamped backups in `.conflict_resolution_backup/`
+  - Detailed logging in `CONFLICT_RESOLUTION_LOG.md`
+  - Requires confirmation before applying each change
+  - Legacy files never modified (read-only)
+  - Can quit anytime and resume later
+- **Rollback Support:**
+  - `/migrate-rollback --conflicts-only` for conflict resolution rollback
+  - Manual rollback from timestamped backups
+  - No changes to main migration
+
+#### Conflict Resolution Logging
+- **CONFLICT_RESOLUTION_LOG.md:**
+  - Session information with timestamps
+  - Detailed action logs for each conflict
+  - AI recommendations for manual conflicts
+  - Statistics and status tracking
+
+### Changed
+- Updated `CLAUDE.md` (both languages) with `/migrate-resolve` command reference
+- Updated `MIGRATION.md` (both languages):
+  - Added "Automatic Resolution via /migrate-resolve" section
+  - Updated "Troubleshooting" with /migrate-resolve examples
+- Updated `README.md` and `README_RU.md` with conflict resolution mention
+
+### Documentation
+- Added comprehensive command guide in `.claude/commands/migrate-resolve.md` (Russian & English)
+- Examples of conflict resolution scenarios
+- Integration guide with other migration commands
+
+### Why This Matters
+Eliminates the main pain point of migration - manual conflict resolution. Users no longer need to figure out how to merge legacy docs into framework structure. AI guides them through each conflict with concrete, actionable solutions.
+
+**User Experience:**
+- Before: "Too many conflicts, don't know where to start" → frustration → abandoned migration
+- After: `/migrate-resolve` → AI shows exactly what to do → [A] to accept → done!
+
+---
+
 ## [1.1.1] - 2025-01-11
 
 ### Added

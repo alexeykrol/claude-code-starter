@@ -169,7 +169,7 @@ claude
 
 **Pause: Your Review**
 - Read MIGRATION_REPORT.md
-- Resolve conflicts
+- Resolve conflicts with `/migrate-resolve` (interactive AI-guided process)
 - Check init_eng/ files
 - Fill gaps
 

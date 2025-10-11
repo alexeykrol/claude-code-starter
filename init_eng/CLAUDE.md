@@ -200,6 +200,7 @@ Use slash commands for typical tasks:
 - `/commit` - create git commit
 - `/pr` - create Pull Request
 - `/migrate` - migrate legacy project to framework
+- `/migrate-resolve` - interactive migration conflict resolution
 - `/migrate-finalize` - finalize migration
 - `/migrate-rollback` - rollback migration
 - `/db-migrate` - create database migration

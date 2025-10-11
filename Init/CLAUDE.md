@@ -200,6 +200,7 @@ npm run build
 - `/commit` - создать git commit
 - `/pr` - создать Pull Request
 - `/migrate` - миграция legacy проекта на фреймворк
+- `/migrate-resolve` - интерактивное разрешение конфликтов миграции
 - `/migrate-finalize` - финализация миграции
 - `/migrate-rollback` - откатить миграцию
 - `/db-migrate` - создать database migration

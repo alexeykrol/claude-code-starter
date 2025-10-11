@@ -270,6 +270,55 @@ code MIGRATION_REPORT.md
 
 #### 2. If CONFLICTS.md Exists - Resolve Conflicts
 
+##### Automatic Resolution via `/migrate-resolve`
+
+**Recommended approach:**
+
+```bash
+/migrate-resolve
+```
+
+This command launches interactive conflict resolution process:
+
+✅ **What it does:**
+- Reads each conflict from CONFLICTS.md
+- Analyzes legacy files and Init/ files
+- Proposes smart solution (merge strategy)
+- Asks for your confirmation for each conflict
+- Applies changes automatically after [A]
+- Creates detailed log in CONFLICT_RESOLUTION_LOG.md
+- Creates backups before changes
+
+✅ **Interactive choice for each conflict:**
+```
+Conflict #1: README.md vs PROJECT_INTAKE.md
+
+🤖 Proposed solution (merge strategy):
+1. Take "Architecture" section from archive/docs/README.md
+2. Insert into Init/ARCHITECTURE.md after "## Core Principles"
+...
+
+Your choice:
+[A] Auto-resolve - apply AI suggestion
+[M] Manual resolution - I'll handle it myself later
+[S] Skip - move to next conflict
+[Q] Quit - finish working
+```
+
+✅ **Safety:**
+- Backups in `.conflict_resolution_backup/`
+- Can rollback via `/migrate-rollback --conflicts-only`
+- Legacy files not modified
+- Requires confirmation at each step
+
+**Details:** See `.claude/commands/migrate-resolve.md`
+
+---
+
+##### Manual Conflict Resolution
+
+If you prefer to resolve manually:
+
 ```bash
 # Open CONFLICTS.md
 code CONFLICTS.md
@@ -666,7 +715,19 @@ project/
 
 ### Problem: "Too many conflicts, don't know where to start"
 
-**Solution:**
+**Solution via `/migrate-resolve`:**
+```bash
+/migrate-resolve
+```
+
+This command:
+- Walks you through each conflict interactively
+- Proposes concrete solution for each
+- You choose [A]uto/[M]anual/[S]kip/[Q]uit
+- Creates backups and logs
+- Can quit [Q] anytime and return later
+
+**Manual solution:**
 ```
 1. Open CONFLICTS.md
 2. Focus only on 🔴 critical ones
