@@ -140,17 +140,23 @@ make pre-push     # audit + build
 - ❌ **Update dependencies** without testing
 - ❌ **Push to main/master** without review (if team workflow requires it)
 
-### 🔐 Security (CRITICAL - NEVER COMPROMISE)
-- ❌ **NEVER hardcode secrets** (API keys, passwords, tokens) in code
-- ❌ **NEVER commit `.env` or `.env.local`** to repository
-- ❌ **NEVER trust user input** - always validate and sanitize
-- ❌ **NEVER use `eval()` or `new Function()`** with user data
-- ❌ **NEVER expose sensitive data** in error messages or logs
-- ❌ **NEVER skip input validation** on server-side (client-side is not enough!)
-- ❌ **NEVER create SQL queries** with string concatenation (use parameterized)
-- ❌ **NEVER disable security features** (CORS, CSRF protection, etc)
-- ❌ **NEVER deploy without** running security checks (npm audit, secret scan)
-- ❌ **NEVER assume data is safe** - sanitize output to prevent XSS
+### 🔐 Security (CRITICAL - READ SECURITY.md FIRST!)
+
+**📖 FULL SECURITY POLICY:** SECURITY.md
+
+**BEFORE starting any coding task:**
+1. Read SECURITY.md → Stage 1 (Planning)
+2. Follow checklists for current stage
+3. If in doubt → `/security` for audit
+
+**Key principles (all details in SECURITY.md):**
+- 🔐 Secrets management → SECURITY.md "Environment Variables"
+- 🔐 Input validation → SECURITY.md Stage 3
+- 🔐 SQL injection prevention → SECURITY.md "Database Security"
+- 🔐 XSS prevention → SECURITY.md "Output Sanitization"
+
+**AGENTS.md contains only project-specific security patterns!**
+See "Project Security Patterns" section below for project-specific rules.
 
 ---
 
@@ -171,17 +177,16 @@ make pre-push     # audit + build
 - ✅ **Use TodoWrite tool** to track progress
 
 ### 🔐 Security (Every Single Time)
-- ✅ **READ SECURITY.md** before starting ANY coding task
-- ✅ **Validate ALL user input** (type, format, length, range)
-- ✅ **Sanitize ALL output** (prevent XSS attacks)
-- ✅ **Use environment variables** for ALL secrets (never hardcode)
-- ✅ **Use parameterized queries** for database (prevent SQL injection)
-- ✅ **Check authentication** before accessing protected resources
-- ✅ **Check authorization** (user has permission for this action?)
-- ✅ **Handle errors securely** (log internally, show generic message to user)
-- ✅ **Run npm audit** before committing changes
-- ✅ **Review SECURITY.md checklist** for current development stage
-- ✅ **Think like an attacker** - "How could I break this?"
+
+**📖 USE CHECKLISTS FROM SECURITY.md:**
+- See SECURITY.md → Stage-specific checklists
+- See SECURITY.md → "Security Requirements by Stage"
+
+**Quick check:**
+```bash
+/security  # Run AI-guided security audit
+make security  # npm audit check
+```
 
 ### After Completion
 - ✅ **Update BACKLOG.md** with implementation status
@@ -228,17 +233,14 @@ make pre-push     # audit + build
 ```
 
 ### 🔐 Security Review (Before Every Deploy)
-```
-1. Read SECURITY.md - Review all checklists
-2. Run npm audit - Fix high/critical vulnerabilities
-3. Scan for secrets - grep for API keys, tokens, passwords
-4. Test authentication - Try bypassing auth if applicable
-5. Test authorization - Try accessing other users' data
-6. Test input validation - Send malicious input (XSS, injection)
-7. Review error handling - Ensure no sensitive data exposed
-8. Check environment variables - All secrets server-side only
-9. Verify HTTPS enforced - Production uses HTTPS
-10. Complete Security Sign-Off - Use template from SECURITY.md
+
+**📖 USE CHECKLIST FROM SECURITY.md:**
+- See SECURITY.md → Stage 5 (Pre-Deployment)
+- See SECURITY.md → "Security Sign-Off Template"
+
+**Or use automation:**
+```bash
+/security  # Run AI-guided security audit
 ```
 
 ---
@@ -269,6 +271,28 @@ make pre-push     # audit + build
 **Decision:** [How data is organized]
 **Reason:**
 - [Reason 1]
+
+---
+
+## 🔐 Project Security Patterns
+
+> **Important:** This section is for SPECIFIC security patterns for THIS project.
+> General security rules see SECURITY.md
+
+[FILL IN as project develops]
+
+### Pattern 1: [Project-Specific Security Rule]
+[Description of project-specific security pattern]
+
+**Template:**
+```markdown
+### Pattern N: [Name]
+**Context:** [When this applies]
+**Rule:** [What to do]
+**Reason:** [Why this is important for THIS project]
+**Example:**
+[Code example]
+```
 
 ---
 

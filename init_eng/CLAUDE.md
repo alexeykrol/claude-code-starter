@@ -68,44 +68,46 @@ gh issue view <number>        # View issue
 
 ## 🔐 Security (CRITICAL!)
 
-**ALWAYS before coding:**
-- ✅ Read SECURITY.md
-- ✅ Validate ALL user input
-- ✅ Use environment variables for secrets
-- ✅ Use parameterized queries (not concatenation)
-- ✅ Check authentication and authorization
-- ❌ NEVER hardcode secrets
-- ❌ NEVER commit .env files
-- ❌ NEVER use eval() or new Function()
+**📖 FULL POLICY:** SECURITY.md
+
+**⚠️ ALWAYS before coding:**
+1. Read SECURITY.md completely
+2. Follow the checklist for current development stage (SECURITY.md → Stage X)
+
+**Key rules (details in SECURITY.md):**
+- ✅ Input validation → SECURITY.md Stage 3
+- ✅ Secrets in .env → SECURITY.md "Secrets Management"
+- ✅ Parameterized queries → SECURITY.md "SQL Injection Prevention"
+- ❌ Never hardcode secrets → SECURITY.md "NEVER DO" section
+- ❌ Never trust user input → SECURITY.md "Zero Trust"
+
+**For AI agents:** Run `/security` for automatic audit
 
 ---
 
 ## 🏗️ Workflow
 
-### Before starting a task:
-1. Read ARCHITECTURE.md (architectural decisions)
-2. Check BACKLOG.md (current status)
-3. Use TodoWrite for planning
-4. Follow existing patterns from code
+**📖 FULL DOCUMENTATION:** WORKFLOW.md
 
-### After series of changes:
-- Always run `make typecheck` (or npm run type-check)
-- Run `make lint` for style checking
-- For speed, run individual tests, not all at once
+**Quick navigation:**
 
-### Working with git:
-- Use meaningful commit messages (why, not what)
-- Merge: for feature branches to main
-- Rebase: for updating feature branch from main
-- Always check git status before commit
+### Before starting a task
+→ See WORKFLOW.md → "Sprint Start" section
 
-### Sprint completion:
-1. Ensure all tests pass
-2. Update BACKLOG.md (implementation status)
-3. Update ARCHITECTURE.md (if architectural changes were made)
-4. Update README.md (if user-facing changes)
-5. Update AGENTS.md (if new patterns/rules)
-6. Create sprint completion commit
+### During development
+→ See WORKFLOW.md → "Implementation" section
+→ See AGENTS.md → Project-specific patterns
+
+### After changes
+→ `make typecheck && make lint`
+
+### Sprint completion
+→ See WORKFLOW.md → "Sprint Completion Checklist" (29 items!)
+→ ⚠️ CRITICAL: Don't skip Security Requirements!
+
+### Git workflow
+→ See WORKFLOW.md → "Git Workflow" section
+→ Commit messages: See WORKFLOW.md → "Commit Templates"
 
 ---
 

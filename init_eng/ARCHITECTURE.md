@@ -6,6 +6,14 @@
 
 ---
 
+> **🏗️ Authoritative Source:** This is the SINGLE SOURCE OF TRUTH for:
+> - System architecture and technical decisions
+> - Modularity philosophy and patterns
+> - Component architecture
+> - Technology stack choices
+>
+> Other files (CLAUDE.md, PROJECT_INTAKE.md) link here, don't duplicate.
+
 ## 📊 Technology Stack
 
 ### Frontend

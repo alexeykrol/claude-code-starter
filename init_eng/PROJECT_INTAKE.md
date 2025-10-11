@@ -535,21 +535,18 @@ Entity 3: [Name]
 
 ### 25a. Modular Structure (MANDATORY!)
 
-**Why modular architecture is critical:**
+**Why modular architecture is critical for AI work:**
 
+📖 **FULL PHILOSOPHY:** ARCHITECTURE.md → "Module Architecture" section
+
+**Brief explanation:**
 1. **Token Economy:** AI loads only needed module (100-200 lines), not entire project (1000+ lines)
-2. **Easy Testing:** Each module = separate task = easy to verify
-3. **Parallel Development:** Can work on different modules simultaneously
-4. **Cost Savings:** Less context = lower cost of AI queries
+2. **Simplicity:** Each module = separate task = easy to verify
+3. **Speed:** Can work on different modules in parallel
 
-**Principle:** Application = set of small building blocks (modules), each solving a narrow task
+**Principle:** Application = set of small LEGO blocks
 
-**Typical modules:**
-- Authentication (separate module)
-- Database (separate module)
-- Each UI screen (separate module)
-- Each business function (separate module)
-- API / Backend (separate module)
+📖 **Details, examples, diagrams:** See ARCHITECTURE.md → "Module Architecture"
 
 **Your approach to modularity:**
 
@@ -557,6 +554,9 @@ Entity 3: [Name]
 - [ ] No, I want monolithic structure (NOT recommended for AI work)
 
 **Selected:** [ANSWER: Modular (recommended)]
+
+**How we'll develop modules:**
+[ANSWER: For example, "One module at a time. See ARCHITECTURE.md for typical sequence"]
 
 ---
 

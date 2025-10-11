@@ -4,6 +4,14 @@
 **Purpose:** Standardized development workflows for consistency and quality
 **Last Updated:** [DATE]
 
+> **📋 Authoritative Source:** This is the SINGLE SOURCE OF TRUTH for:
+> - Sprint workflow and processes
+> - Git workflow and commit templates
+> - Sprint completion checklists
+> - Development best practices
+>
+> Other files (CLAUDE.md, AGENTS.md) link here, don't duplicate.
+
 ---
 
 ## 🎯 Development Philosophy

@@ -9,6 +9,14 @@
 > Security is NOT a separate phase at the end.
 > Security must be considered at EVERY stage: Planning → Design → Development → Testing → Deployment
 
+> **🔐 Authoritative Source:** This is the SINGLE SOURCE OF TRUTH for:
+> - Security practices and guidelines
+> - Security checklists for all stages
+> - Secure coding standards
+> - Vulnerability prevention
+>
+> Other files (CLAUDE.md, AGENTS.md, WORKFLOW.md) link here, don't duplicate.
+
 ---
 
 ## 🎯 Security Philosophy
