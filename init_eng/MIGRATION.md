@@ -114,6 +114,83 @@ tar -czf backup-before-migration.tar.gz .
 - [ ] You have access to project history
 - [ ] You know where important documents are located
 
+### Step 3.5: (Optional) Create .migrationignore
+
+**If your project has files that should NOT be migrated:**
+
+Reference articles, meeting notes, research documents, temporary notes - all of these are NOT project meta-documentation and should be excluded from migration.
+
+**Create `.migrationignore` in project root:**
+
+```bash
+# Copy the example and edit
+cp init_eng/.migrationignore.example .migrationignore
+
+# Or create manually
+nano .migrationignore
+```
+
+**What to exclude:**
+- ✅ Reference articles (docs/articles/, docs/references/)
+- ✅ Meeting notes (notes/meeting-*.md)
+- ✅ Temporary notes (notes/temp*.md, notes/scratch*.md)
+- ✅ Research documents (research/, experiments/)
+- ✅ Old versions (old/, archive/, deprecated/)
+- ✅ Binary files (*.pdf, *.docx)
+
+**What NOT to exclude:**
+- ❌ Your project documentation (README.md, architecture.md)
+- ❌ Project requirements
+- ❌ TODO lists and backlog
+- ❌ Security documentation
+- ❌ Workflow and processes
+
+**Syntax (similar to .gitignore):**
+```
+# Comments start with #
+docs/articles/          # Exclude entire folder
+notes/meeting-*.md      # Pattern matching
+*.pdf                   # File extension
+!important.md          # Negative pattern (DON'T exclude)
+```
+
+**Example .migrationignore:**
+```
+# Reference articles
+docs/articles/
+docs/references/
+
+# Meeting notes
+notes/meeting-*.md
+notes/standup-*.md
+
+# Temporary notes
+notes/temp*.md
+notes/scratch*.md
+
+# Research
+research/
+experiments/
+
+# Old/archived
+old/
+archive/
+docs/deprecated/
+
+# Binary files
+*.pdf
+*.docx
+*.pptx
+```
+
+**What happens during migration:**
+- Excluded files are **NOT migrated** to Init/
+- Excluded files are **NOT archived** to archive/
+- Excluded files **remain in original location** unchanged
+- MIGRATION_REPORT.md will show detailed list of excluded files
+
+**Note:** If `.migrationignore` is not created, AI will analyze files during `/migrate` and offer to create it automatically based on detected non-meta files.
+
 ### Step 4: Launch Claude Code
 
 ```bash

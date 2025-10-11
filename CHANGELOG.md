@@ -7,6 +7,76 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.1.3] - 2025-01-11
+
+### Added
+
+#### 📂 Migration Exclusion System (.migrationignore)
+- **Templates:**
+  - `.migrationignore.example` in Init/ (Russian version)
+  - `.migrationignore.example` in init_eng/ (English version)
+
+#### Exclusion Features
+- **Gitignore-style Syntax:**
+  - Folder exclusions: `docs/articles/`, `research/`
+  - Pattern matching: `notes/meeting-*.md`, `*-2024-*.md`
+  - File extensions: `*.pdf`, `*.docx`, `*.pptx`
+  - Negative patterns: `!important.md` (don't exclude)
+- **Auto-detection:**
+  - AI analyzes files before migration
+  - Detects non-meta files (articles, meeting notes, research docs)
+  - Offers to create .migrationignore with recommendations
+  - User confirms exclusions interactively
+- **Smart Exclusion Criteria:**
+  - Files in folders: articles/, references/, research/, examples/
+  - File patterns: meeting-*.md, brainstorm-*.md, temp-*.md
+  - Date patterns: *-2024-*.md, *-2025-*.md
+  - Large files (>50KB) with lots of code
+  - Old/archived folders: old/, archive/, deprecated/
+  - Binary files: *.pdf, *.docx, *.pptx
+- **Exclusion Behavior:**
+  - Excluded files remain in original location (NOT migrated)
+  - Excluded files are NOT archived
+  - Excluded files are NOT modified
+  - Detailed reporting in MIGRATION_REPORT.md
+
+### Changed
+- **Migration Command (`/migrate`):**
+  - Added Step 0: Check .migrationignore before scanning
+  - Interactive .migrationignore creation if missing
+  - Respects exclusion patterns during file scanning
+  - Updated Summary section to show excluded file counts
+- **MIGRATION_REPORT.md:**
+  - Added "Excluded from Migration" section
+  - Shows patterns and matched files
+  - Explains why files were excluded and where they remain
+- **MIGRATION.md** (both languages):
+  - Added Step 3.5: "(Optional) Create .migrationignore"
+  - Detailed guide on what to exclude vs what to keep
+  - Examples and syntax explanation
+- **README.md and README_RU.md:**
+  - Added "Excluding Files from Migration" section
+  - Quick start instructions updated with .migrationignore step
+  - Examples of common exclusion patterns
+- **CLAUDE.md** (both languages):
+  - Updated migration references to mention .migrationignore
+
+### Why This Matters
+Solves a critical pain point: legacy projects often contain reference materials, meeting notes, and research documents that are NOT project meta-documentation. Without exclusion mechanism, these files would:
+- Be incorrectly analyzed as project documentation
+- Create false conflicts during migration
+- Clutter Init/ with non-project information
+- Waste time on manual cleanup
+
+**User Experience:**
+- Before: All files processed → many false conflicts → confusion → manual cleanup needed
+- After: Create .migrationignore → only project docs processed → clean migration → no cleanup
+
+**Smart Defaults:**
+AI automatically suggests exclusions based on file analysis, making the process effortless for users who don't know what to exclude.
+
+---
+
 ## [1.1.2] - 2025-01-11
 
 ### Added

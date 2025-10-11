@@ -114,6 +114,62 @@ tar -czf backup-before-migration.tar.gz .
 - [ ] У вас есть доступ к истории проекта
 - [ ] Вы знаете где находятся важные документы
 
+### Шаг 3.5: (Опционально) Создайте .migrationignore
+
+**Если в проекте есть файлы, которые НЕ должны мигрироваться:**
+
+Справочные статьи, записи встреч, исследовательские документы, временные заметки - все это НЕ является мета-документацией проекта и должно быть исключено из миграции.
+
+**Создайте `.migrationignore` в корне проекта:**
+
+```bash
+# Скопируйте пример и отредактируйте
+cp Init/.migrationignore.example .migrationignore
+
+# Или создайте вручную
+nano .migrationignore
+```
+
+**Что исключать:**
+- ✅ Справочные статьи (docs/articles/, docs/references/)
+- ✅ Записи встреч (notes/meeting-*.md)
+- ✅ Временные заметки (notes/temp*.md, notes/scratch*.md)
+- ✅ Исследования (research/, experiments/)
+- ✅ Старые версии (old/, archive/, deprecated/)
+- ✅ Бинарные файлы (*.pdf, *.docx)
+
+**Что НЕ исключать:**
+- ❌ Документацию вашего проекта (README.md, architecture.md)
+- ❌ Требования к проекту
+- ❌ TODO списки и backlog
+- ❌ Security документацию
+- ❌ Workflow и процессы
+
+**Примечание:** Если `.migrationignore` не создан, AI предложит создать его автоматически на основе анализа файлов при запуске `/migrate`.
+
+**Пример .migrationignore:**
+```
+# Reference articles
+docs/articles/
+docs/references/
+
+# Meeting notes
+notes/meeting-*.md
+
+# Research
+research/
+
+# Old/archived
+old/
+docs/deprecated/
+
+# Binary files
+*.pdf
+*.docx
+```
+
+См. `Init/.migrationignore.example` для полного примера с комментариями.
+
 ### Шаг 4: Запустите Claude Code
 
 ```bash

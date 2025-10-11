@@ -10,7 +10,7 @@
 > - For complete beginners: [Free AI Intro Course](https://alexeykrol.com/courses/ai_intro/) (Russian)
 
 [![GitHub](https://img.shields.io/badge/GitHub-claude--code--starter-blue)](https://github.com/alexeykrol/claude-code-starter)
-[![Version](https://img.shields.io/badge/version-1.1.2-orange.svg)](https://github.com/alexeykrol/claude-code-starter)
+[![Version](https://img.shields.io/badge/version-1.1.3-orange.svg)](https://github.com/alexeykrol/claude-code-starter)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
 ---
@@ -23,7 +23,23 @@
 
 ---
 
-## 🆕 What's New in v1.1.2
+## 🆕 What's New in v1.1.3
+
+### 📂 Migration Exclusion System (v1.1.3)
+
+**NEW:** `.migrationignore` file support for excluding non-project files from migration!
+
+**Key features:**
+- 📝 Gitignore-style syntax for exclusion patterns
+- 🤖 AI auto-detection of non-meta files (articles, meeting notes, research)
+- 💬 Interactive confirmation before creating .migrationignore
+- 📊 Detailed reporting of excluded files in MIGRATION_REPORT.md
+- ✅ Excluded files remain in place (not migrated, not archived)
+
+**Problem solved:** Legacy projects often contain reference materials that shouldn't be migrated as project documentation.
+
+**Before:** All files processed → false conflicts → manual cleanup
+**After:** Create .migrationignore → only project docs processed → clean migration
 
 ### 🤖 Interactive Conflict Resolution (v1.1.2)
 
@@ -168,12 +184,40 @@ cd your-existing-project
 cp -r /path/to/claude-code-starter/init_eng/* .
 cp -r /path/to/claude-code-starter/init_eng/.claude .
 
-# 2. Launch Claude Code
+# 2. (Optional) Create .migrationignore to exclude non-project files
+cp init_eng/.migrationignore.example .migrationignore
+# Edit to exclude reference articles, meeting notes, research docs, etc.
+
+# 3. Launch Claude Code
 claude
 
-# 3. Run automatic migration
+# 4. Run automatic migration
 /migrate
 ```
+
+### Excluding Files from Migration (Optional)
+
+**Problem:** Your project may have reference articles, meeting notes, or research documents that are NOT project meta-documentation.
+
+**Solution:** Create `.migrationignore` (similar to `.gitignore`):
+
+```bash
+# Copy example and customize
+cp init_eng/.migrationignore.example .migrationignore
+```
+
+**What to exclude:**
+- Reference articles (docs/articles/, docs/references/)
+- Meeting notes (notes/meeting-*.md)
+- Temporary notes (notes/temp*.md)
+- Research documents (research/)
+- Old versions (old/, archive/)
+- Binary files (*.pdf, *.docx)
+
+**Result:**
+- Excluded files stay in original location (not migrated, not archived)
+- MIGRATION_REPORT.md shows what was excluded
+- AI can auto-detect and suggest exclusions during `/migrate`
 
 ### Two-Stage Process with Pause
 

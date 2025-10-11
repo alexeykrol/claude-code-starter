@@ -20,9 +20,109 @@ Use `/migrate-finalize` to complete.
 
 ## 📋 Migration Process (Stage 1)
 
+### Step 0: Check .migrationignore
+
+**IMPORTANT:** Before scanning, check for `.migrationignore` file to exclude files from migration.
+
+#### 0.1. Check .migrationignore existence
+
+```bash
+if [ -f ".migrationignore" ]; then
+  echo "✅ Found .migrationignore - exclusions will be applied"
+else
+  echo "ℹ️  .migrationignore not found - offer to create"
+fi
+```
+
+#### 0.2. If .migrationignore is missing - offer to create
+
+**Automatic detection of exclusion candidates:**
+
+Analyze files and identify potentially NON-meta files:
+
+```
+Exclusion criteria:
+1. Files in folders: articles/, references/, research/, examples/
+2. Files with patterns: meeting-*.md, brainstorm-*.md, temp-*.md
+3. Files with dates in name: *-2024-*.md, *-2025-*.md
+4. Large files (>50KB) with lots of code (likely articles)
+5. Files in folders: old/, archive/, deprecated/
+6. Binary files: *.pdf, *.docx, *.pptx
+```
+
+**Show user:**
+```
+🤔 Detected potentially NON-meta files:
+
+📄 docs/articles/how-react-works.md (15KB, many code examples)
+   Looks like: tutorial article
+   Recommendation: exclude
+
+📄 notes/meeting-2024-01-15.md (2KB, date in name)
+   Looks like: meeting record
+   Recommendation: exclude
+
+📄 docs/architecture.md (8KB, describes project structure)
+   Looks like: project meta-documentation
+   Recommendation: migrate
+
+Create .migrationignore with recommendations? [Y/n]
+```
+
+#### 0.3. Create .migrationignore if user agreed
+
+If answer is "Y":
+```bash
+# Create .migrationignore based on recommendations
+cat > .migrationignore <<EOF
+# Auto-generated migration exclusions
+
+# Reference articles
+docs/articles/
+docs/references/
+
+# Meeting notes
+notes/meeting-*.md
+
+# Research
+research/
+
+# Old/archived
+old/
+archive/
+docs/deprecated/
+
+# Binary files
+*.pdf
+*.docx
+EOF
+
+echo "✅ Created .migrationignore"
+echo "   Edit file if needed and run /migrate again"
+exit 0
+```
+
+If answer is "n":
+```
+ℹ️  Skipping .migrationignore creation
+   All found files will be processed
+```
+
+#### 0.4. Read and apply .migrationignore
+
+If file exists:
+```bash
+# Read all patterns (ignoring comments and empty lines)
+IGNORE_PATTERNS=$(grep -v '^#' .migrationignore | grep -v '^$')
+
+# Save for use in Step 1
+```
+
 ### Step 1: Project Scanning
 
 Find all meta-files containing project documentation:
+
+**With .migrationignore if exists:**
 
 ```bash
 # Search in root and popular directories
@@ -184,12 +284,34 @@ Create detailed migration report in project root:
 
 ## 📊 Summary
 
-- **Legacy files found:** [N]
+- **Total meta-files found:** [N]
+- **Excluded (via .migrationignore):** [N]
+- **Processed for migration:** [N]
 - **Files migrated:** [N]
 - **Files archived:** [N]
 - **Critical conflicts:** [N]
 - **Medium conflicts:** [N]
 - **Low priority notes:** [N]
+
+## 🚫 Excluded from Migration
+
+The following files were excluded per `.migrationignore`:
+
+### Pattern: `docs/articles/`
+- docs/articles/how-jwt-works.md
+- docs/articles/react-patterns.md
+- docs/articles/graphql-intro.md
+(22 more files...)
+
+### Pattern: `notes/meeting-*.md`
+- notes/meeting-2024-01-15.md
+- notes/meeting-2024-02-20.md
+(8 more files...)
+
+**Reason:** These files are reference materials, not project documentation.
+**Location:** Remain in original location. **NOT archived** - stay as-is.
+
+**Note:** Excluded files are NOT migrated, NOT archived, and NOT modified.
 
 ## 🗂️ Migration Mapping
 
@@ -378,10 +500,17 @@ After completing all steps, output to user:
 ✅ Migration (Stage 1) complete!
 
 📊 Results:
-- Legacy files found: [N]
+- Total meta-files found: [N]
+- Excluded (.migrationignore): [N]
+- Processed for migration: [N]
 - Transferred to init_eng/: [N]
 - Archived to archive/: [N]
 - Conflicts detected: [N] (🔴 [critical] 🟡 [medium] 🟢 [low])
+
+ℹ️  Excluded files:
+- [N] files excluded via .migrationignore
+- Remain in original location (NOT archived)
+- See details in MIGRATION_REPORT.md section "Excluded from Migration"
 
 📄 Created files:
 - ✅ MIGRATION_REPORT.md - detailed migration report
