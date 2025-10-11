@@ -10,7 +10,7 @@
 > - For complete beginners: [Free AI Intro Course](https://alexeykrol.com/courses/ai_intro/) (Russian)
 
 [![GitHub](https://img.shields.io/badge/GitHub-claude--code--starter-blue)](https://github.com/alexeykrol/claude-code-starter)
-[![Version](https://img.shields.io/badge/version-1.1-orange.svg)](https://github.com/alexeykrol/claude-code-starter/releases)
+[![Version](https://img.shields.io/badge/version-1.1.2-orange.svg)](https://github.com/alexeykrol/claude-code-starter)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
 ---
@@ -23,15 +23,32 @@
 
 ---
 
-## 🆕 What's New in v1.1
+## 🆕 What's New in v1.1.2
 
-### 🔄 Migration System for Existing Projects
+### 🤖 Interactive Conflict Resolution (v1.1.2)
 
-The framework now supports **automatic migration of legacy projects**!
+**NEW:** AI-guided conflict resolution makes migration effortless!
 
-**New Features:**
+**`/migrate-resolve`** command:
+- 🎯 Analyzes each conflict and proposes smart merge solution
+- 💬 Interactive: [A]uto-resolve / [M]anual / [S]kip / [Q]uit
+- 🛡️ Safe: timestamped backups, detailed logging
+- 📝 Creates CONFLICT_RESOLUTION_LOG.md with all actions
+
+**Before:** "Too many conflicts, don't know where to start" → frustration
+**After:** `/migrate-resolve` → AI shows exactly what to do → [A] to accept → done!
+
+### 🔄 Migration System (v1.1.0-1.1.1)
+
+The framework supports **automatic migration of legacy projects**!
+
+**Commands:**
 - **`/migrate`** - automatic migration of documentation from legacy project
+- **`/migrate-resolve`** - interactive AI-guided conflict resolution ⭐ **NEW**
 - **`/migrate-finalize`** - finalization after review
+- **`/migrate-rollback`** - rollback at any stage
+
+**Features:**
 - **Two-stage process with pause** for safety
 - **Automatic conflict detection** (critical/medium/low priority)
 - **Legacy files archiving** (not deletion)
