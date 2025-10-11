@@ -10,6 +10,7 @@
 ## 📚 Documentation
 
 ### For Developers & AI Agents
+- **[CLAUDE.md](CLAUDE.md)** - 🤖 **AUTO-LOADED** - Context for Claude Code (always read first!)
 - **[PROJECT_INTAKE.md](PROJECT_INTAKE.md)** - ⭐ **START HERE** - Project requirements and context (fill before development)
 - **[PLAN_TEMPLATE.md](PLAN_TEMPLATE.md)** - 📋 **CREATE PLAN.md** - Implementation plan template with security integration
 - **[SECURITY.md](SECURITY.md)** - 🔐 **CRITICAL** - Security requirements for all development stages
@@ -18,13 +19,20 @@
 - **[BACKLOG.md](BACKLOG.md)** - Implementation status and roadmap (**SINGLE SOURCE OF TRUTH**)
 - **[WORKFLOW.md](WORKFLOW.md)** - Development workflows and sprint processes
 
+### Configuration Files
+- **[Makefile](Makefile)** - Standard commands (`make dev`, `make build`, etc)
+- **[.env.example](.env.example)** - Environment variables template
+- **[.claude/settings.json](.claude/settings.json)** - Claude Code permissions
+- **[.claude/commands/](.claude/commands/)** - Custom slash commands (`/commit`, `/pr`, `/migrate`)
+
 ### Quick Start for AI Agents
-1. Read [PROJECT_INTAKE.md](PROJECT_INTAKE.md) - **Fill this first!** Essential project context
-2. Read [SECURITY.md](SECURITY.md) - **Read before ANY coding!** Security requirements
-3. Read [AGENTS.md](AGENTS.md) - Core instructions and patterns
-4. Read [ARCHITECTURE.md](ARCHITECTURE.md) - System design
-5. Read [BACKLOG.md](BACKLOG.md) - Current status and priorities
-6. Read [WORKFLOW.md](WORKFLOW.md) - Sprint processes
+1. Read [CLAUDE.md](CLAUDE.md) - **Auto-loaded context** for Claude Code
+2. Read [PROJECT_INTAKE.md](PROJECT_INTAKE.md) - **Fill this first!** Essential project context
+3. Read [SECURITY.md](SECURITY.md) - **Read before ANY coding!** Security requirements
+4. Read [AGENTS.md](AGENTS.md) - Core instructions and patterns
+5. Read [ARCHITECTURE.md](ARCHITECTURE.md) - System design
+6. Read [BACKLOG.md](BACKLOG.md) - Current status and priorities
+7. Read [WORKFLOW.md](WORKFLOW.md) - Sprint processes
 
 ---
 
@@ -91,16 +99,58 @@ npm run dev
 
 ---
 
-## 📦 Available Scripts
+## 📦 Available Commands
 
+Проект использует **Makefile** для стандартизации команд:
+
+### Development
 ```bash
-npm run dev          # Start development server
-npm run build        # Build for production
-npm run start        # Start production server
-npm run lint         # Run linter
-npm run type-check   # Check TypeScript types (if applicable)
-npm run test         # Run tests (if configured)
+make dev          # Start development server
+make build        # Build for production
+make start        # Start production server
 ```
+
+### Quality & Testing
+```bash
+make lint         # Run linter
+make fix-lint     # Auto-fix linting issues
+make typecheck    # Check TypeScript types
+make test         # Run tests
+make test-watch   # Run tests in watch mode
+```
+
+### Security & Dependencies
+```bash
+make security     # Run npm audit
+make security-fix # Auto-fix vulnerabilities
+make audit        # Full check (lint + typecheck + test + security)
+```
+
+### Database (when applicable)
+```bash
+make db-migrate   # Run database migrations
+make db-reset     # Reset database
+make db-seed      # Seed with test data
+```
+
+### Utility
+```bash
+make install      # Install dependencies
+make clean        # Clean build artifacts
+make reinstall    # Reinstall all dependencies
+make doctor       # Diagnose environment
+make help         # Show all available commands
+```
+
+### Alternative: Direct npm commands
+Если предпочитаешь npm напрямую:
+```bash
+npm run dev       # Same as make dev
+npm run build     # Same as make build
+# ... и так далее
+```
+
+**Рекомендация:** Используй `make` команды - они проще и стандартизированы.
 
 ---
 

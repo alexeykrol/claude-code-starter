@@ -101,6 +101,9 @@ credentials/
 docs/.vitepress/dist
 docs/.vitepress/cache
 
+# Reference materials (temporary)
+Claude Code.md
+
 # Framework specific
 # Next.js
 .next/

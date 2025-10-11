@@ -31,6 +31,7 @@ ARCHITECTURE.md                # System design and patterns
 BACKLOG.md                     # Implementation status (SINGLE SOURCE OF TRUTH)
 WORKFLOW.md                    # Development processes
 README.md                      # User-facing documentation
+CLAUDE.md                      # Auto-loaded context for Claude Code
 
 # Core Application
 [ЗАПОЛНИТЬ: основные файлы проекта]
@@ -40,9 +41,55 @@ README.md                      # User-facing documentation
 # src/components/Main.tsx      # Main component
 
 # Configuration
+Makefile                       # Standard commands (make dev, make build, etc)
+.env.example                   # Environment variables template
 .claude/commands/              # Custom slash commands for Claude Code
+.claude/settings.json          # Claude Code permissions
 .claudeignore                  # Files to ignore in AI context
 ```
+
+### 📦 Standard Commands (Makefile):
+Проект использует Makefile для стандартизации команд:
+
+```bash
+# Development
+make dev          # Запустить development сервер
+make build        # Собрать для production
+make start        # Запустить production сервер
+
+# Quality Checks
+make lint         # Проверить код линтером
+make fix-lint     # Автоматически исправить линтер
+make typecheck    # Проверить TypeScript типы
+make test         # Запустить тесты
+make test-watch   # Тесты в watch режиме
+
+# Security & Dependencies
+make security     # npm audit проверка
+make security-fix # Автоматически исправить уязвимости
+make audit        # Полная проверка (lint+typecheck+test+security)
+
+# Database (когда будет использоваться)
+make db-migrate   # Применить миграции БД
+make db-reset     # Сбросить БД
+make db-seed      # Заполнить тестовыми данными
+
+# Utility
+make install      # Установить зависимости
+make clean        # Очистить build артефакты
+make reinstall    # Переустановить зависимости
+make doctor       # Диагностика окружения
+make help         # Показать все команды
+
+# Pre-commit/push checks
+make pre-commit   # lint + typecheck
+make pre-push     # audit + build
+```
+
+**ВАЖНО:** Всегда используй `make <command>` вместо прямого `npm run <command>`
+- Makefile контролирует что именно запускается
+- Проще для Claude Code автоматизировать (через .claude/settings.json)
+- Единообразие команд между проектами
 
 ---
 
@@ -280,6 +327,49 @@ README.md                      # User-facing documentation
 - [ ] Add to "Common Issues" (if applicable)
 - [ ] Update BACKLOG.md (if tracked)
 - [ ] Create fix commit
+
+---
+
+## 🎯 Custom Slash Commands
+
+Проект включает кастомные slash-команды для автоматизации типичных задач:
+
+### Основные команды:
+- `/security` - провести security audit (см. SECURITY.md)
+- `/test` - написать тесты для кода
+- `/feature` - спланировать и реализовать новую фичу
+- `/review` - провести code review последних изменений
+- `/optimize` - оптимизировать производительность кода
+- `/refactor` - помочь с рефакторингом кода
+- `/explain` - объяснить как работает код
+- `/fix` - найти и исправить баг
+
+### Новые команды для workflow:
+- `/commit` - создать git commit с правильным сообщением
+  - Анализирует изменения
+  - Проверяет на секреты
+  - Создает осмысленное сообщение (why, not what)
+  - Добавляет Co-Authored-By: Claude
+
+- `/pr` - создать Pull Request
+  - Анализирует ВСЕ коммиты (не только последний!)
+  - Создает детальное описание
+  - Включает test plan и checklist
+  - Использует gh CLI
+
+- `/migrate` - создать database migration
+  - Анализирует текущую схему
+  - Создает безопасную миграцию
+  - Обновляет TypeScript types
+  - Настраивает RLS policies
+
+**Использование:**
+```bash
+# В Claude Code просто набери:
+/commit
+/pr
+/migrate
+```
 
 ---
 
