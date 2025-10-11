@@ -199,7 +199,8 @@ npm run build
 - `/fix` - найти и исправить баг
 - `/commit` - создать git commit
 - `/pr` - создать Pull Request
-- `/migrate` - создать database migration
+- `/migrate` - миграция legacy проекта на фреймворк
+- `/db-migrate` - создать database migration
 
 ---
 

@@ -199,7 +199,8 @@ Use slash commands for typical tasks:
 - `/fix` - find and fix bug
 - `/commit` - create git commit
 - `/pr` - create Pull Request
-- `/migrate` - create database migration
+- `/migrate` - migrate legacy project to framework
+- `/db-migrate` - create database migration
 
 ---
 

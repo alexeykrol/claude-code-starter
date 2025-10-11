@@ -106,7 +106,74 @@ claude
 
 ---
 
-## 📦 What's in Init/
+## 🔄 Migrating Existing Projects
+
+> **Already have a project with legacy documentation?** Use automatic migration!
+
+### When You Need Migration
+
+If you have:
+- ✅ Existing project with code
+- ✅ Scattered documentation (README, docs/, notes/, TODO, etc.)
+- ✅ Want to structure into unified framework
+
+### Quick Start Migration
+
+```bash
+# 1. Copy init_eng/ to your project
+cd your-existing-project
+cp -r /path/to/claude-code-starter/init_eng/* .
+cp -r /path/to/claude-code-starter/init_eng/.claude .
+
+# 2. Launch Claude Code
+claude
+
+# 3. Run automatic migration
+/migrate
+```
+
+### Two-Stage Process with Pause
+
+**Stage 1: Analysis and Transfer (automatic)**
+- Scans all your meta-files
+- Transfers information to init_eng/ structure
+- Archives legacy files
+- Creates report and conflict list
+- ⏸️ **Pauses for your review**
+
+**Pause: Your Review**
+- Read MIGRATION_REPORT.md
+- Resolve conflicts
+- Check init_eng/ files
+- Fill gaps
+
+**Stage 2: Finalization (on command)**
+```bash
+/migrate-finalize
+```
+- Completes migration
+- Creates git commit
+- init_eng/ becomes single source of truth
+
+### Learn More
+
+Full migration guide: `init_eng/MIGRATION.md`
+
+**What Migrates Automatically:**
+- `docs/README.md` → `PROJECT_INTAKE.md`
+- `docs/architecture.md` → `ARCHITECTURE.md`
+- `security.md` → `SECURITY.md`
+- `TODO.md` → `BACKLOG.md`
+- And all other meta-files
+
+**Safety:**
+- All legacy files archived (not deleted)
+- Two-stage process with pause for review
+- Can rollback before finalization
+
+---
+
+## 📦 What's in init_eng/
 
 ### Main Documentation Files
 

@@ -1,339 +1,480 @@
 ---
-description: Создать database migration с правильным процессом
+description: Migrate existing project to Claude Code Starter framework
 ---
 
-Создай database migration следуя лучшим практикам.
+# Migrating Legacy Project to Framework
 
-**ВАЖНО: Миграции - критическая часть. Тестируй все тщательно!**
+> Use this command to migrate existing projects with legacy meta-documentation to Claude Code Starter framework v1.0
 
-## Процесс:
+## 🎯 Goal
 
-### 1. Анализ текущей схемы БД
+Transfer all valuable information from scattered meta-files into a structured framework, preserving history and ensuring a single source of truth.
 
-Прочитай и проанализируй:
+## ⚠️ IMPORTANT
+
+This command performs **Stage 1** of migration (analysis + transfer + archiving).
+After completion **MANUAL REVIEW IS REQUIRED** before finalization.
+Use `/migrate-finalize` to complete.
+
+---
+
+## 📋 Migration Process (Stage 1)
+
+### Step 1: Project Scanning
+
+Find all meta-files containing project documentation:
+
 ```bash
-# Найди файлы схемы БД
-find . -name "schema.*" -o -name "*.prisma" -o -name "*migration*"
-
-# Посмотри последние миграции
-ls -la supabase/migrations/ || ls -la prisma/migrations/ || ls -la migrations/
+# Search in root and popular directories
+find . -maxdepth 3 -type f \( \
+  -name "*.md" -o \
+  -name "*.txt" -o \
+  -name "README*" -o \
+  -name "DOCS*" -o \
+  -name "NOTES*" -o \
+  -name "TODO*" \
+) | grep -v "node_modules\|dist\|build\|.next\|init_eng\|Init"
 ```
 
-Прочитай:
-- Текущую схему БД
-- Последние миграции
-- Database documentation (если есть в ARCHITECTURE.md)
+**Exclude:**
+- node_modules/, dist/, build/, .next/
+- Init/ and init_eng/ (this is our new framework)
+- Code files (*.js, *.ts, *.py, etc)
+- Lock files (package-lock.json, etc)
 
-### 2. Пойми требования
+**Search in:**
+- Root README.md, DOCS.md, NOTES.md
+- Folders docs/, documentation/, notes/, wiki/
+- Architecture files: architecture.md, design.md, structure.md
+- Security files: security.md, security.txt
+- Backlogs: backlog.md, todo.md, roadmap.md
+- Any other .md/.txt with meta-information
 
-Спроси себя:
-- Какие изменения в схеме нужны?
-- Есть ли существующие данные, которые нужно сохранить?
-- Нужна ли обратная совместимость?
-- Есть ли зависимости от других таблиц?
+### Step 2: Content Analysis
 
-### 3. Спланируй миграцию
+For each found file:
+1. Read contents
+2. Determine information type (architecture, requirements, processes, security, etc)
+3. Create mapping: which legacy file → which init_eng/ file(s)
 
-**Типы изменений:**
-
-**Безопасные (можно делать на проде):**
-- ✅ ADD column (с DEFAULT или NULL)
-- ✅ ADD index (concurrent)
-- ✅ ADD new table
-- ✅ ADD constraint (NOT VALID, потом VALIDATE)
-
-**Опасные (требуют осторожности):**
-- ⚠️ DROP column (может сломать приложение)
-- ⚠️ RENAME column (нужна двухфазная миграция)
-- ⚠️ CHANGE column type (может потерять данные)
-- ⚠️ ADD NOT NULL (сначала заполни данные)
-
-**Очень опасные (только с downtime):**
-- 🔴 DROP table
-- 🔴 CHANGE primary key
-- 🔴 Большая структурная переделка
-
-### 4. Создай migration файл
-
-**Naming convention:**
+**Create MAPPING:**
 ```
-YYYYMMDDHHMMSS_descriptive_name.sql
+Legacy file → Framework file(s)
+-----------------------------------------
+docs/README.md → PROJECT_INTAKE.md (sections: Overview, Goals)
+docs/architecture.md → ARCHITECTURE.md
+notes/security.txt → SECURITY.md
+TODO.md → BACKLOG.md
+api-docs.md → ARCHITECTURE.md (API Structure section)
+workflow.md → WORKFLOW.md
+...
 ```
 
-Пример: `20250110120000_add_user_preferences_table.sql`
+### Step 3: Conflict Detection
 
-**Структура миграции:**
+Check for potential conflicts:
 
-```sql
--- Migration: Add user preferences table
--- Created: 2025-01-10
--- Author: Claude Code
--- Description: Add table to store user preferences with foreign key to users
+#### 🔴 Critical conflicts (require resolution):
+- **Architectural contradictions**: legacy describes monolith, framework assumes modules
+- **Missing critical information**: no security documentation
+- **Contradictory requirements**: conflicting descriptions in different legacy files
+- **Outdated information**: legacy contains clearly outdated data
 
--- ============================================
--- Up Migration
--- ============================================
+#### 🟡 Medium priority:
+- **Information duplication**: same information in multiple places
+- **Structural differences**: legacy organized differently than framework
+- **Incomplete data**: some framework sections cannot be filled from legacy
 
-BEGIN;
+#### 🟢 Low priority:
+- **Cosmetic differences**: naming conventions, formatting
+- **Excessive detail**: legacy more detailed than framework needs
 
--- Create table
-CREATE TABLE IF NOT EXISTS user_preferences (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-  theme VARCHAR(20) DEFAULT 'light' CHECK (theme IN ('light', 'dark', 'auto')),
-  language VARCHAR(10) DEFAULT 'en',
-  notifications_enabled BOOLEAN DEFAULT true,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+### Step 4: Information Migration
 
-  -- Constraints
-  CONSTRAINT unique_user_preferences UNIQUE(user_id)
-);
+For each init_eng/ file:
 
--- Create indexes
-CREATE INDEX idx_user_preferences_user_id ON user_preferences(user_id);
+#### CLAUDE.md
+- Update "Tech Stack" section from legacy documentation
+- Add project-specific instructions from legacy
+- Update bash commands if they differ from defaults
 
--- Add comments
-COMMENT ON TABLE user_preferences IS 'Stores user-specific preferences';
-COMMENT ON COLUMN user_preferences.theme IS 'UI theme preference';
+#### PROJECT_INTAKE.md
+- **Problem/Solution/Value** from legacy README or docs
+- **User Personas** - if exists in legacy, otherwise mark [NEEDS UPDATE]
+- **User Flows** - from legacy user stories or docs
+- **Features** - from legacy roadmap, backlog, TODO
+- **Modular Structure** - analyze current code and propose modular structure
 
--- Enable Row Level Security
-ALTER TABLE user_preferences ENABLE ROW LEVEL SECURITY;
+#### SECURITY.md
+- Transfer existing security practices from legacy
+- If no legacy security docs - mark [CRITICAL: NEEDS FILLING]
+- Analyze code for security patterns (auth, validation, etc)
 
--- Create RLS policies
-CREATE POLICY "Users can view own preferences"
-  ON user_preferences
-  FOR SELECT
-  USING (auth.uid() = user_id);
+#### ARCHITECTURE.md
+- **Tech Stack** from legacy
+- **Folder Structure** - current real project structure
+- **Module Architecture** - analyze and propose modular division
+- **API Structure** from legacy API docs
+- **Database Schema** from legacy DB docs
+- **Key Decisions** from legacy architecture docs (important to preserve WHY!)
 
-CREATE POLICY "Users can update own preferences"
-  ON user_preferences
-  FOR UPDATE
-  USING (auth.uid() = user_id);
+#### BACKLOG.md
+- Transfer TODO, roadmap items from legacy
+- Analyze current code and update statuses (what's already implemented)
+- Mark legacy items as "Migrated from legacy TODO.md"
 
-CREATE POLICY "Users can insert own preferences"
-  ON user_preferences
-  FOR INSERT
-  WITH CHECK (auth.uid() = user_id);
+#### AGENTS.md
+- If legacy has specific development instructions - transfer
+- Add patterns from codebase analysis
 
-COMMIT;
+#### WORKFLOW.md
+- Transfer existing workflow from legacy
+- If none - keep defaults from template
 
--- ============================================
--- Down Migration (Rollback)
--- ============================================
+#### PLAN_TEMPLATE.md
+- Leave as is (this is template for future tasks)
 
--- Uncomment to enable rollback:
--- BEGIN;
--- DROP TABLE IF EXISTS user_preferences CASCADE;
--- COMMIT;
-```
+#### README-TEMPLATE.md
+- Don't touch (this is template for final project README)
 
-### 5. Создай TypeScript types (если используется TypeScript)
+### Step 5: Archiving Legacy Files
 
-**Файл: `src/types/database.ts` или обнови существующий:**
+Create archive/ folder and move all legacy meta-files there:
 
-```typescript
-// Database Types
-export interface UserPreferences {
-  id: string;
-  user_id: string;
-  theme: 'light' | 'dark' | 'auto';
-  language: string;
-  notifications_enabled: boolean;
-  created_at: string;
-  updated_at: string;
-}
-
-// Database Tables
-export interface Database {
-  public: {
-    Tables: {
-      user_preferences: {
-        Row: UserPreferences;
-        Insert: Omit<UserPreferences, 'id' | 'created_at' | 'updated_at'>;
-        Update: Partial<Omit<UserPreferences, 'id' | 'created_at'>>;
-      };
-      // ... other tables
-    };
-  };
-}
-```
-
-### 6. Тестирование миграции
-
-**В Development:**
 ```bash
-# Применить миграцию
-make db-migrate
-# или
-npm run db:migrate
-# или
-supabase db push
+# Create archive structure
+mkdir -p archive/docs
+mkdir -p archive/notes
+mkdir -p archive/other
 
-# Проверить что таблица создана
-# (команда зависит от вашей БД)
-
-# Тестировать операции
-# - INSERT тестовые данные
-# - SELECT проверить чтение
-# - UPDATE проверить обновление
-# - DELETE проверить удаление
-# - Проверить RLS policies
+# Move files preserving structure
+# For example:
+mv docs/README.md archive/docs/
+mv docs/architecture.md archive/docs/
+mv notes/* archive/notes/ 2>/dev/null || true
+mv TODO.md archive/other/ 2>/dev/null || true
 ```
 
-**Rollback тест:**
-```bash
-# Откатить миграцию
-make db-rollback
-# или
-npm run db:rollback
-
-# Проверить что откат работает
-# Применить снова для продолжения работы
-make db-migrate
-```
-
-### 7. Обнови документацию
-
-**Обнови ARCHITECTURE.md:**
+**Create README.md in archive/:**
 ```markdown
-### Database Schema
+# Archived Legacy Documentation
 
-#### user_preferences
-Stores user-specific UI and notification preferences.
+> These files were archived during migration to Claude Code Starter framework v1.0
+> Date: [DATE]
 
-**Columns:**
-- `id` (UUID, PK) - Unique identifier
-- `user_id` (UUID, FK → users.id) - Reference to user
-- `theme` (VARCHAR) - UI theme: 'light', 'dark', 'auto'
-- `language` (VARCHAR) - Preferred language code
-- `notifications_enabled` (BOOLEAN) - Email notifications toggle
-- `created_at` (TIMESTAMP) - Record creation time
-- `updated_at` (TIMESTAMP) - Last update time
+## Migration
+All information from these files has been migrated to init_eng/ framework files.
+See MIGRATION_REPORT.md for details.
 
-**Constraints:**
-- One preference record per user (unique user_id)
-- Cascading delete when user is deleted
-
-**Security:**
-- RLS enabled
-- Users can only view/edit their own preferences
+## DO NOT USE
+These files are kept for historical reference only.
+**Single source of truth is now init_eng/ folder.**
 ```
 
-### 8. Обнови связанный код
+### Step 6: Creating MIGRATION_REPORT.md
 
-**Создай/обнови API endpoints:**
-```typescript
-// Example: API route for preferences
-import { Database } from '@/types/database';
+Create detailed migration report in project root:
 
-export async function GET(req: Request) {
-  const supabase = createClient<Database>();
+```markdown
+# Migration Report
 
-  const { data, error } = await supabase
-    .from('user_preferences')
-    .select('*')
-    .single();
+> Migration to Claude Code Starter framework v1.0
+> Date: [DATE]
+> Status: ⏸️ PENDING REVIEW (Step 1 complete)
 
-  if (error) {
-    return Response.json({ error: error.message }, { status: 400 });
-  }
+## 📊 Summary
 
-  return Response.json(data);
-}
+- **Legacy files found:** [N]
+- **Files migrated:** [N]
+- **Files archived:** [N]
+- **Critical conflicts:** [N]
+- **Medium conflicts:** [N]
+- **Low priority notes:** [N]
+
+## 🗂️ Migration Mapping
+
+### Legacy → Framework
+
+| Legacy File | Framework File(s) | Status | Notes |
+|-------------|------------------|---------|-------|
+| docs/README.md | PROJECT_INTAKE.md | ✅ Migrated | Sections: Overview, Goals |
+| docs/architecture.md | ARCHITECTURE.md | ⚠️ Partial | Missing module structure |
+| notes/security.txt | SECURITY.md | ❌ Conflict | See CONFLICTS.md #1 |
+| TODO.md | BACKLOG.md | ✅ Migrated | Updated statuses based on code |
+| ... | ... | ... | ... |
+
+## 📝 Detailed Migration Log
+
+### PROJECT_INTAKE.md
+**Sources:**
+- docs/README.md → Problem/Solution/Value
+- TODO.md → Features list
+- notes/user-research.txt → User Personas (partial)
+
+**Added:**
+- ✅ Problem statement (from docs/README.md)
+- ✅ Solution description (from docs/README.md)
+- ✅ Feature list (from TODO.md)
+- ⚠️ User Personas (partial from notes, needs completion)
+- ❌ User Flows (not found in legacy, marked [NEEDS FILLING])
+
+### ARCHITECTURE.md
+**Sources:**
+- docs/architecture.md → Tech Stack, Decisions
+- Code analysis → Current structure
+
+**Added:**
+- ✅ Tech Stack (from docs/architecture.md)
+- ✅ Current folder structure (from code analysis)
+- ⚠️ Module Architecture (proposed based on code, needs review)
+- ✅ Key Decisions (from docs/architecture.md - preserved WHY!)
+
+### SECURITY.md
+**Sources:**
+- No legacy security documentation found
+
+**Added:**
+- ⚠️ Analyzed code for security patterns
+- ⚠️ Found: JWT auth, input validation in some routes
+- ❌ Missing: comprehensive security policy
+- 🔴 **CRITICAL: Requires manual filling**
+
+### BACKLOG.md
+**Sources:**
+- TODO.md → Tasks
+- Code analysis → Current implementation status
+
+**Added:**
+- ✅ All TODO items migrated
+- ✅ Statuses updated based on code analysis
+- ✅ Marked as "Migrated from legacy TODO.md"
+
+### Other files
+- AGENTS.md: ✅ Added project-specific patterns from code analysis
+- WORKFLOW.md: ✅ Kept default (no legacy workflow found)
+- CLAUDE.md: ✅ Updated with project tech stack
+
+## 📦 Archived Files
+
+All files moved to `archive/` directory:
+- archive/docs/README.md
+- archive/docs/architecture.md
+- archive/notes/security.txt
+- archive/other/TODO.md
+- ... (see archive/README.md for full list)
+
+## ⏭️ Next Steps
+
+1. **REVIEW CONFLICTS**: Read CONFLICTS.md and resolve all issues
+2. **REVIEW INIT FILES**: Check all init_eng/ files for accuracy and completeness
+3. **FILL GAPS**: Complete sections marked [NEEDS FILLING] or [NEEDS UPDATE]
+4. **VERIFY NOTHING LOST**: Compare init_eng/ with archive/ to ensure all critical info migrated
+5. **FINALIZE**: Run `/migrate-finalize` when ready
+
+## ⏸️ Migration Status: PAUSED
+
+**Action required:** Review and resolve conflicts before finalizing.
+
+---
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)
 ```
 
-### 9. Создай коммит
+### Step 7: Creating CONFLICTS.md (if conflicts exist)
 
-Используй `/commit` команду со следующими изменениями:
-- Migration SQL файл
-- TypeScript types
-- Обновленная документация
-- Новый/обновленный код использующий новую схему
+If conflicts are detected, create detailed file:
 
-### 10. Security Checklist для миграций
+```markdown
+# Migration Conflicts Report
 
-- [ ] RLS (Row Level Security) включен для новых таблиц
-- [ ] RLS policies созданы и протестированы
-- [ ] Foreign keys правильно настроены
-- [ ] Indexes добавлены для performance
-- [ ] Sensitive data правильно защищена
-- [ ] Cascading deletes настроены где нужно
-- [ ] Comments добавлены для документации
-- [ ] Нет hardcoded значений (используй константы/enums)
+> ⚠️ Review and resolve these conflicts before finalizing migration
 
-## 📋 Migration Checklist
+**Status:** [N] critical, [N] medium, [N] low priority conflicts
 
-### До создания:
-- [ ] Прочитал текущую схему БД
-- [ ] Понял требования к изменениям
-- [ ] Спланировал безопасную миграцию
-- [ ] Проверил зависимости от других таблиц
+---
 
-### Во время создания:
-- [ ] Создал migration файл с правильным именем
-- [ ] Добавил комментарии и описание
-- [ ] Создал rollback (down migration)
-- [ ] Обновил TypeScript types
-- [ ] Добавил indexes для performance
-- [ ] Настроил RLS и policies
+## 🔴 Critical Conflicts (require resolution)
 
-### После создания:
-- [ ] Протестировал в development
-- [ ] Протестировал rollback
-- [ ] Обновил ARCHITECTURE.md
-- [ ] Обновил связанный код
-- [ ] Создал коммит с описанием
+### 1. [Conflict Name]
+**Priority:** 🔴 Critical
+**Legacy:** [What legacy says]
+**Framework:** [What framework assumes]
+**Conflict:** [What's the contradiction]
+**Impact:** [Why this is critical]
 
-## 🚫 Опасные операции
+**Action Required:**
+- [ ] [Specific action 1]
+- [ ] [Specific action 2]
+- [ ] Update affected files: [file list]
 
-**НИКОГДА не делай без явного подтверждения:**
-- ❌ DROP TABLE на production
-- ❌ DROP COLUMN с данными
-- ❌ TRUNCATE TABLE
-- ❌ ALTER TYPE на больших таблицах (может заблокировать)
-- ❌ Миграции без rollback плана
+**Recommendation:** [Your recommendation for resolution]
 
-**Если нужно удалить column:**
-1. Сначала убери использование в коде
-2. Deploy код без использования column
-3. Только потом DROP column в миграции
+---
 
-## 💡 Best Practices
+### 2. Missing Security Documentation
+**Priority:** 🔴 Critical
+**Legacy:** No security documentation found in legacy files
+**Framework:** SECURITY.md requires comprehensive security policy
+**Conflict:** Critical security information missing
+**Impact:** Cannot establish security baseline without this
 
-1. **Atomic migrations:** Используй BEGIN/COMMIT
-2. **Idempotent:** Используй IF EXISTS / IF NOT EXISTS
-3. **Reversible:** Всегда создавай down migration
-4. **Documented:** Добавляй комментарии SQL и в docs
-5. **Tested:** Тестируй up и down migrations
-6. **Small:** Одна миграция = одно логическое изменение
-7. **Safe defaults:** Используй DEFAULT для новых columns
+**Action Required:**
+- [ ] Review current code for security practices (auth, validation, sanitization)
+- [ ] Interview team about security policies
+- [ ] Fill all sections of SECURITY.md
+- [ ] Run `/security` audit after filling
 
-## Примеры частых сценариев:
+**Recommendation:** Treat as highest priority - security cannot be skipped.
 
-### Add column (безопасно):
-```sql
-ALTER TABLE users
-ADD COLUMN avatar_url TEXT DEFAULT NULL;
+---
+
+## 🟡 Medium Priority (recommended to resolve)
+
+### 3. [Conflict Name]
+**Priority:** 🟡 Medium
+**Legacy:** [What's in legacy]
+**Framework:** [What's in framework]
+**Conflict:** [Contradiction]
+**Impact:** [Impact]
+
+**Suggestion:**
+- [ ] [Action]
+
+---
+
+## 🟢 Low Priority (can postpone)
+
+### 4. [Conflict Name]
+**Priority:** 🟢 Low
+**Legacy:** [What's in legacy]
+**Framework:** [What's in framework]
+**Conflict:** [Contradiction]
+**Impact:** Minimal - cosmetic/organizational
+
+**Suggestion:** [Recommendation]
+
+---
+
+## Summary & Next Steps
+
+**Before finalizing migration, you MUST:**
+1. ✅ Resolve all 🔴 Critical conflicts
+2. ⚠️ Review all 🟡 Medium conflicts (strongly recommended)
+3. 📝 Document decisions in appropriate init_eng/ files
+
+**After resolving conflicts:**
+- Run `/migrate-finalize` to complete migration
+
+---
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)
 ```
 
-### Add NOT NULL column (двухфазно):
-```sql
--- Phase 1: Add column as nullable with default
-ALTER TABLE users ADD COLUMN email_verified BOOLEAN DEFAULT false;
+### Step 8: Output Result
 
--- Phase 2 (after data backfill): Make NOT NULL
--- ALTER TABLE users ALTER COLUMN email_verified SET NOT NULL;
+After completing all steps, output to user:
+
+```
+✅ Migration (Stage 1) complete!
+
+📊 Results:
+- Legacy files found: [N]
+- Transferred to init_eng/: [N]
+- Archived to archive/: [N]
+- Conflicts detected: [N] (🔴 [critical] 🟡 [medium] 🟢 [low])
+
+📄 Created files:
+- ✅ MIGRATION_REPORT.md - detailed migration report
+- ⚠️ CONFLICTS.md - conflicts requiring resolution (if any)
+- ✅ archive/README.md - archive explanation
+- ✅ init_eng/ - all files filled from legacy
+
+⏸️ MIGRATION PAUSED FOR REVIEW
+
+📋 WHAT TO DO NEXT:
+
+1. **Read MIGRATION_REPORT.md**
+   - Check mapping: are all files accounted for
+   - Ensure nothing important was lost
+
+2. **If CONFLICTS.md exists - resolve conflicts**
+   - Start with 🔴 critical ones
+   - Update init_eng/ files accordingly
+   - Delete CONFLICTS.md when all resolved
+
+3. **Check init_eng/ files**
+   - PROJECT_INTAKE.md - all sections filled?
+   - SECURITY.md - critically important!
+   - ARCHITECTURE.md - is architecture correct?
+   - BACKLOG.md - are statuses current?
+
+4. **Fill gaps**
+   - Find [NEEDS FILLING] and fill
+   - Find [NEEDS UPDATE] and update
+
+5. **When ready - finalize migration**
+   ```
+   /migrate-finalize
+   ```
+
+⚠️ DO NOT DELETE:
+- MIGRATION_REPORT.md (needed for finalization)
+- CONFLICTS.md (if exists - resolve conflicts)
+- archive/ (this is project history)
+
+💡 You can ask AI for help:
+- "Help resolve conflict #1 in CONFLICTS.md"
+- "Fill User Flows section in PROJECT_INTAKE.md"
+- "Check all init_eng/ files for completeness"
 ```
 
-### Rename column (двухфазно):
-```sql
--- Phase 1: Add new column
-ALTER TABLE users ADD COLUMN full_name TEXT;
-UPDATE users SET full_name = name;
+---
 
--- Phase 2 (after code update): Drop old column
--- ALTER TABLE users DROP COLUMN name;
-```
+## 🔐 Important Checks
 
-**После выполнения миграции обязательно обнови BACKLOG.md!**
+Before completing migration, verify:
+
+### Security
+- [ ] Didn't accidentally transfer secrets from legacy (API keys, passwords)
+- [ ] archive/ contains no credential files
+- [ ] SECURITY.md filled or marked as [CRITICAL]
+
+### Completeness
+- [ ] All critical legacy files accounted for in MIGRATION_REPORT.md
+- [ ] Architectural decisions and their WHY preserved
+- [ ] TODO items transferred
+- [ ] Tech stack current
+
+### Structure
+- [ ] archive/ contains all legacy files
+- [ ] archive/README.md created
+- [ ] init_eng/ files correctly filled
+- [ ] Conflicts documented
+
+---
+
+## 🚫 DON'T DO
+
+- ❌ Don't delete legacy files (only move to archive/)
+- ❌ Don't finalize migration automatically (user review needed)
+- ❌ Don't skip CONFLICTS.md if critical conflicts exist
+- ❌ Don't transfer secrets/credentials to init_eng/ files
+- ❌ Don't ignore gaps in SECURITY.md
+
+---
+
+## 💡 Tips
+
+1. **Preserve WHY, not just WHAT** - when migrating architectural decisions, it's critical to preserve rationale (why decision was made)
+
+2. **Check code, not just documentation** - if legacy docs are outdated, analyze real code
+
+3. **Modularity is key** - when migrating to framework, it's the perfect time to plan modular structure
+
+4. **Legacy ≠ Truth** - if legacy contains clearly outdated information, update it, don't copy blindly
+
+5. **Document decisions** - document all non-obvious migration decisions in MIGRATION_REPORT.md
+
+---
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)
