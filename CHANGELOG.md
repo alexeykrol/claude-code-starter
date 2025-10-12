@@ -7,6 +7,187 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.2.5] - 2025-10-12
+
+### ⚡ Cold Start Protocol: Token Optimization on Session Reloads
+
+**Goal:** Eliminate token waste when Claude Code session restarts by implementing smart file reading protocol.
+
+### Added
+
+#### 🔄 Cold Start Protocol System
+
+**Problem Solved:**
+Every Claude Code restart wasted 15-20k tokens (~$0.15-0.20) reading ALL files, even when not needed.
+
+**Solution:**
+Implemented 3-stage conditional file reading protocol that saves ~60% tokens on every session reload.
+
+**Components Added:**
+
+1. **Migration Status Field in PROJECT_INTAKE.md**
+   - New field: `**Migration Status:** [NOT MIGRATED]`
+   - Auto-set to `✅ COMPLETED (YYYY-MM-DD)` after `/migrate-finalize`
+   - Signals to AI whether to skip MIGRATION_REPORT.md reading
+   - Added to both `Init/PROJECT_INTAKE.md` and `init_eng/PROJECT_INTAKE.md`
+
+2. **Cold Start Protocol in CLAUDE.md**
+   - New section: "🔄 Протокол Cold Start" (Russian) / "🔄 Cold Start Protocol" (English)
+   - **Stage 1: Quick Status Check (~500 tokens)**
+     - Reads only first 20 lines of PROJECT_INTAKE.md
+     - Checks: Status, Migration Status, Project Name
+     - Conditional logic for next steps
+   - **Stage 2: Context Loading (~5-7k tokens)**
+     - IF Status = "✅ FILLED" → Read full PROJECT_INTAKE.md + BACKLOG.md
+     - IF user needs code → Read ARCHITECTURE.md + SECURITY.md
+     - IF Migration Status = "✅ COMPLETED" → Skip MIGRATION_REPORT.md
+   - **Stage 3: Never Unless Asked**
+     - MIGRATION_REPORT.md, WORKFLOW.md, archive/* only on explicit request
+   - Added to both `Init/CLAUDE.md` and `init_eng/CLAUDE.md`
+
+3. **Automatic Status Update in /migrate-finalize**
+   - New Step 5 in migrate-finalize.md: "Update PROJECT_INTAKE.md Migration Status"
+   - Automatically sets Migration Status to COMPLETED with current date
+   - Enables automatic token savings on all future session reloads
+   - Added to both `Init/.claude/commands/migrate-finalize.md` and `init_eng/.claude/commands/migrate-finalize.md`
+
+4. **README Documentation**
+   - New section: "⚡ Cold Start Protocol: Token Optimization" in README.md
+   - New section: "⚡ Протокол Cold Start: Оптимизация токенов" in README_RU.md
+   - Added to features list: "✅ **Cold Start Protocol** - 60% token savings on session reloads"
+   - Explains problem, solution, stages, and automatic activation
+
+### Fixed
+
+#### 🐛 Migration Command Fixes (8 critical issues)
+
+Based on real migration test execution in ButcherChat project, fixed:
+
+1. **Archive Structure (Critical)**
+   - Wrong: Created `archive/docs/` instead of `archive/legacy-docs/`
+   - Fixed: Now creates both `archive/legacy-docs/` and `archive/backup-YYYYMMDD-HHMMSS/`
+   - Ensures proper backup and rollback capability
+
+2. **SECURITY.md Not Updated (Critical)**
+   - Problem: AI skipped SECURITY.md thinking "template is comprehensive"
+   - Fixed: Added mandatory SECURITY.md update section with project-specific rules
+   - Example rules: API key management, architecture security, etc.
+
+3. **Missing CONFLICTS.md (Critical)**
+   - Problem: Low priority conflicts (typos, formatting) weren't documented
+   - Fixed: Now creates CONFLICTS.md for ANY conflicts including 🟢 low priority
+   - Ensures user reviews all issues, even minor ones
+
+4. **MIGRATION_REPORT.md Format (Medium)**
+   - Problems: Missing time, no "Stage 1" in title, no conflict breakdown
+   - Fixed: Exact format template with all required fields
+   - Header: "# Migration Report - Stage 1"
+   - Date: "**Date:** YYYY-MM-DD HH:MM:SS" (with time!)
+   - Summary: "(🔴 X 🟡 Y 🟢 Z)" conflict breakdown
+
+5. **Verbose PAUSE Message (Medium)**
+   - Problem: Too verbose with commit examples and recommendations
+   - Fixed: Brief template with only 4 actions, no extras
+   - Clear, actionable next steps only
+
+6. **Token Waste from Multiple Updates (Low Priority)**
+   - Problem: 6x Update calls for single file instead of batching
+   - Fixed: "Execution Mode" section with batching rules
+   - ONE Edit call per file, not multiple Updates
+   - Target: 40-50k tokens instead of 87k+
+
+7. **Missing Source Markers (Low Priority)**
+   - Problem: No tracking of where information came from
+   - Fixed: Required `<!-- MIGRATED FROM: filename.md -->` markers
+   - Helps future reference and debugging
+
+8. **Unnecessary git diff (Low Priority)**
+   - Problem: Output included git diff command
+   - Fixed: Minimal output, no additional tools
+
+### Changed
+
+**Token Economics:**
+- **Without protocol:** ~15-20k tokens (~$0.15-0.20) per session reload
+- **With protocol:** ~6-8k tokens (~$0.05-0.08) per session reload
+- **Savings:** ~60% tokens on every Claude Code restart
+
+**Migration Reliability:**
+- Test execution: 87k+ tokens → Target: 40-50k tokens
+- Archive structure: Now reliable and complete
+- SECURITY.md: Always updated with project rules
+- CONFLICTS.md: All issues documented, even minor
+
+### Impact
+
+**For All Users:**
+- ✅ Automatic 60% token savings on session reloads
+- ✅ No configuration needed - works out of the box
+- ✅ ~$0.10 saved per session
+- ✅ ~$3-5 saved per month for active projects
+
+**For Migrated Projects:**
+- ✅ Migration Status auto-set after finalization
+- ✅ MIGRATION_REPORT.md skipped automatically
+- ✅ Additional ~5k token savings per reload
+- ✅ More reliable migration process
+
+**Cost Savings Example:**
+```
+Project with 50 session reloads/month:
+- Before: 50 × 20k = 1M tokens = ~$10/month
+- After: 50 × 8k = 400k tokens = ~$4/month
+- Savings: $6/month = $72/year per project
+```
+
+### Files Modified
+
+**Templates:**
+- Init/PROJECT_INTAKE.md (+1 line, Migration Status field)
+- Init/CLAUDE.md (+41 lines, Cold Start protocol section)
+- Init/.claude/commands/migrate.md (+360 lines, comprehensive fixes)
+- Init/.claude/commands/migrate-finalize.md (+32 lines, status update step)
+- init_eng/PROJECT_INTAKE.md (+1 line)
+- init_eng/CLAUDE.md (+39 lines)
+- init_eng/.claude/commands/migrate.md (+360 lines)
+- init_eng/.claude/commands/migrate-finalize.md (+32 lines)
+
+**Documentation:**
+- README.md (+37 lines, Cold Start section)
+- README_RU.md (+37 lines, Cold Start section)
+
+**Archives:**
+- init-starter.zip (recreated)
+- init-starter-en.zip (recreated)
+
+### Why This Matters
+
+**Token Optimization:**
+User feedback: "Каждый раз перезагружаю Claude Code и чувствую что токены тратятся на чтение всего"
+
+The Cold Start protocol addresses this by implementing conditional file reading based on project status. AI only reads what's necessary for current context.
+
+**Migration Reliability:**
+Test execution revealed 8 real-world issues that would cause migration failures or incomplete documentation. All fixed based on actual test case.
+
+### Migration Path
+
+**For New Projects:**
+- Cold Start protocol active immediately
+- Minimal token usage from day one
+
+**For Existing Projects:**
+- Run `/migrate-finalize` to activate protocol
+- Migration Status auto-set
+- Token savings start on next reload
+
+**For Framework Updates:**
+- Pull latest version
+- Protocol active automatically
+- No configuration needed
+
+---
+
 ## [1.2.4] - 2025-10-11
 
 ### 📝 Documentation Update: "start" Command Protocol
