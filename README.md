@@ -119,8 +119,9 @@ code PROJECT_INTAKE.md
 # Launch Claude Code
 claude
 
-# Start dialogue
-"Read PROJECT_INTAKE.md and ask all clarifying questions"
+# Initialize AI dialogue (IMPORTANT!)
+start
+# AI will automatically analyze your project and ask clarifying questions
 ```
 
 **For LEGACY projects:**
@@ -131,7 +132,11 @@ cp init_eng/.migrationignore.example .migrationignore
 # Launch Claude Code
 claude
 
-# Run migration
+# Initialize AI dialogue (IMPORTANT!)
+start
+# AI will analyze project and suggest migration steps
+
+# Then run migration
 /migrate
 ```
 
@@ -169,7 +174,11 @@ cp init_eng/.migrationignore.example .migrationignore
 # 5. Launch Claude Code
 claude
 
-# 6. Run automatic migration
+# 6. Initialize AI dialogue (IMPORTANT!)
+start
+# AI will analyze your project and prepare for migration
+
+# 7. Run automatic migration
 /migrate
 ```
 
