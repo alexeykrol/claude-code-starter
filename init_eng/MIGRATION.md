@@ -198,6 +198,15 @@ docs/deprecated/
 claude
 ```
 
+**⚠️ IMPORTANT:** After the first launch of Claude Code, you must restart to load slash commands:
+
+```bash
+exit
+claude
+```
+
+Slash commands (`/migrate`, `/migrate-finalize`, etc.) will only become available after restart.
+
 ---
 
 ## Stage 1: Analysis and Transfer

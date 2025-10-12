@@ -2,608 +2,430 @@
 description: Миграция существующего проекта на Claude Code Starter framework
 ---
 
-# Миграция Legacy проекта на фреймворк
+# Миграция проекта на Claude Code Starter
 
-> Используйте эту команду для миграции существующих проектов с legacy мета-документацией на Claude Code Starter framework v1.0
+## 🎯 Что делает эта команда
 
-## 🎯 Цель
+**Этап 1: Анализ и перенос (автоматически)**
 
-Перенести всю ценную информацию из разрозненных мета-файлов в структурированный фреймворк, сохранив историю и обеспечив единый источник истины.
+1. Сканирует все meta-файлы проекта
+2. Переносит информацию в Init/ структуру
+3. Архивирует legacy файлы в `archive/`
+4. Создает `MIGRATION_REPORT.md`
+5. Создает `CONFLICTS.md` (если есть конфликты)
+6. ⏸️ **ОСТАНАВЛИВАЕТСЯ** для проверки
 
-## ⚠️ ВАЖНО
-
-Эта команда выполняет **Этап 1** миграции (анализ + перенос + архивирование).
-После завершения **ТРЕБУЕТСЯ РУЧНАЯ ПРОВЕРКА** перед финализацией.
-Для завершения используйте `/migrate-finalize`.
+**После выполнения этой команды:**
+- Используй `/migrate-resolve` для разрешения конфликтов
+- Используй `/migrate-finalize` для завершения миграции
+- Используй `/migrate-rollback` для отката
 
 ---
 
-## 📋 Процесс миграции (Этап 1)
+## 📋 Процесс миграции - Stage 1
 
-### Шаг 0: Проверка .migrationignore
+### Шаг 1: Сканирование meta-файлов
 
-**ВАЖНО:** Перед сканированием проверить наличие файла `.migrationignore` для исключения файлов из миграции.
+**Задача:** Найти все существующие meta-файлы проекта
 
-#### 0.1. Проверить существование .migrationignore
+**Действие:**
+\`\`\`bash
+# Сканируем корень проекта на предмет meta-файлов
+find . -maxdepth 1 -type f \( \
+  -name "CLAUDE.md" -o \
+  -name "PROJECT_INTAKE.md" -o \
+  -name "SECURITY.md" -o \
+  -name "ARCHITECTURE.md" -o \
+  -name "BACKLOG.md" -o \
+  -name "AGENTS.md" -o \
+  -name "WORKFLOW.md" -o \
+  -name "PLAN*.md" -o \
+  -name "spec.md" -o \
+  -name "project-requirements.md" -o \
+  -name "NOTES.md" \
+\)
+\`\`\`
 
-```bash
-if [ -f ".migrationignore" ]; then
-  echo "✅ Найден .migrationignore - будут применены исключения"
-else
-  echo "ℹ️  .migrationignore не найден - предложить создать"
-fi
-```
+**Результат:**
+- Список найденных файлов
+- Понимание, какие файлы нужно мигрировать
 
-#### 0.2. Если .migrationignore отсутствует - предложить создать
+---
 
-**Автоматическое определение кандидатов на исключение:**
+### Шаг 2: Создание структуры archive/
 
-Проанализировать файлы и определить потенциально НЕ-мета файлы:
+**Задача:** Создать папку для архивирования legacy файлов
 
-```
-Критерии для exclusion:
-1. Файлы в папках: articles/, references/, research/, examples/
-2. Файлы с паттернами: meeting-*.md, brainstorm-*.md, temp-*.md
-3. Файлы с датами в названии: *-2024-*.md, *-2025-*.md
-4. Большие файлы (>50KB) с много кода (вероятно статьи)
-5. Файлы в папках: old/, archive/, deprecated/
-6. Бинарные файлы: *.pdf, *.docx, *.pptx
-```
+**Действие:**
+\`\`\`bash
+# Создаем структуру для архива
+mkdir -p archive/legacy-docs
+mkdir -p archive/backup-\$(date +%Y%m%d-%H%M%S)
+\`\`\`
 
-**Показать пользователю:**
-```
-🤔 Обнаружены потенциально НЕ-мета файлы:
-
-📄 docs/articles/how-react-works.md (15KB, много примеров кода)
-   Похоже на: обучающая статья
-   Рекомендация: exclude
-
-📄 notes/meeting-2024-01-15.md (2KB, дата в названии)
-   Похоже на: запись встречи
-   Рекомендация: exclude
-
-📄 docs/architecture.md (8KB, описывает структуру проекта)
-   Похоже на: мета-документация проекта
-   Рекомендация: migrate
-
-Создать .migrationignore с рекомендациями? [Y/n]
-```
-
-#### 0.3. Создать .migrationignore если пользователь согласился
-
-Если ответ "Y":
-```bash
-# Создать .migrationignore на основе рекомендаций
-cat > .migrationignore <<EOF
-# Auto-generated migration exclusions
-
-# Reference articles
-docs/articles/
-docs/references/
-
-# Meeting notes
-notes/meeting-*.md
-
-# Research
-research/
-
-# Old/archived
-old/
+**Результат:**
+\`\`\`
 archive/
-docs/deprecated/
+├── legacy-docs/          # Для всех старых meta-файлов
+└── backup-20241012-143022/  # Timestamped backup
+\`\`\`
 
-# Binary files
-*.pdf
-*.docx
+---
+
+### Шаг 3: Анализ содержимого файлов
+
+**Задача:** Прочитать и проанализировать каждый найденный файл
+
+**Для каждого файла:**
+
+1. **Прочитать содержимое** с помощью Read tool
+2. **Определить категорию информации:**
+   - Project requirements → PROJECT_INTAKE.md
+   - Security rules → SECURITY.md
+   - Architecture decisions → ARCHITECTURE.md
+   - Task backlog → BACKLOG.md
+   - AI instructions → AGENTS.md
+   - Workflow processes → WORKFLOW.md
+
+3. **Выявить дубликаты информации**
+4. **Найти противоречия** между файлами
+
+---
+
+### Шаг 4: Маппинг legacy → Init/
+
+**Задача:** Создать карту переноса информации
+
+**Mapping table:**
+
+| Legacy File | → | Init/ Target | Section |
+|-------------|---|--------------|---------|
+| \`spec.md\` | → | \`PROJECT_INTAKE.md\` | Problem/Solution/MVP |
+| \`project-requirements.md\` | → | \`PROJECT_INTAKE.md\` | Requirements |
+| \`SECURITY.md\` (old) | → | \`SECURITY.md\` (new) | Merge rules |
+| \`ARCHITECTURE.md\` (old) | → | \`ARCHITECTURE.md\` (new) | Preserve decisions |
+| \`BACKLOG.md\` (old) | → | \`BACKLOG.md\` (new) | Current status |
+| \`CLAUDE.md\` (old) | → | \`AGENTS.md\` | Custom instructions |
+| \`NOTES.md\` | → | \`AGENTS.md\` or \`WORKFLOW.md\` | Depends on content |
+| \`PLAN*.md\` | → | \`archive/legacy-docs/\` | Reference only |
+
+---
+
+### Шаг 5: Перенос информации
+
+**Задача:** Заполнить Init/ файлы информацией из legacy файлов
+
+**Для PROJECT_INTAKE.md:**
+\`\`\`markdown
+# Источники:
+- spec.md → секция "Problem & Solution"
+- project-requirements.md → секция "Requirements"
+- README.md → секция "Project Overview"
+
+# Логика переноса:
+1. Читаем spec.md
+2. Извлекаем проблему, решение, MVP
+3. Заполняем соответствующие секции PROJECT_INTAKE.md
+4. Помечаем [MIGRATED FROM: spec.md]
+\`\`\`
+
+**Для SECURITY.md:**
+\`\`\`markdown
+# Логика:
+1. Если старый SECURITY.md существует → сравнить с новым шаблоном
+2. Добавить специфичные для проекта правила в секцию "Project-Specific Rules"
+3. Сохранить оригинал в archive/
+\`\`\`
+
+**Для ARCHITECTURE.md:**
+\`\`\`markdown
+# Логика:
+1. Извлечь все архитектурные решения
+2. Заполнить секцию "Key Decisions"
+3. Обновить Tech Stack
+4. Сохранить legacy версию в archive/
+\`\`\`
+
+**Для AGENTS.md:**
+\`\`\`markdown
+# Логика:
+1. Извлечь кастомные инструкции из старого CLAUDE.md
+2. Добавить в секцию "Custom Instructions"
+3. Извлечь паттерны из NOTES.md
+4. Заполнить секцию "Common Patterns"
+\`\`\`
+
+---
+
+### Шаг 6: Детекция конфликтов
+
+**Задача:** Найти противоречия в информации
+
+**Типы конфликтов:**
+
+1. **Дубликаты с разными данными**
+   \`\`\`
+   spec.md: "Database: PostgreSQL"
+   ARCHITECTURE.md: "Database: MongoDB"
+   \`\`\`
+
+2. **Противоречивые требования**
+   \`\`\`
+   PROJECT_INTAKE.md: "Must support 1000 users"
+   spec.md: "MVP for 100 users"
+   \`\`\`
+
+3. **Устаревшая информация**
+   \`\`\`
+   BACKLOG.md: "Auth module: in progress"
+   Git history: Auth module committed 2 months ago
+   \`\`\`
+
+**Действие:**
+- Записать все конфликты в \`CONFLICTS.md\`
+- Пометить conflicted секции в Init/ файлах как \`[CONFLICT: see CONFLICTS.md]\`
+
+---
+
+### Шаг 7: Архивирование legacy файлов
+
+**Задача:** Перенести старые файлы в archive/
+
+**Действие:**
+\`\`\`bash
+# Для каждого legacy файла:
+mv CLAUDE.md archive/legacy-docs/CLAUDE.md.old
+mv spec.md archive/legacy-docs/spec.md
+mv project-requirements.md archive/legacy-docs/project-requirements.md
+# etc...
+
+# Создаем README в archive/
+cat > archive/README.md << 'EOF'
+# Legacy Documentation Archive
+
+Эта папка содержит старые meta-файлы проекта до миграции на Claude Code Starter framework.
+
+## Дата миграции: \$(date +%Y-%m-%d)
+
+## Архивированные файлы:
+[список файлов]
+
+## Не удаляйте эти файлы!
+Они могут понадобиться для разрешения конфликтов миграции.
+
+После успешной миграции (через 1-2 спринта) можно безопасно удалить эту папку.
 EOF
+\`\`\`
 
-echo "✅ Создан .migrationignore"
-echo "   Отредактируйте файл если нужно и запустите /migrate снова"
-exit 0
-```
+---
 
-Если ответ "n":
-```
-ℹ️  Пропускаю создание .migrationignore
-   Все найденные файлы будут обработаны
-```
+### Шаг 8: Создание MIGRATION_REPORT.md
 
-#### 0.4. Прочитать и применить .migrationignore
+**Задача:** Создать отчет о миграции
 
-Если файл существует:
-```bash
-# Прочитать все паттерны (игнорируя комментарии и пустые строки)
-IGNORE_PATTERNS=$(grep -v '^#' .migrationignore | grep -v '^$')
+**Структура отчета:**
 
-# Сохранить для использования в Шаге 1
-```
+\`\`\`markdown
+# Migration Report - Stage 1
 
-### Шаг 1: Сканирование проекта
+**Date:** \$(date +%Y-%m-%d %H:%M:%S)
+**Framework Version:** 1.2.4
 
-Найти все мета-файлы, которые содержат документацию проекта:
-
-**С учетом .migrationignore если существует:**
-
-```bash
-# Искать в корне и популярных директориях
-find . -maxdepth 3 -type f \( \
-  -name "*.md" -o \
-  -name "*.txt" -o \
-  -name "README*" -o \
-  -name "DOCS*" -o \
-  -name "NOTES*" -o \
-  -name "TODO*" \
-) | grep -v "node_modules\|dist\|build\|.next\|Init\|init_eng"
-```
-
-**Исключить:**
-- node_modules/, dist/, build/, .next/
-- Init/ и init_eng/ (это наш новый фреймворк)
-- Файлы кода (*.js, *.ts, *.py, etc)
-- Lock файлы (package-lock.json, etc)
-
-**Искать в:**
-- Корневые README.md, DOCS.md, NOTES.md
-- Папки docs/, documentation/, notes/, wiki/
-- Файлы архитектуры: architecture.md, design.md, structure.md
-- Файлы безопасности: security.md, security.txt
-- Бэклоги: backlog.md, todo.md, roadmap.md
-- Любые другие .md/.txt с мета-информацией
-
-### Шаг 2: Анализ содержимого
-
-Для каждого найденного файла:
-1. Прочитать содержимое
-2. Определить тип информации (архитектура, требования, процессы, безопасность, etc)
-3. Создать mapping: какой legacy файл → какой Init/ файл(ы)
-
-**Создать MAPPING:**
-```
-Legacy файл → Framework файл(ы)
------------------------------------------
-docs/README.md → PROJECT_INTAKE.md (секции: Overview, Goals)
-docs/architecture.md → ARCHITECTURE.md
-notes/security.txt → SECURITY.md
-TODO.md → BACKLOG.md
-api-docs.md → ARCHITECTURE.md (секция API Structure)
-workflow.md → WORKFLOW.md
-...
-```
-
-### Шаг 3: Обнаружение конфликтов
-
-Проверить на потенциальные конфликты:
-
-#### 🔴 Критические конфликты (требуют разрешения):
-- **Архитектурные противоречия**: legacy описывает монолит, фреймворк предполагает модули
-- **Отсутствие критичной информации**: нет документации по безопасности
-- **Противоречивые требования**: в разных legacy файлах противоречащие друг другу описания
-- **Устаревшая информация**: legacy содержит явно устаревшие данные
-
-#### 🟡 Средний приоритет:
-- **Дублирование информации**: одна и та же информация в нескольких местах
-- **Структурные различия**: legacy организован иначе, чем фреймворк
-- **Неполнота данных**: некоторые секции фреймворка невозможно заполнить из legacy
-
-#### 🟢 Низкий приоритет:
-- **Косметические различия**: naming conventions, форматирование
-- **Избыточная детализация**: legacy более детален, чем нужно фреймворку
-
-### Шаг 4: Миграция информации
-
-Для каждого Init/ файла:
-
-#### CLAUDE.md
-- Обновить секцию "Tech Stack" из legacy документации
-- Добавить специфичные для проекта инструкции из legacy
-- Обновить bash-команды если они отличаются от дефолтных
-
-#### PROJECT_INTAKE.md
-- **Problem/Solution/Value** из legacy README или docs
-- **User Personas** - если есть в legacy, иначе пометить [NEEDS UPDATE]
-- **User Flows** - из legacy user stories или docs
-- **Features** - из legacy roadmap, backlog, TODO
-- **Modular Structure** - проанализировать текущий код и предложить модульную структуру
-
-#### SECURITY.md
-- Перенести существующие security practices из legacy
-- Если нет legacy security docs - пометить [CRITICAL: NEEDS FILLING]
-- Проанализировать код на security patterns (auth, validation, etc)
-
-#### ARCHITECTURE.md
-- **Tech Stack** из legacy
-- **Folder Structure** - текущую реальную структуру проекта
-- **Module Architecture** - проанализировать и предложить модульное разделение
-- **API Structure** из legacy API docs
-- **Database Schema** из legacy DB docs
-- **Key Decisions** из legacy architecture docs (важно сохранить WHY!)
-
-#### BACKLOG.md
-- Перенести TODO, roadmap items из legacy
-- Проанализировать текущий код и обновить статусы (что уже реализовано)
-- Пометить legacy items как "Migrated from legacy TODO.md"
-
-#### AGENTS.md
-- Если в legacy есть специфичные инструкции для разработки - перенести
-- Добавить паттерны из анализа кодовой базы
-
-#### WORKFLOW.md
-- Перенести существующие workflow из legacy
-- Если нет - оставить дефолтные из шаблона
-
-#### PLAN_TEMPLATE.md
-- Оставить как есть (это шаблон для будущих задач)
-
-#### README-TEMPLATE.md
-- Не трогать (это шаблон для финального README проекта)
-
-### Шаг 5: Архивирование legacy файлов
-
-Создать папку archive/ и переместить туда все legacy мета-файлы:
-
-```bash
-# Создать структуру archive
-mkdir -p archive/docs
-mkdir -p archive/notes
-mkdir -p archive/other
-
-# Переместить файлы с сохранением структуры
-# Например:
-mv docs/README.md archive/docs/
-mv docs/architecture.md archive/docs/
-mv notes/* archive/notes/ 2>/dev/null || true
-mv TODO.md archive/other/ 2>/dev/null || true
-```
-
-**В archive/ создать README.md:**
-```markdown
-# Archived Legacy Documentation
-
-> These files were archived during migration to Claude Code Starter framework v1.0
-> Date: [DATE]
-
-## Migration
-All information from these files has been migrated to Init/ framework files.
-See MIGRATION_REPORT.md for details.
-
-## DO NOT USE
-These files are kept for historical reference only.
-**Single source of truth is now Init/ folder.**
-```
-
-### Шаг 6: Создание MIGRATION_REPORT.md
-
-Создать детальный отчет о миграции в корне проекта:
-
-```markdown
-# Migration Report
-
-> Migration to Claude Code Starter framework v1.0
-> Date: [DATE]
-> Status: ⏸️ PENDING REVIEW (Step 1 complete)
+---
 
 ## 📊 Summary
 
-- **Total meta-files found:** [N]
-- **Excluded (via .migrationignore):** [N]
-- **Processed for migration:** [N]
-- **Files migrated:** [N]
-- **Files archived:** [N]
-- **Critical conflicts:** [N]
-- **Medium conflicts:** [N]
-- **Low priority notes:** [N]
-
-## 🚫 Excluded from Migration
-
-The following files were excluded per `.migrationignore`:
-
-### Pattern: `docs/articles/`
-- docs/articles/how-jwt-works.md
-- docs/articles/react-patterns.md
-- docs/articles/graphql-intro.md
-(22 more files...)
-
-### Pattern: `notes/meeting-*.md`
-- notes/meeting-2024-01-15.md
-- notes/meeting-2024-02-20.md
-(8 more files...)
-
-**Reason:** These files are reference materials, not project documentation.
-**Location:** Remain in original location. **NOT archived** - stay as-is.
-
-**Note:** Excluded files are NOT migrated, NOT archived, and NOT modified.
-
-## 🗂️ Migration Mapping
-
-### Legacy → Framework
-
-| Legacy File | Framework File(s) | Status | Notes |
-|-------------|------------------|---------|-------|
-| docs/README.md | PROJECT_INTAKE.md | ✅ Migrated | Sections: Overview, Goals |
-| docs/architecture.md | ARCHITECTURE.md | ⚠️ Partial | Missing module structure |
-| notes/security.txt | SECURITY.md | ❌ Conflict | See CONFLICTS.md #1 |
-| TODO.md | BACKLOG.md | ✅ Migrated | Updated statuses based on code |
-| ... | ... | ... | ... |
-
-## 📝 Detailed Migration Log
-
-### PROJECT_INTAKE.md
-**Sources:**
-- docs/README.md → Problem/Solution/Value
-- TODO.md → Features list
-- notes/user-research.txt → User Personas (partial)
-
-**Added:**
-- ✅ Problem statement (from docs/README.md)
-- ✅ Solution description (from docs/README.md)
-- ✅ Feature list (from TODO.md)
-- ⚠️ User Personas (partial from notes, needs completion)
-- ❌ User Flows (not found in legacy, marked [NEEDS FILLING])
-
-### ARCHITECTURE.md
-**Sources:**
-- docs/architecture.md → Tech Stack, Decisions
-- Code analysis → Current structure
-
-**Added:**
-- ✅ Tech Stack (from docs/architecture.md)
-- ✅ Current folder structure (from code analysis)
-- ⚠️ Module Architecture (proposed based on code, needs review)
-- ✅ Key Decisions (from docs/architecture.md - preserved WHY!)
-
-### SECURITY.md
-**Sources:**
-- No legacy security documentation found
-
-**Added:**
-- ⚠️ Analyzed code for security patterns
-- ⚠️ Found: JWT auth, input validation in some routes
-- ❌ Missing: comprehensive security policy
-- 🔴 **CRITICAL: Requires manual filling**
-
-### BACKLOG.md
-**Sources:**
-- TODO.md → Tasks
-- Code analysis → Current implementation status
-
-**Added:**
-- ✅ All TODO items migrated
-- ✅ Statuses updated based on code analysis
-- ✅ Marked as "Migrated from legacy TODO.md"
-
-### Other files
-- AGENTS.md: ✅ Added project-specific patterns from code analysis
-- WORKFLOW.md: ✅ Kept default (no legacy workflow found)
-- CLAUDE.md: ✅ Updated with project tech stack
-
-## 📦 Archived Files
-
-All files moved to `archive/` directory:
-- archive/docs/README.md
-- archive/docs/architecture.md
-- archive/notes/security.txt
-- archive/other/TODO.md
-- ... (see archive/README.md for full list)
-
-## ⏭️ Next Steps
-
-1. **REVIEW CONFLICTS**: Read CONFLICTS.md and resolve all issues
-2. **REVIEW INIT FILES**: Check all Init/ files for accuracy and completeness
-3. **FILL GAPS**: Complete sections marked [NEEDS FILLING] or [NEEDS UPDATE]
-4. **VERIFY NOTHING LOST**: Compare Init/ with archive/ to ensure all critical info migrated
-5. **FINALIZE**: Run `/migrate-finalize` when ready
-
-## ⏸️ Migration Status: PAUSED
-
-**Action required:** Review and resolve conflicts before finalizing.
+- **Legacy files found:** [count]
+- **Files migrated:** [count]
+- **Files archived:** [count]
+- **Conflicts detected:** [count]
 
 ---
 
-🤖 Generated with [Claude Code](https://claude.com/claude-code)
-```
+## 📂 Files Processed
 
-### Шаг 7: Создание CONFLICTS.md (если есть конфликты)
+### Migrated to Init/:
+- ✅ spec.md → PROJECT_INTAKE.md (Problem, Solution, MVP)
+- ✅ SECURITY.md.old → SECURITY.md (merged rules)
+- ✅ ARCHITECTURE.md.old → ARCHITECTURE.md (preserved decisions)
+[... etc]
 
-Если обнаружены конфликты, создать детальный файл:
-
-```markdown
-# Migration Conflicts Report
-
-> ⚠️ Review and resolve these conflicts before finalizing migration
-
-**Status:** [N] critical, [N] medium, [N] low priority conflicts
-
----
-
-## 🔴 Critical Conflicts (require resolution)
-
-### 1. [Название конфликта]
-**Priority:** 🔴 Critical
-**Legacy:** [Что сказано в legacy]
-**Framework:** [Что предполагает фреймворк]
-**Conflict:** [В чем противоречие]
-**Impact:** [Почему это критично]
-
-**Action Required:**
-- [ ] [Конкретное действие 1]
-- [ ] [Конкретное действие 2]
-- [ ] Update affected files: [список файлов]
-
-**Recommendation:** [Твоя рекомендация по разрешению]
+### Archived to archive/legacy-docs/:
+- 📦 spec.md
+- 📦 project-requirements.md
+- 📦 CLAUDE.md.old
+[... etc]
 
 ---
 
-### 2. Missing Security Documentation
-**Priority:** 🔴 Critical
-**Legacy:** No security documentation found in legacy files
-**Framework:** SECURITY.md requires comprehensive security policy
-**Conflict:** Critical security information missing
-**Impact:** Cannot establish security baseline without this
+## ⚠️ Conflicts Detected
 
-**Action Required:**
-- [ ] Review current code for security practices (auth, validation, sanitization)
-- [ ] Interview team about security policies
-- [ ] Fill all sections of SECURITY.md
-- [ ] Run `/security` audit after filling
+[If conflicts exist, list them here with references to CONFLICTS.md]
 
-**Recommendation:** Treat as highest priority - security cannot be skipped.
+**Action required:** Run \`/migrate-resolve\` to resolve conflicts
 
 ---
 
-## 🟡 Medium Priority (recommended to resolve)
+## ✅ Next Steps
 
-### 3. [Название конфликта]
-**Priority:** 🟡 Medium
-**Legacy:** [Что в legacy]
-**Framework:** [Что во фреймворке]
-**Conflict:** [Противоречие]
-**Impact:** [Влияние]
+1. **Review migrated content:**
+   - Read PROJECT_INTAKE.md
+   - Read ARCHITECTURE.md
+   - Read BACKLOG.md
 
-**Suggestion:**
-- [ ] [Действие]
+2. **Resolve conflicts (if any):**
+   \`\`\`
+   /migrate-resolve
+   \`\`\`
 
----
-
-## 🟢 Low Priority (can postpone)
-
-### 4. [Название конфликта]
-**Priority:** 🟢 Low
-**Legacy:** [Что в legacy]
-**Framework:** [Что во фреймворке]
-**Conflict:** [Противоречие]
-**Impact:** Minimal - cosmetic/organizational
-
-**Suggestion:** [Рекомендация]
-
----
-
-## Summary & Next Steps
-
-**Before finalizing migration, you MUST:**
-1. ✅ Resolve all 🔴 Critical conflicts
-2. ⚠️ Review all 🟡 Medium conflicts (strongly recommended)
-3. 📝 Document decisions in appropriate Init/ files
-
-**After resolving conflicts:**
-- Run `/migrate-finalize` to complete migration
-
----
-
-🤖 Generated with [Claude Code](https://claude.com/claude-code)
-```
-
-### Шаг 8: Вывод результата
-
-После завершения всех шагов вывести пользователю:
-
-```
-✅ Миграция (Этап 1) завершена!
-
-📊 Результаты:
-- Всего найдено мета-файлов: [N]
-- Исключено (.migrationignore): [N]
-- Обработано для миграции: [N]
-- Перенесено в Init/: [N]
-- Архивировано в archive/: [N]
-- Обнаружено конфликтов: [N] (🔴 [critical] 🟡 [medium] 🟢 [low])
-
-ℹ️  Исключенные файлы:
-- [N] файлов исключено через .migrationignore
-- Остаются в исходном расположении (НЕ архивируются)
-- См. детали в MIGRATION_REPORT.md секция "Excluded from Migration"
-
-📄 Созданные файлы:
-- ✅ MIGRATION_REPORT.md - детальный отчет о миграции
-- ⚠️ CONFLICTS.md - конфликты требующие разрешения (если есть)
-- ✅ archive/README.md - пояснение для архива
-- ✅ Init/ - все файлы заполнены из legacy
-
-⏸️ МИГРАЦИЯ ПРИОСТАНОВЛЕНА ДЛЯ ПРОВЕРКИ
-
-📋 ЧТО ДЕЛАТЬ ДАЛЬШЕ:
-
-1. **Прочитайте MIGRATION_REPORT.md**
-   - Проверьте mapping: все ли файлы учтены
-   - Убедитесь что ничего важного не потеряно
-
-2. **Если есть CONFLICTS.md - разрешите конфликты**
-   - Начните с 🔴 критических
-   - Обновите Init/ файлы соответственно
-   - Удалите CONFLICTS.md когда все разрешите
-
-3. **Проверьте Init/ файлы**
-   - PROJECT_INTAKE.md - все ли секции заполнены?
-   - SECURITY.md - критично важно!
-   - ARCHITECTURE.md - корректна ли архитектура?
-   - BACKLOG.md - актуальны ли статусы?
-
-4. **Заполните пробелы**
-   - Найдите [NEEDS FILLING] и заполните
-   - Найдите [NEEDS UPDATE] и обновите
-
-5. **Когда все готово - финализируйте миграцию**
-   ```
+3. **Finalize migration:**
+   \`\`\`
    /migrate-finalize
-   ```
+   \`\`\`
 
-⚠️ НЕ УДАЛЯЙТЕ:
-- MIGRATION_REPORT.md (нужен для финализации)
-- CONFLICTS.md (если есть - разрешите конфликты)
-- archive/ (это история проекта)
-
-💡 Можно попросить AI помочь:
-- "Помоги разрешить конфликт #1 в CONFLICTS.md"
-- "Заполни секцию User Flows в PROJECT_INTAKE.md"
-- "Проверь все Init/ файлы на полноту"
-```
+4. **OR rollback if needed:**
+   \`\`\`
+   /migrate-rollback
+   \`\`\`
 
 ---
 
-## 🔐 Важные проверки
+## 📋 Checklist Before Finalize
 
-Перед завершением миграции проверить:
-
-### Безопасность
-- [ ] Не перенесли ли случайно секреты из legacy (API keys, passwords)
-- [ ] В archive/ нет файлов с credentials
-- [ ] SECURITY.md заполнен или помечен как [CRITICAL]
-
-### Полнота
-- [ ] Все критичные legacy файлы учтены в MIGRATION_REPORT.md
-- [ ] Архитектурные решения и их WHY сохранены
-- [ ] TODO items перенесены
-- [ ] Tech stack актуален
-
-### Структура
-- [ ] archive/ содержит все legacy файлы
-- [ ] archive/README.md создан
-- [ ] Init/ файлы корректно заполнены
-- [ ] Конфликты документированы
+- [ ] PROJECT_INTAKE.md reviewed and accurate
+- [ ] SECURITY.md contains all project-specific rules
+- [ ] ARCHITECTURE.md reflects current architecture
+- [ ] BACKLOG.md shows current project status
+- [ ] All conflicts resolved (if any)
+- [ ] Legacy files safely archived
 
 ---
 
-## 🚫 НЕ ДЕЛАЙ
-
-- ❌ Не удаляй legacy файлы (только перемещай в archive/)
-- ❌ Не финализируй миграцию автоматически (нужна проверка пользователя)
-- ❌ Не пропускай CONFLICTS.md если есть критичные конфликты
-- ❌ Не переноси секреты/credentials в Init/ файлы
-- ❌ Не игнорируй пробелы в SECURITY.md
+*Generated by /migrate command*
+\`\`\`
 
 ---
 
-## 💡 Tips
+### Шаг 9: Создание CONFLICTS.md (если есть конфликты)
 
-1. **Сохраняй WHY, не только WHAT** - при миграции архитектурных решений критично сохранить обоснование (почему было принято такое решение)
+**Задача:** Документировать все найденные противоречия
 
-2. **Проверяй код, не только документацию** - если legacy docs устарели, анализируй реальный код
+**Структура:**
 
-3. **Модульность - это ключ** - при миграции на фреймворк самое время спланировать модульную структуру
+\`\`\`markdown
+# Migration Conflicts
 
-4. **Legacy ≠ Truth** - если legacy содержит явно устаревшую информацию, обнови её, не копируй слепо
-
-5. **Документируй решения** - все неочевидные решения при миграции документируй в MIGRATION_REPORT.md
+Обнаружены противоречия в legacy документации. Требуется ручное разрешение.
 
 ---
 
-🤖 Generated with [Claude Code](https://claude.com/claude-code)
+## Conflict 1: Database Choice
+
+**Location:** PROJECT_INTAKE.md - Tech Stack
+
+**Sources:**
+- \`spec.md\` line 45: "Database: PostgreSQL with Prisma ORM"
+- \`ARCHITECTURE.md.old\` line 12: "Using MongoDB with Mongoose"
+
+**Current state:** [CONFLICT]
+
+**Options:**
+1. Use PostgreSQL (spec.md)
+2. Use MongoDB (ARCHITECTURE.md)
+3. Specify different choice
+
+**Resolution:** [FILL IN]
+
+---
+
+## Conflict 2: User Capacity
+
+**Location:** PROJECT_INTAKE.md - Non-Functional Requirements
+
+**Sources:**
+- \`spec.md\`: "MVP should support 100 concurrent users"
+- \`project-requirements.md\`: "Must support 1000+ concurrent users"
+
+**Current state:** [CONFLICT]
+
+**Options:**
+1. MVP target: 100 users (spec.md)
+2. Full target: 1000+ users (requirements)
+3. Specify phased approach
+
+**Resolution:** [FILL IN]
+
+---
+
+[... more conflicts]
+
+---
+
+## How to Resolve
+
+1. For each conflict, choose one option or specify custom resolution
+2. Update the corresponding Init/ file with chosen resolution
+3. Run \`/migrate-resolve\` to mark conflicts as resolved
+4. Run \`/migrate-finalize\` to complete migration
+\`\`\`
+
+---
+
+## 🎯 Execution
+
+**Эта команда выполняет следующие действия:**
+
+1. **Сканирование:**
+   - Использую \`find\` и \`Glob\` для поиска всех meta-файлов
+   - Использую \`Read\` для чтения содержимого
+
+2. **Анализ:**
+   - Использую \`Grep\` для поиска ключевых секций
+   - Анализирую структуру и содержание
+   - Выявляю дубликаты и противоречия
+
+3. **Перенос:**
+   - Использую \`Read\` для legacy файлов
+   - Использую \`Edit\` для обновления Init/ файлов
+   - Добавляю маркеры \`[MIGRATED FROM: filename.md]\`
+
+4. **Архивирование:**
+   - Использую \`Bash\` для создания archive/ структуры
+   - Перемещаю legacy файлы с помощью \`mv\`
+   - Создаю archive/README.md
+
+5. **Отчетность:**
+   - Использую \`Write\` для создания MIGRATION_REPORT.md
+   - Использую \`Write\` для создания CONFLICTS.md (если нужно)
+
+---
+
+## ⏸️ Остановка для проверки
+
+**После выполнения всех шагов, я остановлюсь и предоставлю:**
+
+1. ✅ **MIGRATION_REPORT.md** - полный отчет
+2. ⚠️ **CONFLICTS.md** - список конфликтов (если есть)
+3. 📊 **Summary** - краткая статистика
+
+**Ты должен:**
+1. Прочитать MIGRATION_REPORT.md
+2. Проверить Init/ файлы
+3. Разрешить конфликты (если есть) через \`/migrate-resolve\`
+4. Запустить \`/migrate-finalize\` для завершения
+
+**Или:**
+- Запустить \`/migrate-rollback\` для отката миграции
+
+---
+
+## 🚨 Safety
+
+- ✅ Все legacy файлы сохранены в \`archive/\`
+- ✅ Timestamped backup создан
+- ✅ Можно откатить через \`/migrate-rollback\`
+- ✅ Git commit создается только в \`/migrate-finalize\`
+
+---
+
+**Готов начать миграцию? Дай команду, и я начну Stage 1!**

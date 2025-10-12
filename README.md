@@ -61,7 +61,13 @@ The framework provides **11 ready-made documentation templates** that:
    claude
    ```
 
-5. **Start the framework:**
+5. **Exit and restart** (to load slash commands):
+   ```bash
+   exit
+   claude
+   ```
+
+6. **Start the framework:**
    ```
    start
    ```
