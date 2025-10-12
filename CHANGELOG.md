@@ -7,6 +7,84 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.2.1] - 2025-01-11
+
+### 🎯 Smart Installation Script
+
+**Goal:** Eliminate installation complexity and errors for unqualified users through automated setup.
+
+### Added
+
+#### 🚀 Smart Installation System
+- **init-project.sh** - Intelligent bash script (183 lines) that:
+  - Asks for folder confirmation before proceeding
+  - Supports bilingual templates (--lang=ru|en flag)
+  - Auto-detects project type (new vs legacy)
+  - Extracts templates from zip archives
+  - NEW projects: automatically installs templates, cleans up zip/temp files
+  - LEGACY projects: prepares Init/ folder for `/migrate` command
+  - Color-coded output with clear next steps
+  - Error handling for missing dependencies (unzip)
+
+#### 📦 Distribution Packages
+- **init-starter.zip** - Pre-packaged Russian templates (Init/ directory)
+- **init-starter-en.zip** - Pre-packaged English templates (init_eng/ directory)
+- Both include all templates, .claude/ folder, Makefile, .env.example
+
+#### 📖 Documentation Updates
+- **README.md:**
+  - Added "What's New in v1.2.0" section with before/after comparison
+  - Completely rewritten Quick Start (5 steps → 3 steps)
+  - Updated migration instructions to use script
+  - Clear emphasis on "bash init-project.sh" (no chmod required)
+- **README_RU.md:**
+  - Added "Что нового в v1.2.0" section
+  - Rewritten Quick Start with new 3-step process
+  - Updated migration section with script-based workflow
+
+### Changed
+- **Installation Process:**
+  - **Before:** 5 manual steps with cp commands, easy to forget .claude/ folder
+  - **After:** 3 simple steps: download → copy → run script
+- **User Experience:**
+  - **Before:** Users needed to know project type and follow different instructions
+  - **After:** Script auto-detects and adapts workflow automatically
+- **Error Prevention:**
+  - Folder confirmation prevents accidental installation in wrong directory
+  - Script validates all prerequisites (zip file, unzip command)
+  - Clean error messages with actionable solutions
+
+### Impact
+
+**Simplification Metrics:**
+- Installation steps: 5 → 3 (40% reduction)
+- Manual file copy commands: 2 → 0 (eliminated)
+- User decisions required: 2 → 0 (auto-detection)
+- Potential error points: 5 → 1 (script validation)
+
+**Benefits:**
+- ✅ Unqualified users can install without terminal expertise
+- ✅ No more forgotten .claude/ or .env.example files
+- ✅ Automatic workflow selection (new vs legacy)
+- ✅ Cross-platform compatible (Mac, Linux, Windows Git Bash)
+- ✅ Bilingual support (Russian and English)
+
+**Problem Solved:**
+Users (especially beginners) reported that manual file copying was error-prone:
+- Easy to forget hidden .claude/ folder
+- Confusion about new vs legacy project setup
+- Need to understand cp command and paths
+
+The smart script eliminates these pain points entirely.
+
+### Why This Matters
+
+This update addresses critical user feedback: "можно ошибиться, много файлом" (easy to make mistakes with many files). By automating the entire installation process and adding intelligent project detection, we've made the framework accessible to absolute beginners while maintaining power-user flexibility through command-line flags.
+
+The script embodies the framework's philosophy: **simplify complexity for the user, let automation handle the details**.
+
+---
+
 ## [1.2.0] - 2025-01-11
 
 ### 🎯 Major Refactoring: Documentation Deduplication

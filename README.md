@@ -10,7 +10,7 @@
 > - For complete beginners: [Free AI Intro Course](https://alexeykrol.com/courses/ai_intro/) (Russian)
 
 [![GitHub](https://img.shields.io/badge/GitHub-claude--code--starter-blue)](https://github.com/alexeykrol/claude-code-starter)
-[![Version](https://img.shields.io/badge/version-1.1.3-orange.svg)](https://github.com/alexeykrol/claude-code-starter)
+[![Version](https://img.shields.io/badge/version-1.2.0-orange.svg)](https://github.com/alexeykrol/claude-code-starter)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
 ---
@@ -23,7 +23,53 @@
 
 ---
 
-## 🆕 What's New in v1.1.3
+## 🆕 What's New in v1.2.0
+
+### 🎯 Smart Installation Script (v1.2.0)
+
+**NEW:** Super-simple 3-step installation for any project!
+
+**What's new:**
+- 🤖 **Smart script** `init-project.sh` - one command to rule them all
+- 📦 **Pre-packaged templates** in .zip - no git cloning needed
+- 🔍 **Auto-detection** - script knows if it's new or legacy project
+- ✅ **Zero configuration** for new projects - just run and code!
+
+**Before (5 steps, error-prone):**
+```bash
+git clone https://github.com/alexeykrol/claude-code-starter.git
+cd claude-code-starter
+mkdir my-new-project
+cd my-new-project
+cp -r ../claude-code-starter/Init/* .
+cp -r ../claude-code-starter/Init/.claude .  # Easy to forget!
+```
+
+**After (1 step):**
+```bash
+bash init-project.sh  # Done!
+```
+
+### 🧹 Documentation Deduplication (v1.2.0)
+
+**MAJOR:** Framework documentation refactored to eliminate duplications!
+
+**Impact:**
+- 📉 90% reduction in duplicated content (~500 lines eliminated)
+- 📖 Clear **Single Source of Truth** for each concept
+- 🎯 CLAUDE.md reduced by 50% (170 → 85 lines)
+- ✅ No more conflicting instructions for AI agents
+
+**New files:**
+- `DOCS_MAP.md` - Navigation guide for all documentation
+- `CONSISTENCY_AUDIT.md` - Audit report
+- `REFACTORING_PLAN.md` - Detailed refactoring plan
+
+See [CHANGELOG.md](CHANGELOG.md) for full details.
+
+---
+
+## 🆕 Previous Updates
 
 ### 📂 Migration Exclusion System (v1.1.3)
 
@@ -109,58 +155,70 @@ The framework provides **11 ready-made documentation templates** that:
 
 ## 🚀 Quick Start
 
-### 1. Clone the repository
+> **New in v1.2.0:** Super-simple installation with smart script! Just 3 steps.
+
+### 1. Download Files
+
+Download from [Releases](https://github.com/alexeykrol/claude-code-starter/releases):
+- **`init-starter.zip`** - Russian templates
+- **`init-starter-en.zip`** - English templates
+- **`init-project.sh`** - Smart installation script
+
+### 2. Copy to Your Project
+
+Copy both files to your project folder:
+- **New project:** Create a folder and copy there
+- **Existing project:** Copy to project root
 
 ```bash
-git clone https://github.com/alexeykrol/claude-code-starter.git
-cd claude-code-starter
-```
-
-### 2. Copy templates to your project
-
-```bash
-# Create new project or navigate to existing one
+# Example for new project
 mkdir my-new-project
 cd my-new-project
-
-# Copy all files from Init/
-cp -r ../claude-code-starter/Init/* .
-cp -r ../claude-code-starter/Init/.claude .
+# Copy init-starter.zip and init-project.sh here
 ```
 
-### 3. Fill in PROJECT_INTAKE.md
+### 3. Run Installation
 
-This is the most important file - start here:
+Open terminal **IN YOUR PROJECT FOLDER** and run:
 
 ```bash
-# Open in editor
+bash init-project.sh
+```
+
+**That's it!** The script will:
+- ✅ Ask confirmation you're in the right folder
+- ✅ Extract templates
+- ✅ Detect if it's a new or existing project
+- ✅ **New project:** Auto-install templates
+- ✅ **Legacy project:** Prepare for migration
+
+### 4. Next Steps
+
+**For NEW projects:**
+```bash
+# Rename README template
+mv README-TEMPLATE.md README.md
+
+# Fill in project details
 code PROJECT_INTAKE.md
 
-# Or use Claude Code
-claude PROJECT_INTAKE.md
-```
-
-Fill in key sections:
-1. **Problem → Solution → Value** - why does your project exist?
-2. **User Personas** - who are your users?
-3. **User Flows** - how will they interact?
-4. **Unique vs Standard Features** - what to build vs what to integrate?
-5. **Modular Structure** - how to break into modules?
-
-### 4. Launch Claude Code
-
-```bash
-# In your project root
+# Launch Claude Code
 claude
 
-# Claude will automatically load CLAUDE.md into context
-# And read all necessary files
-```
-
-### 5. Start dialogue with AI
-
-```
+# Start dialogue
 "Read PROJECT_INTAKE.md and ask all clarifying questions"
+```
+
+**For LEGACY projects:**
+```bash
+# (Optional) Create .migrationignore to exclude files
+cp init_eng/.migrationignore.example .migrationignore
+
+# Launch Claude Code
+claude
+
+# Run migration
+/migrate
 ```
 
 ---
@@ -178,20 +236,26 @@ If you have:
 
 ### Quick Start Migration
 
-```bash
-# 1. Copy init_eng/ to your project
-cd your-existing-project
-cp -r /path/to/claude-code-starter/init_eng/* .
-cp -r /path/to/claude-code-starter/init_eng/.claude .
+> **New in v1.2.0:** Use the smart installation script!
 
-# 2. (Optional) Create .migrationignore to exclude non-project files
+```bash
+# 1. Download init-starter-en.zip and init-project.sh
+# 2. Copy both to your existing project folder
+cd your-existing-project
+
+# 3. Run installation script
+bash init-project.sh --lang=en
+
+# Script will detect existing project and prepare for migration!
+
+# 4. (Optional) Create .migrationignore to exclude files
 cp init_eng/.migrationignore.example .migrationignore
 # Edit to exclude reference articles, meeting notes, research docs, etc.
 
-# 3. Launch Claude Code
+# 5. Launch Claude Code
 claude
 
-# 4. Run automatic migration
+# 6. Run automatic migration
 /migrate
 ```
 
