@@ -291,6 +291,7 @@ npm run build
 - `/migrate-finalize` - финализация миграции
 - `/migrate-rollback` - откатить миграцию
 - `/db-migrate` - создать database migration
+- `/release` - создать релиз фреймворка (только для claude-code-starter)
 
 ---
 

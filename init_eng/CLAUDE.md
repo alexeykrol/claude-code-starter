@@ -291,6 +291,7 @@ Use slash commands for typical tasks:
 - `/migrate-finalize` - finalize migration
 - `/migrate-rollback` - rollback migration
 - `/db-migrate` - create database migration
+- `/release` - create framework release (only for claude-code-starter)
 
 ---
 

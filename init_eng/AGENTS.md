@@ -397,6 +397,196 @@ The project includes custom slash commands to automate typical tasks:
 
 ---
 
+## 🚀 Release Management (for claude-code-starter project)
+
+> **⚠️ IMPORTANT:** This section applies **ONLY to the claude-code-starter project**
+> DO NOT apply these rules to user projects!
+
+### Proactive Release Checking
+
+**Context:** When working with the `claude-code-starter` framework (path `/Users/alexeykrolmini/Downloads/Code/Project_init`), you MUST automatically offer creating a release after substantial changes.
+
+**Why this matters:**
+```
+The framework's purpose is helping other projects not miss anything.
+We ourselves shouldn't forget to update README and CHANGELOG!
+("Shoemaker without shoes" problem)
+```
+
+### Definition of "Substantial Changes"
+
+**Substantial changes include:**
+
+1. **New features:**
+   - New slash commands added to `.claude/commands/`
+   - New sections in templates (Init/, init_eng/)
+   - New protocols (e.g., Cold Start Protocol)
+   - New documentation files
+
+2. **Bug fixes:**
+   - Critical errors fixed in commands
+   - Migration logic errors fixed
+   - Template errors fixed
+
+3. **Documentation improvements:**
+   - Substantial sections added to README
+   - New best practices added
+   - Usage examples added
+
+**NOT substantial:**
+- Typos
+- Formatting without content changes
+- Code comments
+- Minor text edits
+
+### Proactive Suggestion Rules
+
+**After committing substantial changes:**
+
+1. **Analyze recent commits:**
+   ```bash
+   git log --oneline -n 5
+   ```
+
+2. **Assess significance:**
+   - IF new files in .claude/commands/ → Substantial
+   - IF changes in Init/ templates → Substantial
+   - IF new sections in README → Substantial
+   - IF bugfixes in commands → Substantial
+
+3. **Automatically suggest release:**
+   ```
+   ✅ Changes committed.
+
+   🎯 Substantial changes detected:
+   - [list of changes]
+
+   💡 Recommended to create release to update CHANGELOG and README.
+
+   Create release?
+   1. Patch (X.X.N) - bugfixes, documentation
+   2. Minor (X.N.0) - new features
+   3. Major (N.0.0) - breaking changes
+
+   Choose [1/2/3] or "skip":
+   ```
+
+4. **IF user chose 1/2/3:**
+   - Run `/release` automatically
+   - Pass selected release type
+
+5. **IF user chose "skip":**
+   - Don't suggest again in this session
+   - But suggest again in next session if release not created
+
+### Slash Command `/release`
+
+**Purpose:** Automates release process
+
+**What it does:**
+1. Analyzes changes since last release
+2. Determines release type (patch/minor/major)
+3. Updates version in README.md and README_RU.md
+4. Creates CHANGELOG.md entry
+5. Rebuilds zip archives (init-starter.zip, init-starter-en.zip)
+6. Creates release commit
+7. Pushes to GitHub
+8. Optionally creates GitHub Release
+
+**Usage:**
+```bash
+/release
+```
+
+**When to use:**
+- After completing new feature
+- After fixing critical bug
+- After substantial documentation changes
+- Before announcing updates
+
+### Release Check On "Cold Start"
+
+**On session reload (Cold Start):**
+
+1. **Read first 20 lines of README.md**
+   ```bash
+   head -n 20 README.md
+   ```
+
+2. **Extract current version:**
+   ```markdown
+   [![Version](https://img.shields.io/badge/version-1.2.5-orange.svg)]
+   ```
+
+3. **Check last commit:**
+   ```bash
+   git log -1 --oneline
+   ```
+
+4. **IF last commit NOT "chore: Release v..." AND there are new commits:**
+   ```bash
+   git log --oneline --grep="chore: Release" -1  # last release
+   git log <last-release>..HEAD --oneline        # commits after release
+   ```
+
+5. **IF substantial changes found without release:**
+   - Suggest creating release (see template above)
+   - BUT only once, not on every message
+
+### Integration with TodoWrite
+
+**If working on feature/bugfix:**
+
+1. Add to todo list:
+   ```
+   - Implement feature X
+   - Test feature X
+   - Update documentation
+   - Create release  # ← Add automatically for substantial changes
+   ```
+
+2. After completing all tasks → automatically suggest `/release`
+
+### Examples
+
+**Example 1: New command added**
+```
+✅ New slash command /release created
+
+🎯 This is substantial change:
+- Added Init/.claude/commands/release.md
+- Added init_eng/.claude/commands/release.md
+- Updated AGENTS.md and WORKFLOW.md
+
+💡 Recommended to create Minor release (new feature).
+
+Create release 1.3.0? [y/n]
+```
+
+**Example 2: Critical bugfix**
+```
+✅ Critical error in /migrate command fixed
+
+🎯 This is substantial change:
+- Fixed 8 bugs in migrate.md
+- Updated archiving logic
+
+💡 Recommended to create Patch release.
+
+Create release 1.2.6? [y/n]
+```
+
+### Checklist Before Release
+
+Before running `/release` ensure:
+- [ ] All changes committed
+- [ ] Working directory clean
+- [ ] New features tested
+- [ ] Documentation updated
+- [ ] No git conflicts
+
+---
+
 ## 🔍 Debugging Quick Reference
 
 ### [FILL IN: Project-specific debugging commands]

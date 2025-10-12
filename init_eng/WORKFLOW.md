@@ -200,6 +200,150 @@ EOF
 
 ---
 
+## 📦 Release Process (for claude-code-starter)
+
+> **⚠️ IMPORTANT:** This section applies **ONLY to the claude-code-starter project**
+> DO NOT apply to user projects!
+
+### When to Create Release
+
+**After substantial framework changes:**
+- New slash commands (in `.claude/commands/`)
+- New sections in templates (Init/, init_eng/)
+- New protocols or features (Cold Start, Migration, etc)
+- Critical bugfixes in commands
+- Substantial documentation updates
+
+**DO NOT create release for:**
+- Typos
+- Formatting without content changes
+- Code comments
+- Minor text edits
+
+### Automatic Workflow
+
+**AI should automatically:**
+
+1. **After committing substantial changes:**
+   - Analyze recent commits
+   - Assess significance of changes
+   - Suggest creating release
+
+2. **Suggestion template:**
+   ```
+   ✅ Changes committed.
+
+   🎯 Substantial changes detected:
+   - [list of changes]
+
+   💡 Recommended to create release to update CHANGELOG and README.
+
+   Create release?
+   1. Patch (X.X.N) - bugfixes, documentation
+   2. Minor (X.N.0) - new features
+   3. Major (N.0.0) - breaking changes
+
+   Choose [1/2/3] or "skip":
+   ```
+
+### Using `/release` Command
+
+**Command automates:**
+1. Analyzing changes since last release
+2. Determining release type (patch/minor/major)
+3. Updating version in README.md and README_RU.md
+4. Creating CHANGELOG.md entry
+5. Rebuilding zip archives
+6. Creating release commit
+7. Pushing to GitHub
+8. Optionally creating GitHub Release
+
+**Usage:**
+```bash
+/release
+```
+
+### Semantic Versioning Rules
+
+**Patch (X.X.N):**
+- Bug fixes
+- Documentation updates
+- Minor improvements without new features
+- Dependency updates
+
+**Minor (X.N.0):**
+- New features
+- New commands (slash commands)
+- New sections in templates
+- Backward compatible changes
+
+**Major (N.0.0):**
+- Breaking changes
+- Deprecated function removal
+- File structure changes
+- Incompatible API changes
+
+### Release Commit Template
+
+```bash
+git commit -m "$(cat <<'EOF'
+chore: Release v${NEW_VERSION}
+
+Release v${NEW_VERSION} includes [brief description].
+
+## Highlights:
+
+[2-3 key changes]
+
+## Changes in this commit:
+
+### Version Updates
+- README.md: ${CURRENT_VERSION} → ${NEW_VERSION}
+- README_RU.md: ${CURRENT_VERSION} → ${NEW_VERSION}
+
+### CHANGELOG.md
+Added v${NEW_VERSION} entry documenting:
+- [Category 1]: [briefly]
+- [Category 2]: [briefly]
+
+### Archives Recreated
+- init-starter.zip (updated with all changes)
+- init-starter-en.zip (updated with all changes)
+
+[If README changed - describe]
+
+## Impact:
+
+[Key impact metrics]
+
+See CHANGELOG.md for full details.
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)
+
+Co-Authored-By: Claude <noreply@anthropic.com>
+EOF
+)"
+```
+
+### Checklist Before Release
+
+- [ ] All changes committed
+- [ ] Working directory clean (`git status`)
+- [ ] New features tested
+- [ ] Documentation updated
+- [ ] No git conflicts
+- [ ] Determined correct release type (patch/minor/major)
+
+### Integration with Other Commands
+
+- After `/feature` → May need minor release
+- After `/fix` → May need patch release
+- After template refactoring → Check if release needed
+
+**Full documentation:** See `init_eng/.claude/commands/release.md`
+
+---
+
 ## 🏗️ Sprint Patterns by Type
 
 ### New Feature Sprint
