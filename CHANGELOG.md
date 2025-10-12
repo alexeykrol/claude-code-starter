@@ -7,6 +7,64 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.2.4] - 2025-10-11
+
+### 📝 Documentation Update: "start" Command Protocol
+
+**Goal:** Document technical limitation of Claude Code CLI and provide clear protocol for users.
+
+### Added
+
+#### 📖 "start" Command Instructions
+
+**Technical Context:**
+- Claude Code CLI (REPL) waits for first user input before AI can respond
+- AI cannot speak first automatically (architectural limitation)
+- Solution: User types `start` command to initialize AI dialogue
+
+**Documentation Updates:**
+- **README.md:**
+  - Added "start" command after `claude` in Quick Start
+  - For NEW projects: "# Initialize AI dialogue (IMPORTANT!) / start"
+  - For LEGACY projects: "# Initialize AI dialogue (IMPORTANT!) / start"
+  - Updated migration section with "start" command
+- **README_RU.md:**
+  - Same updates in Russian
+  - "# Инициализируйте диалог с AI (ВАЖНО!) / start"
+- **init-project.sh:**
+  - Updated NEW project output: "4. ВАЖНО! Инициализируйте диалог с AI: start"
+  - Updated LEGACY project output: "3. ВАЖНО! Инициализируйте диалог с AI: start"
+  - Recreated zip archives with updated script
+
+### Changed
+
+**User Protocol:**
+- **Before (unclear):**
+  ```
+  1. Run: claude
+  2. See blank prompt → confusion
+  3. Type random message → AI responds
+  ```
+- **After (clear):**
+  ```
+  1. Run: claude
+  2. Type: start
+  3. AI begins proactive analysis immediately
+  ```
+
+### Impact
+
+**User Experience:**
+- ✅ Clear expectation: type "start" after `claude` command
+- ✅ No confusion about blank prompt
+- ✅ Consistent protocol for all users
+- ✅ Works for both new and legacy projects
+
+**Why This Matters:**
+User feedback revealed confusion: "После команды claude ничего не произошло". Users expected AI to speak first automatically but didn't understand CLI limitation. Now documentation clearly states: `claude` → `start` → AI engages.
+
+---
+
 ## [1.2.3] - 2025-10-11
 
 ### 🎯 Proactive AI Agent Behavior

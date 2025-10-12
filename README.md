@@ -10,7 +10,7 @@
 > - For complete beginners: [Free AI Intro Course](https://alexeykrol.com/courses/ai_intro/) (Russian)
 
 [![GitHub](https://img.shields.io/badge/GitHub-claude--code--starter-blue)](https://github.com/alexeykrol/claude-code-starter)
-[![Version](https://img.shields.io/badge/version-1.2.3-orange.svg)](https://github.com/alexeykrol/claude-code-starter)
+[![Version](https://img.shields.io/badge/version-1.2.4-orange.svg)](https://github.com/alexeykrol/claude-code-starter)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
 ---
@@ -23,7 +23,31 @@
 
 ---
 
-## 🆕 What's New in v1.2.3
+## 🆕 What's New in v1.2.4
+
+**NEW:** Clear protocol to initialize AI dialogue!
+
+**After running `claude`, type:**
+```
+start
+```
+
+**Then AI automatically:**
+- ✅ Confirms CLAUDE.md loaded into context
+- ✅ Shows current directory
+- ✅ Reads key files (PROJECT_INTAKE.md, BACKLOG.md, SECURITY.md)
+- ✅ Analyzes project and identifies gaps
+- ✅ Asks 3-5 clarifying questions
+- ✅ Suggests next steps
+
+**Why "start" command:**
+Claude Code CLI waits for first user input (technical limitation). Type `start` to initialize proactive AI analysis.
+
+📋 **[Full version history →](CHANGELOG.md)**
+
+---
+
+## 🎯 What is this?
 
 **NEW:** AI agents now proactive and interactive from the first message!
 
