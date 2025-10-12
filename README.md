@@ -37,6 +37,7 @@ When working with Claude Code or other AI agents:
 The framework provides **11 ready-made documentation templates** that:
 - ✅ **Auto-load** into Claude Code context (via `CLAUDE.md`)
 - ✅ **Save tokens** through modular architecture
+- ✅ **Cold Start Protocol** - 60% token savings on session reloads
 - ✅ **Single source of truth** for AI and team
 - ✅ **Built-in security** (SECURITY.md)
 - ✅ **Slash commands** for automation (/commit, /pr, /migrate, etc.)
@@ -103,6 +104,44 @@ The framework provides **11 ready-made documentation templates** that:
 | **.claude/commands/** | Slash commands: `/commit`, `/pr`, `/migrate`, `/security`, etc |
 | **.claude/settings.json** | Access permissions for Claude Code |
 | **.env.example** | Environment variables template |
+
+---
+
+## ⚡ Cold Start Protocol: Token Optimization
+
+### Problem: Session Reloads Waste Tokens
+
+Every time Claude Code restarts:
+- **Without protocol:** Reads ALL files → ~15-20k tokens (~$0.15-0.20)
+- **With protocol:** Reads ONLY needed files → ~6-8k tokens (~$0.05-0.08)
+- **Result:** **~60% token savings** on every reload! 🚀
+
+### How It Works
+
+**Stage 1: Quick Status Check (~500 tokens)**
+1. Reads PROJECT_INTAKE.md (first 20 lines only)
+2. Checks: `Status`, `Migration Status`, Project Name
+3. Decides what to read next based on status
+
+**Stage 2: Context Loading (~5-7k tokens)**
+- IF project filled → Read full PROJECT_INTAKE.md + BACKLOG.md
+- IF user needs code → Read ARCHITECTURE.md + SECURITY.md
+- IF migration completed → **Skip MIGRATION_REPORT.md** automatically
+
+**Stage 3: Never Unless Asked**
+- ❌ MIGRATION_REPORT.md (only if user asks)
+- ❌ WORKFLOW.md (only if user asks)
+- ❌ archive/* (only on request)
+
+### Automatic After Migration
+
+When you run `/migrate-finalize`:
+1. Migration Status automatically set to `✅ COMPLETED (YYYY-MM-DD)`
+2. Next session AI sees this status
+3. Skips reading migration report
+4. **~5k tokens saved on every reload** going forward
+
+**See CLAUDE.md → "🔄 Cold Start Protocol" for full details**
 
 ---
 
