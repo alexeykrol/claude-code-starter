@@ -23,49 +23,46 @@
 
 ---
 
-## 🆕 What's New in v1.2.0
+## 🆕 What's New in v1.2.3
 
-### 🎯 Smart Installation Script (v1.2.0)
+### 🤖 Proactive AI Agent Behavior (v1.2.3)
 
-**NEW:** Super-simple 3-step installation for any project!
+**NEW:** AI agents now proactive and interactive from the first message!
 
-**What's new:**
-- 🤖 **Smart script** `init-project.sh` - one command to rule them all
-- 📦 **Pre-packaged templates** in .zip - no git cloning needed
-- 🔍 **Auto-detection** - script knows if it's new or legacy project
-- ✅ **Zero configuration** for new projects - just run and code!
+**When you run `claude`, AI now automatically:**
+- ✅ Confirms CLAUDE.md loaded into context
+- ✅ Shows current directory
+- ✅ Reads key files (PROJECT_INTAKE.md, BACKLOG.md, SECURITY.md)
+- ✅ Analyzes project and identifies gaps
+- ✅ Asks 3-5 clarifying questions
+- ✅ Suggests next steps
 
-**Before (5 steps, error-prone):**
-```bash
-git clone https://github.com/alexeykrol/claude-code-starter.git
-cd claude-code-starter
-mkdir my-new-project
-cd my-new-project
-cp -r ../claude-code-starter/Init/* .
-cp -r ../claude-code-starter/Init/.claude .  # Easy to forget!
-```
+**Before:** Silent auto-loading, blank prompt, user uncertain if framework active
+**After:** Immediate confirmation, project analysis, interactive engagement
 
-**After (1 step):**
-```bash
-bash init-project.sh  # Done!
-```
+**Problem solved:** Users reported confusion seeing blank prompt with no indication that CLAUDE.md loaded or framework is working.
 
-### 🧹 Documentation Deduplication (v1.2.0)
+### 🐛 Critical Fixes (v1.2.1-v1.2.2)
 
-**MAJOR:** Framework documentation refactored to eliminate duplications!
+**v1.2.2:** Fixed CLAUDE.md auto-loading for legacy projects
+- Script now copies CLAUDE.md to root (required for auto-loading)
+- Legacy projects work correctly with `claude` command
 
-**Impact:**
-- 📉 90% reduction in duplicated content (~500 lines eliminated)
-- 📖 Clear **Single Source of Truth** for each concept
-- 🎯 CLAUDE.md reduced by 50% (170 → 85 lines)
-- ✅ No more conflicting instructions for AI agents
+**v1.2.1:** Smart Installation Script
+- 🤖 `init-project.sh` - one command installation
+- 📦 Pre-packaged templates in .zip
+- 🔍 Auto-detection (new vs legacy project)
+- Installation: 5 steps → 3 steps (40% simpler!)
 
-**New files:**
-- `DOCS_MAP.md` - Navigation guide for all documentation
-- `CONSISTENCY_AUDIT.md` - Audit report
-- `REFACTORING_PLAN.md` - Detailed refactoring plan
+### 🧹 Major Refactoring (v1.2.0)
 
-See [CHANGELOG.md](CHANGELOG.md) for full details.
+**Framework documentation refactored to eliminate duplications:**
+- 📉 90% reduction in duplicated content (~500 lines)
+- 📖 Single Source of Truth established
+- 🎯 CLAUDE.md reduced by 50%
+- ✅ No conflicting instructions
+
+📋 [Full changelog](CHANGELOG.md)
 
 ---
 
