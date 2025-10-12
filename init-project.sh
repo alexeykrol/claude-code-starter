@@ -149,6 +149,15 @@ else
     # Legacy project scenario
     echo -e "${YELLOW}📂 Обнаружен СУЩЕСТВУЮЩИЙ проект (найдено файлов/папок: $TOTAL_COUNT)${NC}"
     echo ""
+
+    # Copy CLAUDE.md to root for auto-loading
+    if [ ! -f "CLAUDE.md" ]; then
+        cp "$TEMPLATES_DIR/CLAUDE.md" ./CLAUDE.md
+        echo -e "${GREEN}✅ CLAUDE.md скопирован в корень для автозагрузки${NC}"
+    else
+        echo -e "${YELLOW}⚠️  CLAUDE.md уже существует, пропускаем копирование${NC}"
+    fi
+
     echo -e "${GREEN}✅ Шаблоны готовы в папке: $TEMPLATES_DIR/${NC}"
     echo ""
     echo -e "${GREEN}╔════════════════════════════════════════════════════════════╗${NC}"

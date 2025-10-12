@@ -7,6 +7,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.2.2] - 2025-01-11
+
+### Fixed
+
+#### 🐛 CLAUDE.md Auto-loading for Legacy Projects
+
+**Problem:** In v1.2.1, when running `init-project.sh` on a legacy project, CLAUDE.md remained in `Init/` folder and was NOT copied to project root. This prevented Claude Code from auto-loading the file when running `claude` command.
+
+**Solution:**
+- Modified `init-project.sh` legacy scenario to automatically copy CLAUDE.md to root
+- Added check: if CLAUDE.md already exists in root, skip copying (prevents overwriting user customizations)
+- User sees clear message: "✅ CLAUDE.md скопирован в корень для автозагрузки"
+
+**Impact:**
+- ✅ Legacy projects now work correctly with `claude` command
+- ✅ CLAUDE.md auto-loads as designed
+- ✅ Safe: doesn't overwrite existing CLAUDE.md if already present
+
+**Why This Matters:**
+Claude Code CLI requires CLAUDE.md to be in project root for auto-loading. Without this fix, legacy project users would have no context auto-loaded, defeating the entire purpose of the framework.
+
+---
+
 ## [1.2.1] - 2025-01-11
 
 ### 🎯 Smart Installation Script
