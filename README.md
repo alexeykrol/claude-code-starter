@@ -25,8 +25,6 @@
 
 ## 🆕 What's New in v1.2.3
 
-### 🤖 Proactive AI Agent Behavior (v1.2.3)
-
 **NEW:** AI agents now proactive and interactive from the first message!
 
 **When you run `claude`, AI now automatically:**
@@ -39,28 +37,6 @@
 
 **Before:** Silent auto-loading, blank prompt, user uncertain if framework active
 **After:** Immediate confirmation, project analysis, interactive engagement
-
-**Problem solved:** Users reported confusion seeing blank prompt with no indication that CLAUDE.md loaded or framework is working.
-
-### 🐛 Critical Fixes (v1.2.1-v1.2.2)
-
-**v1.2.2:** Fixed CLAUDE.md auto-loading for legacy projects
-- Script now copies CLAUDE.md to root (required for auto-loading)
-- Legacy projects work correctly with `claude` command
-
-**v1.2.1:** Smart Installation Script
-- 🤖 `init-project.sh` - one command installation
-- 📦 Pre-packaged templates in .zip
-- 🔍 Auto-detection (new vs legacy project)
-- Installation: 5 steps → 3 steps (40% simpler!)
-
-### 🧹 Major Refactoring (v1.2.0)
-
-**Framework documentation refactored to eliminate duplications:**
-- 📉 90% reduction in duplicated content (~500 lines)
-- 📖 Single Source of Truth established
-- 🎯 CLAUDE.md reduced by 50%
-- ✅ No conflicting instructions
 
 📋 **[Full version history →](CHANGELOG.md)**
 
