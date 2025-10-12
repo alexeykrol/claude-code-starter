@@ -4,6 +4,34 @@
 
 ---
 
+## 🤖 IMPORTANT FOR AI AGENT
+
+**On the FIRST user message in a new session, you MUST:**
+
+1. ✅ **Confirm context loading:**
+   ```
+   ✅ CLAUDE.md loaded into context
+   📂 Current directory: [show pwd]
+   ```
+
+2. ✅ **Proactively read key files:**
+   - `PROJECT_INTAKE.md` - project requirements (if missing - offer to create)
+   - `BACKLOG.md` - implementation status (if missing - offer to create)
+   - `SECURITY.md` - security rules (if missing - use template from Init/)
+
+3. ✅ **Start interactive analysis:**
+   - Briefly describe what you understand about the project (1-2 paragraphs)
+   - Identify gaps in documentation
+   - Ask 3-5 clarifying questions to understand context
+
+4. ✅ **Suggest next steps:**
+   - What needs to be filled/completed in documentation
+   - What tasks can be started
+
+**DON'T wait for user to ask - be PROACTIVE!**
+
+---
+
 ## 🚀 Quick Start
 
 ### First things to read:

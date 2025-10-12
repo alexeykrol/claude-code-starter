@@ -7,6 +7,94 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.2.3] - 2025-01-11
+
+### 🎯 Proactive AI Agent Behavior
+
+**Goal:** Make AI agents proactive and interactive from the first moment of `claude` command execution.
+
+### Added
+
+#### 🤖 AI Agent Instructions in CLAUDE.md
+
+**New section at the top of CLAUDE.md:**
+```markdown
+## 🤖 IMPORTANT FOR AI AGENT
+
+On the FIRST user message in new session, you MUST:
+1. ✅ Confirm context loading (CLAUDE.md loaded, show pwd)
+2. ✅ Proactively read key files (PROJECT_INTAKE.md, BACKLOG.md, SECURITY.md)
+3. ✅ Start interactive analysis (describe project, identify gaps)
+4. ✅ Ask 3-5 clarifying questions
+5. ✅ Suggest next steps
+
+DON'T wait for user to ask - be PROACTIVE!
+```
+
+**Applied to both versions:**
+- `Init/CLAUDE.md` (Russian templates)
+- `init_eng/CLAUDE.md` (English templates)
+
+### Changed
+
+**AI Agent Behavior:**
+- **Before:** Silent auto-loading, no confirmation, reactive only
+- **After:** Proactive greeting, context confirmation, immediate project analysis
+
+**User Experience:**
+- **Before:** User sees blank prompt, unsure if CLAUDE.md loaded, must manually ask questions
+- **After:** AI immediately confirms loading, reads key files, asks clarifying questions
+
+### Impact
+
+**User Feedback Addressed:**
+> "По плану ты должен как-то подтвердить все, потом начать анализ и какой-то диалог"
+
+**Benefits:**
+- ✅ Clear confirmation that framework is active
+- ✅ Immediate project context understanding
+- ✅ Interactive onboarding from first message
+- ✅ No guessing if CLAUDE.md was loaded
+- ✅ AI takes initiative to understand project
+
+**Example First Response:**
+```
+✅ CLAUDE.md loaded into context
+📂 Current directory: /Users/name/my-project
+
+📖 Reading project files...
+- PROJECT_INTAKE.md: Found! [brief summary]
+- BACKLOG.md: Missing - should I create it?
+- SECURITY.md: Found in Init/
+
+🔍 Project Analysis:
+[1-2 paragraph summary of what AI understood]
+
+❓ Clarifying Questions:
+1. What's the primary goal of this project?
+2. Are there existing users or is this greenfield?
+...
+
+📋 Next Steps:
+- Fill PROJECT_INTAKE.md sections X, Y, Z
+- Create BACKLOG.md from template
+- Review SECURITY.md requirements
+```
+
+### Why This Matters
+
+Users reported confusion: they ran `claude` command but saw no indication that CLAUDE.md was loaded or that the framework was active. This made them uncertain if the installation worked correctly.
+
+Now AI agents proactively demonstrate that:
+1. Framework is installed and working
+2. Context is loaded properly
+3. AI is ready to engage with project-specific information
+4. Next steps are clear
+
+This addresses the core issue: **"интерактивность"** - users want immediate, visible, interactive engagement.
+
+---
+
 ## [1.2.2] - 2025-01-11
 
 ### Fixed
