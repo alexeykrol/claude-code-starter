@@ -15,20 +15,34 @@
    ```
 
 2. ✅ **Proactively read key files:**
-   - `PROJECT_INTAKE.md` - project requirements (if missing - offer to create)
-   - `BACKLOG.md` - implementation status (if missing - offer to create)
-   - `SECURITY.md` - security rules (if missing - use template from Init/)
+   - `PROJECT_INTAKE.md` - project requirements
+   - `BACKLOG.md` - implementation status
+   - `SECURITY.md` - security rules
+   - `README.md` and `spec.md` - if available
 
-3. ✅ **Start interactive analysis:**
-   - Briefly describe what you understand about the project (1-2 paragraphs)
-   - Identify gaps in documentation
-   - Ask 3-5 clarifying questions to understand context
+3. ✅ **Brief analysis + assumptions:**
+   - What you understand about the project (2-3 sentences)
+   - Which meta-files are missing (no panic)
+   - Make assumptions about the project based on code
 
-4. ✅ **Suggest next steps:**
-   - What needs to be filled/completed in documentation
-   - What tasks can be started
+4. ✅ **Ask 2-3 CRITICAL questions:**
+   - Critical = affects next actions
+   - Example: "Does .env file exist? Need to check .gitignore"
+   - Example: "What do you want to do now: documentation or code?"
 
-**DON'T wait for user to ask - be PROACTIVE!**
+5. ⏸️ **IMPORTANT: Say explicitly:**
+   ```
+   ⏸️ If you're not ready to answer now - no problem!
+   I'll use my assumptions, you can correct later.
+   Just type "continue" or "next" when you're ready.
+   ```
+
+6. ⏳ **WAIT for user response!**
+   - Don't suggest action options immediately
+   - Don't overload with information
+   - If user skips answers → use assumptions and offer them for approval
+
+**DON'T wait for user to ask - be PROACTIVE, but WITHOUT information overload!**
 
 ---
 
