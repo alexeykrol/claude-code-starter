@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [1.2.3] - 2025-01-11
+## [1.2.3] - 2025-10-11
 
 ### 🎯 Proactive AI Agent Behavior
 
@@ -95,7 +95,7 @@ This addresses the core issue: **"интерактивность"** - users want
 
 ---
 
-## [1.2.2] - 2025-01-11
+## [1.2.2] - 2025-10-11
 
 ### Fixed
 
@@ -118,7 +118,7 @@ Claude Code CLI requires CLAUDE.md to be in project root for auto-loading. Witho
 
 ---
 
-## [1.2.1] - 2025-01-11
+## [1.2.1] - 2025-10-11
 
 ### 🎯 Smart Installation Script
 
@@ -196,7 +196,7 @@ The script embodies the framework's philosophy: **simplify complexity for the us
 
 ---
 
-## [1.2.0] - 2025-01-11
+## [1.2.0] - 2025-10-11
 
 ### 🎯 Major Refactoring: Documentation Deduplication
 
@@ -293,7 +293,7 @@ This refactoring was based on user feedback identifying potential overlaps and i
 
 ---
 
-## [1.1.3] - 2025-01-11
+## [1.1.3] - 2025-10-11
 
 ### Added
 
@@ -363,7 +363,7 @@ AI automatically suggests exclusions based on file analysis, making the process 
 
 ---
 
-## [1.1.2] - 2025-01-11
+## [1.1.2] - 2025-10-11
 
 ### Added
 
@@ -421,7 +421,7 @@ Eliminates the main pain point of migration - manual conflict resolution. Users 
 
 ---
 
-## [1.1.1] - 2025-01-11
+## [1.1.1] - 2025-10-11
 
 ### Added
 
@@ -460,7 +460,7 @@ Provides safe exit strategy from migration at any point, increasing confidence w
 
 ---
 
-## [1.1.0] - 2025-01-11
+## [1.1.0] - 2025-10-11
 
 ### Added
 
