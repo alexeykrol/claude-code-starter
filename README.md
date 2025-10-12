@@ -132,79 +132,33 @@ bash init-project.sh
 
 ### 4. Next Steps
 
-**For NEW projects:**
+After installation:
+
 ```bash
-# Rename README template
-mv README-TEMPLATE.md README.md
-
-# Fill in project details
-code PROJECT_INTAKE.md
-
 # Launch Claude Code
 claude
 
 # Initialize AI dialogue (IMPORTANT!)
 start
-# AI will automatically analyze your project and ask clarifying questions
+# AI will analyze your project and guide you through next steps
 ```
 
-**For LEGACY projects:**
-```bash
-# (Optional) Create .migrationignore to exclude files
-cp init_eng/.migrationignore.example .migrationignore
-
-# Launch Claude Code
-claude
-
-# Initialize AI dialogue (IMPORTANT!)
-start
-# AI will analyze project and suggest migration steps
-
-# Then run migration
-/migrate
-```
+**That's it!** AI will determine project state and suggest appropriate actions.
 
 ---
 
-## 🔄 Migrating Existing Projects
+## 🔄 For Existing Projects
 
-> **Already have a project with legacy documentation?** Use automatic migration!
+> **Already have a project with code and scattered documentation?**
 
-### When You Need Migration
+The installation process is **exactly the same**:
+1. Copy `init-starter-en.zip` and `init-project.sh` to your project root
+2. Run `bash init-project.sh`
+3. Launch `claude` and type `start`
 
-If you have:
-- ✅ Existing project with code
-- ✅ Scattered documentation (README, docs/, notes/, TODO, etc.)
-- ✅ Want to structure into unified framework
+**AI will guide you through migration automatically!**
 
-### Quick Start Migration
-
-> **New in v1.2.0:** Use the smart installation script!
-
-```bash
-# 1. Download init-starter-en.zip and init-project.sh
-# 2. Copy both to your existing project folder
-cd your-existing-project
-
-# 3. Run installation script
-bash init-project.sh --lang=en
-
-# Script will detect existing project and prepare for migration!
-
-# 4. (Optional) Create .migrationignore to exclude files
-cp init_eng/.migrationignore.example .migrationignore
-# Edit to exclude reference articles, meeting notes, research docs, etc.
-
-# 5. Launch Claude Code
-claude
-
-# 6. Initialize AI dialogue (IMPORTANT!)
-start
-# AI will analyze your project and prepare for migration
-
-# 7. Run automatic migration
-/migrate
-```
+Full migration guide: `init_eng/MIGRATION.md`
 
 ### Excluding Files from Migration (Optional)
 
