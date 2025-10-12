@@ -2,6 +2,7 @@
 
 **Purpose:** Fill this document BEFORE starting development to provide AI agents with essential context
 **Status:** [TEMPLATE - Fill before first sprint]
+**Migration Status:** [NOT MIGRATED] <!-- Will be set to "✅ COMPLETED (YYYY-MM-DD)" after /migrate-finalize -->
 **Last Updated:** [DATE]
 
 ---

@@ -149,7 +149,39 @@ if [ -f "CONFLICTS.md" ]; then
 fi
 ```
 
-### Шаг 5: Обновить CLAUDE.md
+### Шаг 5: Обновить PROJECT_INTAKE.md Migration Status
+
+**КРИТИЧНО:** Пометить проект как мигрированный для протокола Cold Start!
+
+```bash
+# Получить текущую дату
+CURRENT_DATE=$(date +%Y-%m-%d)
+
+# Обновить Migration Status в PROJECT_INTAKE.md
+# Заменить: **Migration Status:** [NOT MIGRATED]
+# На: **Migration Status:** ✅ COMPLETED (2025-01-12)
+```
+
+**Используя Edit tool:**
+
+```markdown
+OLD:
+**Status:** ✅ FILLED
+**Migration Status:** [NOT MIGRATED]
+**Last Updated:** [DATE]
+
+NEW:
+**Status:** ✅ FILLED
+**Migration Status:** ✅ COMPLETED ($CURRENT_DATE)
+**Last Updated:** $CURRENT_DATE
+```
+
+**Зачем это нужно:**
+- При следующем "cold start" AI НЕ будет читать MIGRATION_REPORT.md
+- Экономия токенов: ~5k токенов при каждой перезагрузке
+- См. CLAUDE.md → "🔄 Протокол Cold Start"
+
+### Шаг 6: Обновить CLAUDE.md
 
 Добавить в начало CLAUDE.md секцию о миграции:
 
@@ -170,7 +202,7 @@ Legacy documentation archived for reference only.
 ---
 ```
 
-### Шаг 6: Обновить BACKLOG.md
+### Шаг 7: Обновить BACKLOG.md
 
 Добавить в начало BACKLOG.md:
 
@@ -189,7 +221,7 @@ Legacy documentation archived for reference only.
 ---
 ```
 
-### Шаг 7: Создать Git commit
+### Шаг 8: Создать Git commit
 
 ```bash
 # Проверить статус
@@ -229,7 +261,7 @@ EOF
 git log -1 --stat
 ```
 
-### Шаг 8: Финальный вывод
+### Шаг 9: Финальный вывод
 
 После завершения вывести:
 

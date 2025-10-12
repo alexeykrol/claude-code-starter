@@ -149,7 +149,39 @@ if [ -f "CONFLICTS.md" ]; then
 fi
 ```
 
-### Step 5: Update CLAUDE.md
+### Step 5: Update PROJECT_INTAKE.md Migration Status
+
+**CRITICAL:** Mark project as migrated for Cold Start protocol!
+
+```bash
+# Get current date
+CURRENT_DATE=$(date +%Y-%m-%d)
+
+# Update Migration Status in PROJECT_INTAKE.md
+# Replace: **Migration Status:** [NOT MIGRATED]
+# With: **Migration Status:** ✅ COMPLETED (2025-01-12)
+```
+
+**Using Edit tool:**
+
+```markdown
+OLD:
+**Status:** ✅ FILLED
+**Migration Status:** [NOT MIGRATED]
+**Last Updated:** [DATE]
+
+NEW:
+**Status:** ✅ FILLED
+**Migration Status:** ✅ COMPLETED ($CURRENT_DATE)
+**Last Updated:** $CURRENT_DATE
+```
+
+**Why this is needed:**
+- On next "cold start" AI will NOT read MIGRATION_REPORT.md
+- Token savings: ~5k tokens per reload
+- See CLAUDE.md → "🔄 Cold Start Protocol"
+
+### Step 6: Update CLAUDE.md
 
 Add migration section at the beginning of CLAUDE.md:
 
@@ -170,7 +202,7 @@ Legacy documentation archived for reference only.
 ---
 ```
 
-### Step 6: Update BACKLOG.md
+### Step 7: Update BACKLOG.md
 
 Add at the beginning of BACKLOG.md:
 
@@ -189,7 +221,7 @@ Add at the beginning of BACKLOG.md:
 ---
 ```
 
-### Step 7: Create Git Commit
+### Step 8: Create Git Commit
 
 ```bash
 # Check status
@@ -229,7 +261,7 @@ EOF
 git log -1 --stat
 ```
 
-### Step 8: Final Output
+### Step 9: Final Output
 
 After completion, output:
 

@@ -46,6 +46,49 @@
 
 ---
 
+## 🔄 "Cold Start" Protocol (Session Reload)
+
+> **Goal:** Minimize tokens when restoring context after Claude Code restart
+
+**On FIRST message after reload read IN THIS ORDER:**
+
+### Stage 1: Quick Status Check (~500 tokens)
+
+1. ✅ **Read PROJECT_INTAKE.md (first 20 lines)**
+   - Check: `Status`, `Migration Status`, Project Name, Elevator Pitch
+
+   **Conditions:**
+   - IF `Status` = `"[TEMPLATE..."` → New project, suggest filling
+   - IF `Status` = `"✅ FILLED"` → Project filled, continue reading
+   - IF `Migration Status` = `"✅ COMPLETED (date)"` → DO NOT read MIGRATION_REPORT.md
+   - IF `Migration Status` = `"[NOT MIGRATED]"` → Normal, project not migrated
+
+### Stage 2: Context Loading (~5-7k tokens)
+
+2. ✅ **IF Status = "✅ FILLED":**
+   - Read full PROJECT_INTAKE.md (understand project)
+   - Read BACKLOG.md (current tasks and status)
+
+3. ⏸️ **IF user asks to write code:**
+   - Read ARCHITECTURE.md (system structure)
+   - Read SECURITY.md (security rules - CRITICAL!)
+
+### Stage 3: Never Unless Asked
+
+4. ❌ **DO NOT read automatically:**
+   - MIGRATION_REPORT.md (only if user asks or rollback)
+   - WORKFLOW.md (only if user asks about processes)
+   - AGENTS.md (instructions already in this file)
+   - archive/* (only on request)
+
+### 💰 Token Savings:
+
+- **Without protocol:** ~15-20k tokens (~$0.15-0.20) - read everything
+- **With protocol:** ~6-8k tokens (~$0.05-0.08) - read only needed
+- **Savings:** ~60% tokens on each cold start! 🚀
+
+---
+
 ## 🚀 Quick Start
 
 ### First things to read:
