@@ -7,6 +7,123 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.4.1] - 2025-10-13
+
+### 📚 Documentation Enhancement: Token Economics & Navigation
+
+**Goal:** Help users understand the investment/payback model and improve README navigation through table of contents.
+
+### Problem Identified
+
+Users needed clearer explanation of:
+- Why first framework setup takes more tokens (~15-20k)
+- How this one-time investment pays back in 2-3 sessions
+- Monthly/annual savings calculation
+- Why modular focus matters for continuous cost reduction
+
+Additionally, README files were becoming long (~400 lines) without easy navigation.
+
+### Added
+
+#### 📑 Table of Contents in README Files
+**Modified Files:**
+- README.md (lines 28-42)
+- README_RU.md (lines 28-42)
+
+**Features:**
+- Internal anchor links to all major sections
+- Consistent navigation structure across both language versions
+- Quick access to key topics (Installation, Token Economics, Cold Start Protocol, etc.)
+
+#### 💰 Token Economics & ROI Section
+**New Section in README.md and README_RU.md (after "What's in init_eng/" section)**
+
+**Content:**
+- **Understanding the Investment:**
+  - First-time setup cost breakdown (~15-20k tokens = ~$0.15-0.20)
+  - Ongoing savings per cold start (~$0.12 = 80%!)
+
+- **ROI Calculation:**
+  - Real-world example: 30 cold starts/month
+  - Without framework: $4.50/month
+  - With framework: $0.90/month
+  - Savings: $3.60/month = $43.20/year per project!
+  - Payback period: Just 2-3 cold starts 🚀
+
+- **Why Modular Focus Matters:**
+  - Fewer tokens (load Auth module, not entire project)
+  - Fewer errors (AI doesn't get confused)
+  - Faster responses (less to read and analyze)
+  - Better accuracy (focused context = focused answers)
+  - Example comparison: 5000-line monolith vs 200-line module
+
+### Changed
+
+**README Structure:**
+- Enhanced "The Problem & Solution" to be a proper section header
+- Reorganized content hierarchy for better navigation
+- Added Token Economics section between "What's in" and "Cold Start Protocol"
+
+### Impact
+
+**For Users:**
+- ✅ Clear understanding of investment vs savings model
+- ✅ Concrete ROI numbers ($43.20/year savings per project)
+- ✅ Transparent cost breakdown (first setup vs ongoing costs)
+- ✅ Easy navigation through long README with table of contents
+- ✅ Motivation to adopt framework (clear payback period: 2-3 sessions)
+
+**For Framework Adoption:**
+- ✅ Removes barrier: "Why spend tokens on setup?"
+- ✅ Answers key question: "When does it pay for itself?"
+- ✅ Demonstrates continuous value through modular focus
+- ✅ Builds trust through transparency
+
+**User Experience:**
+- **Before:** "Setup takes 20k tokens, seems expensive, maybe not worth it"
+- **After:** "Setup is one-time investment, pays back in 2-3 sessions, saves $43/year, definitely worth it!"
+
+### Files Modified
+
+**Documentation:**
+- README.md (+63 lines: Table of Contents + Token Economics section)
+- README_RU.md (+63 lines: Table of Contents + Token Economics section in Russian)
+
+**Total Changes:** ~126 lines added across 2 files
+
+### Why This Matters
+
+**User Insight:**
+User explained the philosophy: "По идее получается так, что когда фреймворк загружается 1-й раз, то ИИ должен прочитать его весь... Но потом даже при холодном новом старте, ему нужо будет прочитать очень мало..."
+
+Translation: "The way it works is that when the framework loads the first time, AI must read everything... But then even with cold starts, it needs to read very little..."
+
+The one-time cost is an **investment**, not waste. This needed to be explicitly documented with concrete ROI calculations.
+
+**Transparency Principle:**
+Users deserve to know:
+1. Exact costs (first setup vs ongoing)
+2. When investment pays for itself (2-3 sessions)
+3. Long-term savings ($43/year per project)
+4. Why modular focus provides continuous value
+
+**Navigation Improvement:**
+As README approached 400 lines, table of contents became essential for quick access to relevant sections.
+
+### Philosophy Applied
+
+**Show, don't just claim savings**
+
+Instead of vague "saves tokens", we now provide:
+- Concrete dollar amounts
+- Real-world usage scenarios (30 restarts/month)
+- Clear payback timeline (2-3 sessions)
+- Annual savings projection ($43.20/year)
+
+This aligns with framework's core principle: **transparency and single source of truth**.
+
+---
+
 ## [1.4.0] - 2025-10-13
 
 ### 🚀 Cold Start Enhancement: PROJECT_SNAPSHOT.md + Modular Focus

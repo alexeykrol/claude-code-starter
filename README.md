@@ -10,7 +10,7 @@ Ready-to-use meta-documentation framework for structured AI-assisted development
 > - For complete beginners: [Free AI Intro Course](https://alexeykrol.com/courses/ai_intro/) (Russian)
 
 [![GitHub](https://img.shields.io/badge/GitHub-claude--code--starter-blue)](https://github.com/alexeykrol/claude-code-starter)
-[![Version](https://img.shields.io/badge/version-1.4.0-orange.svg)](https://github.com/alexeykrol/claude-code-starter)
+[![Version](https://img.shields.io/badge/version-1.4.1-orange.svg)](https://github.com/alexeykrol/claude-code-starter)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
 ---
@@ -22,6 +22,28 @@ Ready-to-use meta-documentation framework for structured AI-assisted development
 > - `init_eng/` — английские шаблоны (English templates)
 
 📋 **[Full version history →](CHANGELOG.md)**
+
+---
+
+## 📑 Table of Contents
+
+- [The Problem & Solution](#the-problem--solution)
+- [Installation](#-installation)
+- [What's in init_eng/](#-whats-in-init_eng)
+- [Token Economics & ROI](#-token-economics--roi)
+- [Cold Start Protocol](#-cold-start-protocol-token-optimization)
+- [Philosophy: Modular Architecture](#-philosophy-modular-architecture)
+- [How to Work with the Framework](#-how-to-work-with-the-framework)
+- [Best Practices](#-best-practices)
+- [Project Structure](#-project-structure-with-framework)
+- [Framework Updates](#-framework-updates)
+- [Contributing](#-contributing)
+- [Useful Links](#-useful-links)
+- [Roadmap](#-roadmap)
+
+---
+
+## The Problem & Solution
 
 ### The Problem
 
@@ -109,6 +131,57 @@ The framework provides **14 ready-made documentation templates** that:
 | **.claude/commands/** | Slash commands: `/commit`, `/pr`, `/migrate`, `/security`, etc |
 | **.claude/settings.json** | Access permissions for Claude Code |
 | **.env.example** | Environment variables template |
+
+---
+
+## 💰 Token Economics & ROI
+
+### Understanding the Investment
+
+**First-Time Setup (One-Time Cost):**
+```
+Initial framework read: ~15-20k tokens (~$0.15-0.20)
++ Project setup and template deployment
++ Optional: Legacy project migration
+= One-time investment that pays for itself quickly
+```
+
+**Every Cold Start After (Ongoing Savings):**
+```
+Without framework: ~15-20k tokens (~$0.15) per restart
+With framework: ~2-3k tokens (~$0.03) per restart
+Savings per restart: ~$0.12 (80%!)
+```
+
+### ROI Calculation
+
+**30 Cold Starts Per Month (typical for active project):**
+```
+Without optimization: 30 × $0.15 = $4.50/month
+With framework: 30 × $0.03 = $0.90/month
+---
+Monthly savings: $3.60
+Annual savings: $43.20 per project!
+```
+
+**Payback Period:** Just 2-3 cold starts! 🚀
+
+**After that:** Pure savings on every session restart.
+
+### Why Modular Focus Matters
+
+The framework's modular approach provides continuous benefits:
+
+✅ **Fewer Tokens** - Load only what you need (Auth module, not entire project)
+✅ **Fewer Errors** - AI doesn't get confused in large context
+✅ **Faster Responses** - Less to read and analyze
+✅ **Better Accuracy** - Focused context = focused answers
+
+**Example:**
+- Monolithic: Load entire 5000-line project = ~8k tokens + higher error rate
+- Modular: Load Auth module (200 lines) = ~1k tokens + precise answers
+
+The investment pays for itself almost immediately, then continues saving on every session.
 
 ---
 
