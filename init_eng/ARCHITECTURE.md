@@ -568,9 +568,178 @@ ARCHITECTURE  Code+Tests    Manual QA   Update docs   Git push
 
 ---
 
+## 🧪 Module Testing - Isolated Testing
+
+> **Why:** Each module should work independently of others. This saves time and tokens when developing with AI.
+
+### Module testing principle:
+
+**❌ Bad:**
+```
+Test entire project at once →
+Unclear where error is →
+AI loads all code →
+Slow, expensive
+```
+
+**✅ Good:**
+```
+Test one module →
+Error localized →
+AI sees only 1 module →
+Fast, cheap
+```
+
+### How to test module in isolation:
+
+#### Step 1: Create test page
+
+```typescript
+// src/test/[ModuleName]Test.tsx
+import { [ModuleName] } from '../modules/[module-name]/[ModuleName]';
+
+function [ModuleName]Test() {
+  return (
+    <div className="p-8">
+      <h1>Testing: [ModuleName]</h1>
+      <[ModuleName] />
+    </div>
+  );
+}
+
+export default [ModuleName]Test;
+```
+
+#### Step 2: Temporarily connect in App
+
+```typescript
+// src/App.tsx (temporary)
+import [ModuleName]Test from './test/[ModuleName]Test';
+
+function App() {
+  return <[ModuleName]Test />;
+}
+```
+
+#### Step 3: Check functionality
+
+**Module testing checklist:**
+- [ ] Module displays without errors
+- [ ] Core functionality works
+- [ ] Edge cases handled
+- [ ] Error states displayed correctly
+- [ ] Loading states work
+- [ ] UI responsive (if applicable)
+
+#### Step 4: Restore App to original
+
+After testing:
+- Restore `App.tsx`
+- Delete test file or keep for documentation
+- Make commit with results
+
+### Module readiness criteria:
+
+A module is considered **ready** when:
+
+#### Basic criteria:
+- [ ] All module files created (component, hook, types)
+- [ ] Code compiles without TypeScript errors
+- [ ] No ESLint warnings (or justified)
+- [ ] Module tested in isolation
+
+#### Functional criteria:
+- [ ] Core functionality implemented
+- [ ] Edge cases handled
+- [ ] Error handling added
+- [ ] Loading states implemented
+- [ ] Data validation works
+
+#### Documentation:
+- [ ] Module interface documented
+- [ ] Dependencies specified
+- [ ] Usage examples provided (if needed)
+
+#### Meta-files:
+- [ ] BACKLOG.md — tasks marked ✅
+- [ ] PROJECT_SNAPSHOT.md — module added
+- [ ] PROCESS.md — checklist completed
+
+### Module dependency graph:
+
+**Important:** Develop modules in correct order!
+
+```
+Independent modules (first):
+├─ UI Components (Button, Input, etc.)
+├─ Utility Modules (encryption, validation)
+└─ API Clients (no UI)
+
+Dependent modules (later):
+├─ Feature Modules
+│   └─ depends on: UI Components, Utilities
+└─ Integration Modules
+    └─ depends on: Feature Modules
+```
+
+**How to determine order:**
+1. Draw dependency graph
+2. Start with modules having no incoming arrows
+3. Move to next level only after previous is ready
+
+### Token savings through modular testing:
+
+**Example:** Project with 5 modules
+
+**Without isolation:**
+```
+Testing entire project:
+→ AI reads all 5 modules (2000 lines)
+→ ~8000 tokens × 3 iterations = 24k tokens
+→ Cost: ~$0.24
+```
+
+**With isolation:**
+```
+Testing each module separately:
+→ AI reads 1 module (400 lines)
+→ ~1500 tokens × 3 iterations × 5 modules = 22.5k tokens
+→ BUT! Fewer iterations (faster bug finding)
+→ Actually: ~1500 × 2 × 5 = 15k tokens
+→ Cost: ~$0.15
+
+Savings: ~40%! + Faster development!
+```
+
+### Template for documenting tests:
+
+```markdown
+## Testing [Module Name]
+
+### Test 1: [Functionality name]
+- **Action:** [what we do]
+- **Expected result:** [what should happen]
+- **Status:** [x] Passed / [ ] Failed
+- **Bugs:** [if found]
+
+### Test 2: [Edge case]
+- **Action:** [what we do]
+- **Expected result:** [what should happen]
+- **Status:** [x] Passed / [ ] Failed
+
+### Summary:
+- ✅ Module ready for integration
+- ⏸️ Requires work: [list]
+```
+
+---
+
 ## 📚 Related Documentation
 
 - **BACKLOG.md** - Current implementation status and roadmap
+- **PROJECT_SNAPSHOT.md** - Current project state snapshot
+- **PROCESS.md** - Documentation update process after each phase
+- **DEVELOPMENT_PLAN_TEMPLATE.md** - Planning methodology
 - **AGENTS.md** - AI assistant working instructions
 - **WORKFLOW.md** - Development processes and sprint workflow
 - **README.md** - User-facing project information

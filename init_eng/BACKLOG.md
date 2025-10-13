@@ -16,6 +16,11 @@
 > **For AI Agents:**
 > When user asks for checklist or "what's next?" → Read THIS file, not ARCHITECTURE.md
 >
+> **📋 After completing each phase:**
+> - Update this file according to [`PROCESS.md`](./PROCESS.md)
+> - Update [`PROJECT_SNAPSHOT.md`](./PROJECT_SNAPSHOT.md) with current progress
+> - See [`DEVELOPMENT_PLAN_TEMPLATE.md`](./DEVELOPMENT_PLAN_TEMPLATE.md) for planning methodology
+>
 > All AI agents and developers MUST check this file before starting work.
 
 ---

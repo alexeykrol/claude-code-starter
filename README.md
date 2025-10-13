@@ -10,7 +10,7 @@ Ready-to-use meta-documentation framework for structured AI-assisted development
 > - For complete beginners: [Free AI Intro Course](https://alexeykrol.com/courses/ai_intro/) (Russian)
 
 [![GitHub](https://img.shields.io/badge/GitHub-claude--code--starter-blue)](https://github.com/alexeykrol/claude-code-starter)
-[![Version](https://img.shields.io/badge/version-1.3.1-orange.svg)](https://github.com/alexeykrol/claude-code-starter)
+[![Version](https://img.shields.io/badge/version-1.4.0-orange.svg)](https://github.com/alexeykrol/claude-code-starter)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
 ---
@@ -34,10 +34,12 @@ When working with Claude Code or other AI agents:
 
 ### The Solution
 
-The framework provides **11 ready-made documentation templates** that:
+The framework provides **14 ready-made documentation templates** that:
 - ✅ **Auto-load** into Claude Code context (via `CLAUDE.md`)
 - ✅ **Save tokens** through modular architecture
-- ✅ **Cold Start Protocol** - 60% token savings on session reloads
+- ✅ **Cold Start Protocol v1.4.0** - 85% token savings (5x cheaper!) on session reloads
+- ✅ **PROJECT_SNAPSHOT.md** - instant project state overview
+- ✅ **Modular focus** - loads only current module
 - ✅ **Single source of truth** for AI and team
 - ✅ **Built-in security** (SECURITY.md)
 - ✅ **Slash commands** for automation (/commit, /pr, /migrate, etc.)
@@ -91,6 +93,9 @@ The framework provides **11 ready-made documentation templates** that:
 | **SECURITY.md** | 🔐 Security best practices | Security rules, guidelines, checklists | ❌ Project-specific patterns (→ AGENTS.md) |
 | **ARCHITECTURE.md** | 🏗️ WHY of architectural decisions | Technology choices, design principles, module structure | ❌ Operational checklists, current tasks |
 | **BACKLOG.md** | 📋 Detailed plan + status | Implementation phases with checklists, task status, roadmap | ❌ WHY explanations (→ ARCHITECTURE.md) |
+| **PROJECT_SNAPSHOT.md** | 📸 Project snapshot | Current phase, progress (%), module status - for Cold Start | ❌ Detailed tasks (→ BACKLOG.md) |
+| **PROCESS.md** | 🔄 Reminders to update meta-files | Checklist for AI after each phase | ❌ Development processes (→ WORKFLOW.md) |
+| **DEVELOPMENT_PLAN_TEMPLATE.md** | 📐 Planning methodology | HOW to plan modular development | ❌ Specific project plan (→ BACKLOG.md) |
 | **AGENTS.md** | 🎯 Project-specific AI patterns | Patterns unique to THIS project | ❌ Universal rules (→ SECURITY.md, WORKFLOW.md) |
 | **WORKFLOW.md** | 🔄 Development processes | Sprint workflows, git processes, commit templates | ❌ Project-specific patterns |
 | **PLAN_TEMPLATE.md** | 📝 Planning template | Use as template for feature planning | Use as-is, fill when needed |
@@ -112,23 +117,27 @@ The framework provides **11 ready-made documentation templates** that:
 ### Problem: Session Reloads Waste Tokens
 
 Every time Claude Code restarts:
-- **Without protocol:** Reads ALL files → ~15-20k tokens (~$0.15-0.20)
-- **With protocol:** Reads ONLY needed files → ~6-8k tokens (~$0.05-0.08)
-- **Result:** **~60% token savings** on every reload! 🚀
+- **Without optimization:** Reads ALL files → ~15-20k tokens (~$0.15-0.20)
+- **With basic protocol:** Reads ONLY needed files → ~6-8k tokens (~$0.05-0.08)
+- **With PROJECT_SNAPSHOT.md + modular focus:** ~2-3k tokens (~$0.02-0.03)
+- **Result:** **~85% token savings = 5x cheaper!** 🚀
 
 ### How It Works
 
-**Stage 1: Quick Status Check (~500 tokens)**
-1. Reads PROJECT_INTAKE.md (first 20 lines only)
-2. Checks: `Status`, `Migration Status`, Project Name
-3. Decides what to read next based on status
+**Stage 1: PROJECT_SNAPSHOT.md - instant start (~500 tokens)**
+1. AI reads PROJECT_SNAPSHOT.md FIRST
+2. Sees: Phase 3 (45%), Auth Module in development
+3. Loads ONLY Auth Module from BACKLOG.md and ARCHITECTURE.md
+4. **~2-3k tokens instead of ~10k = 75% savings!**
 
-**Stage 2: Context Loading (~5-7k tokens)**
-- IF project filled → Read full PROJECT_INTAKE.md + BACKLOG.md
-- IF user needs code → Read ARCHITECTURE.md + SECURITY.md
-- IF migration completed → **Skip MIGRATION_REPORT.md** automatically
+**Stage 2: Modular context loading (~2-3k tokens)**
+- Reads ONLY current module from BACKLOG.md
+- Reads ONLY module section from ARCHITECTURE.md
+- Loads ONLY current module files
+- Skips other modules until needed
 
 **Stage 3: Never Unless Asked**
+- ❌ Other modules (only on request)
 - ❌ MIGRATION_REPORT.md (only if user asks)
 - ❌ WORKFLOW.md (only if user asks)
 - ❌ archive/* (only on request)

@@ -576,6 +576,51 @@ Create release 1.3.0? [y/n]
 Create release 1.2.6? [y/n]
 ```
 
+### ⚠️ CRITICAL: After EVERY Commit
+
+**MANDATORY after creating ANY commit:**
+
+1. **Check README.md and README_RU.md:**
+   - [ ] Features list reflects changes
+   - [ ] Template count is accurate (e.g., "14 templates" if added 3 files)
+   - [ ] Version badge is current (if release)
+   - [ ] Cold Start Protocol description is accurate (% token savings)
+   - [ ] "What's in Init/" table contains all new files
+
+2. **Check CHANGELOG.md:**
+   - [ ] Entry added for current version
+   - [ ] All substantial changes described
+   - [ ] Number of changed lines/files indicated
+   - [ ] "Why This Matters" section added
+
+**Why this is CRITICAL:**
+```
+The framework's purpose is helping other projects not miss anything.
+We ourselves MUST NOT forget to update README and CHANGELOG!
+("Shoemaker without shoes" problem v2.0)
+```
+
+**Example of what we forgot in v1.4.0:**
+- ❌ README said "11 templates" instead of "14 templates"
+- ❌ Features list said "60% savings" instead of "85% savings (5x cheaper!)"
+- ❌ Didn't mention PROJECT_SNAPSHOT.md and modular focus in features
+
+**How to check:**
+```bash
+# After each commit:
+git diff HEAD~1 README.md       # Check README was updated
+git diff HEAD~1 CHANGELOG.md    # Check CHANGELOG was updated
+```
+
+**Rule for AI:**
+After EVERY commit AI MUST:
+1. Read README.md (features section, file count)
+2. Read CHANGELOG.md (latest version)
+3. Verify consistency with commit
+4. If inconsistent → fix immediately
+
+---
+
 ### Checklist Before Release
 
 Before running `/release` ensure:
@@ -583,6 +628,7 @@ Before running `/release` ensure:
 - [ ] Working directory clean
 - [ ] New features tested
 - [ ] Documentation updated
+- [ ] **README.md and CHANGELOG.md verified (see above)**
 - [ ] No git conflicts
 
 ---

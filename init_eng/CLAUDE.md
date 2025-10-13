@@ -52,9 +52,22 @@
 
 **On FIRST message after reload read IN THIS ORDER:**
 
-### Stage 1: Quick Status Check (~500 tokens)
+### Stage 1: Quick Status Check (~500 tokens) 🚀 START HERE!
 
-1. ✅ **Read PROJECT_INTAKE.md (first 20 lines)**
+1. ✅ **Read PROJECT_SNAPSHOT.md (if exists)**
+   - **PRIORITY #1** - this file gives instant project overview!
+   - Check: Current phase, progress (%), module status
+   - You'll see: what's done, what's in progress, what's next
+
+   **If PROJECT_SNAPSHOT.md exists:**
+   - You already know: Phase X (Y%), module Z in development
+   - Jump to Stage 2-A (read only current phase!)
+
+   **If PROJECT_SNAPSHOT.md does NOT exist:**
+   - Normal for new projects
+   - Proceed to standard protocol (Stage 1-B)
+
+1-B. ✅ **Read PROJECT_INTAKE.md (first 20 lines)** (if no SNAPSHOT)
    - Check: `Status`, `Migration Status`, Project Name, Elevator Pitch
 
    **Conditions:**
@@ -63,9 +76,31 @@
    - IF `Migration Status` = `"✅ COMPLETED (date)"` → DO NOT read MIGRATION_REPORT.md
    - IF `Migration Status` = `"[NOT MIGRATED]"` → Normal, project not migrated
 
-### Stage 2: Context Loading (~5-7k tokens)
+### Stage 2-A: Modular Focus (~2-3k tokens) 🎯 75% SAVINGS!
 
-2. ✅ **IF Status = "✅ FILLED":**
+**If PROJECT_SNAPSHOT.md shows current module:**
+
+2-A. ✅ **Read ONLY current module, NOT entire project!**
+
+   **Example:** SNAPSHOT says "Phase 3: Auth Module in progress"
+
+   - Read BACKLOG.md → ONLY Phase 3 section (Auth Module)
+   - Read ARCHITECTURE.md → ONLY Auth Module section
+   - Read src/modules/auth/* → ONLY Auth Module files
+
+   **DO NOT read:**
+   - ❌ Other modules (Settings, Chat, etc.)
+   - ❌ Entire BACKLOG.md
+   - ❌ Entire ARCHITECTURE.md
+   - ❌ Entire src/
+
+   **Result:** ~2-3k tokens instead of ~10k = **75% savings!** 🚀
+
+### Stage 2-B: Context Loading (~5-7k tokens)
+
+**If PROJECT_SNAPSHOT.md doesn't exist or full context needed:**
+
+2-B. ✅ **IF Status = "✅ FILLED":**
    - Read full PROJECT_INTAKE.md (understand project)
    - Read BACKLOG.md (current tasks and status)
      - **BACKLOG.md = single source for checklists and tasks**
@@ -74,6 +109,7 @@
 
 3. ⏸️ **IF user asks to write code:**
    - Read ARCHITECTURE.md (system structure)
+     - **Modular focus:** Read ONLY needed module!
    - Read SECURITY.md (security rules - CRITICAL!)
 
 ### Stage 3: Never Unless Asked
@@ -81,14 +117,31 @@
 4. ❌ **DO NOT read automatically:**
    - MIGRATION_REPORT.md (only if user asks or rollback)
    - WORKFLOW.md (only if user asks about processes)
+   - PROCESS.md (only if phase is completing)
+   - DEVELOPMENT_PLAN_TEMPLATE.md (only if planning project)
    - AGENTS.md (instructions already in this file)
    - archive/* (only on request)
 
 ### 💰 Token Savings:
 
-- **Without protocol:** ~15-20k tokens (~$0.15-0.20) - read everything
+#### Without optimization:
+- **Old way:** ~15-20k tokens (~$0.15-0.20) - read everything
+
+#### With Cold Start Protocol:
 - **With protocol:** ~6-8k tokens (~$0.05-0.08) - read only needed
-- **Savings:** ~60% tokens on each cold start! 🚀
+- **Savings:** ~60% tokens
+
+#### With PROJECT_SNAPSHOT.md + Modular Focus:
+- **With SNAPSHOT + modules:** ~2-3k tokens (~$0.02-0.03) - read only current module!
+- **Savings:** ~85% tokens = **5x cheaper!** 🚀
+
+**Example:**
+```
+Without optimization: 10 restarts × $0.15 = $1.50
+With SNAPSHOT + modules: 10 restarts × $0.03 = $0.30
+---
+Savings: $1.20 = 80%! 💰
+```
 
 ---
 
