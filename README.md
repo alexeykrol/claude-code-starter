@@ -84,17 +84,17 @@ The framework provides **11 ready-made documentation templates** that:
 
 ### Main Documentation Files
 
-| File | Purpose | When to Fill |
-|------|---------|-------------|
-| **CLAUDE.md** | 🤖 Auto-loads in Claude Code | Immediately, minimal edits |
-| **PROJECT_INTAKE.md** | ⭐ START HERE - project requirements | Day 1, foundation of everything |
-| **SECURITY.md** | 🔐 Security rules | Immediately, critical! |
-| **ARCHITECTURE.md** | 🏗️ Architectural decisions | As decisions are made |
-| **BACKLOG.md** | 📋 Single source of truth for status | Update each sprint |
-| **AGENTS.md** | 🎯 Detailed AI instructions | As patterns emerge |
-| **WORKFLOW.md** | 🔄 Development processes | Rarely, when processes change |
-| **PLAN_TEMPLATE.md** | 📝 Planning template | Use as template |
-| **README-TEMPLATE.md** | 📖 README template for project | Fill and rename to README.md |
+| File | Purpose | ✅ FOR WHAT | ❌ NOT FOR WHAT |
+|------|---------|------------|----------------|
+| **CLAUDE.md** | 🤖 Auto-loads in Claude Code | Navigation, quick links to other docs | ❌ Duplicating detailed rules |
+| **PROJECT_INTAKE.md** | ⭐ START HERE - project requirements | User Personas, User Flows, requirements | ❌ Implementation tasks, code details |
+| **SECURITY.md** | 🔐 Security best practices | Security rules, guidelines, checklists | ❌ Project-specific patterns (→ AGENTS.md) |
+| **ARCHITECTURE.md** | 🏗️ WHY of architectural decisions | Technology choices, design principles, module structure | ❌ Operational checklists, current tasks |
+| **BACKLOG.md** | 📋 Detailed plan + status | Implementation phases with checklists, task status, roadmap | ❌ WHY explanations (→ ARCHITECTURE.md) |
+| **AGENTS.md** | 🎯 Project-specific AI patterns | Patterns unique to THIS project | ❌ Universal rules (→ SECURITY.md, WORKFLOW.md) |
+| **WORKFLOW.md** | 🔄 Development processes | Sprint workflows, git processes, commit templates | ❌ Project-specific patterns |
+| **PLAN_TEMPLATE.md** | 📝 Planning template | Use as template for feature planning | Use as-is, fill when needed |
+| **README-TEMPLATE.md** | 📖 README template for project | Fill and rename to README.md | Keep as template until ready |
 
 ### Automation
 

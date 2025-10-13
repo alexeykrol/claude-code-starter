@@ -7,10 +7,18 @@
 ---
 
 > **🏗️ Authoritative Source:** This is the SINGLE SOURCE OF TRUTH for:
-> - System architecture and technical decisions
+> - WHY we chose specific technologies (technology choices, design principles)
+> - HOW the system is structured (modules, layers, components)
 > - Modularity philosophy and patterns
-> - Component architecture
-> - Technology stack choices
+> - Design principles and architecture patterns
+>
+> **⚠️ NOT for operational checklists:**
+> ❌ Don't store detailed implementation tasks here (→ BACKLOG.md)
+> ❌ Don't store sprint checklists here (→ BACKLOG.md)
+> ❌ Don't store "Phase 1: do X, Y, Z" task lists here (→ BACKLOG.md)
+>
+> **This file = Reference (WHY & HOW)**
+> **BACKLOG.md = Action Plan (WHAT to do now)**
 >
 > Other files (CLAUDE.md, PROJECT_INTAKE.md) link here, don't duplicate.
 

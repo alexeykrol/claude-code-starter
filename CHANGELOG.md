@@ -7,6 +7,134 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.3.1] - 2025-10-13
+
+### 📚 Documentation Enhancement: File Purpose Clarification
+
+**Goal:** Prevent semantic confusion between ARCHITECTURE.md (WHY reference) and BACKLOG.md (WHAT action list) based on real user feedback.
+
+### Problem Identified
+
+User reported that AI was skipping nested checklist items when they stored detailed project phases (Phase 1, Phase 2, Phase 3) with task breakdowns in ARCHITECTURE.md.
+
+**Root Cause:** Framework didn't explicitly prevent this pattern. Natural logic ("project phases = architecture") led users to put operational checklists in ARCHITECTURE.md, creating semantic confusion for AI agents.
+
+### Changed
+
+#### README.md and README_RU.md
+- **Enhanced file descriptions table** with explicit DO/DON'T columns
+- **Before:** Simple "Purpose | When to Fill" columns
+- **After:** "Purpose | ✅ FOR WHAT | ❌ NOT FOR WHAT" columns
+- Clear separation of concerns for each documentation file
+- Examples:
+  - ARCHITECTURE.md: ✅ Technology choices, design principles | ❌ Operational checklists, current tasks
+  - BACKLOG.md: ✅ Implementation phases with checklists, task status, roadmap | ❌ WHY explanations
+
+#### BACKLOG.md Templates (Init/ and init_eng/)
+- **Added authoritative header** after project metadata
+- Explicitly states: "This is the SINGLE SOURCE OF TRUTH for detailed implementation plan with checklists"
+- Clear warning: "ARCHITECTURE.md explains WHY, THIS file contains WHAT to do"
+- For AI Agents section: "When user asks for checklist → Read THIS file, not ARCHITECTURE.md"
+
+#### ARCHITECTURE.md Templates (Init/ and init_eng/)
+- **Added warning section** in authoritative header
+- Explicitly lists what NOT to store:
+  - ❌ Don't store detailed implementation tasks (→ BACKLOG.md)
+  - ❌ Don't store sprint checklists (→ BACKLOG.md)
+  - ❌ Don't store "Phase 1: do X, Y, Z" task lists (→ BACKLOG.md)
+- Clear statement: "This file = Reference (WHY & HOW), BACKLOG.md = Action Plan (WHAT to do now)"
+
+#### AGENTS.md Templates (Init/ and init_eng/)
+- **New section:** "📋 Where to Get Checklists and Tasks" (after Sprint Workflow section)
+- Explicit instructions for AI agents:
+  - ✅ CORRECT: Read BACKLOG.md for checklists and tasks
+  - ❌ WRONG: Don't read ARCHITECTURE.md for operational checklists
+- Explains WHY: "If detailed tasks stored in ARCHITECTURE.md, AI may skip nested items due to large file size"
+- Example of correct AI response workflow
+- Exception handling: If BACKLOG.md empty → suggest creating it
+
+#### CLAUDE.md Templates (Init/ and init_eng/)
+- **Updated Cold Start Protocol** (Stage 2: Context Loading)
+- Added explicit note when reading BACKLOG.md:
+  - "BACKLOG.md = single source for checklists and tasks"
+  - "When user asks 'what to do?' → show from BACKLOG.md"
+  - "ARCHITECTURE.md = WHY reference, BACKLOG.md = WHAT plan"
+
+### Added
+
+#### FUTURE_IMPROVEMENTS.md
+- **New file:** Documents Priority 2-3 improvements for future releases
+- Based on real user feedback, not hypothetical scenarios
+- Clear implementation phases with success metrics
+- Recommendations:
+  - Wait for more user feedback before implementing
+  - Collect real-world use cases
+  - Avoid hypothetical solutions without validation
+
+#### GitHub Issue #1
+- Created issue for Priority 2-3 improvements
+- Link: https://github.com/alexeykrol/claude-code-starter/issues/1
+- Tracks future enhancements:
+  - Add "Common Mistakes" section to DOCS_MAP.md
+  - Expand Best Practices in README
+  - Create visual guides (GIF/video)
+  - Additional template improvements
+
+### Impact
+
+**For AI Agents:**
+- ✅ Clear guidance on where to find operational checklists
+- ✅ Explicit instructions prevent semantic confusion
+- ✅ Reduced risk of skipping nested checklist items
+- ✅ Consistent behavior across all AI interactions
+
+**For Users:**
+- ✅ Explicit DO/DON'T guidance in README
+- ✅ Clear file purpose separation
+- ✅ Templates with built-in warnings
+- ✅ Prevents common documentation mistakes
+
+**For Framework:**
+- ✅ Addresses real user feedback
+- ✅ Improves documentation clarity without adding complexity
+- ✅ Establishes foundation for future improvements
+- ✅ Creates feedback loop (GitHub issue for Priority 2-3)
+
+### Files Modified
+
+**Documentation:**
+- README.md (table format improved)
+- README_RU.md (table format improved)
+- FUTURE_IMPROVEMENTS.md (new file)
+
+**Templates (Russian & English):**
+- Init/BACKLOG.md, init_eng/BACKLOG.md (authoritative header added)
+- Init/ARCHITECTURE.md, init_eng/ARCHITECTURE.md (warning section added)
+- Init/AGENTS.md, init_eng/AGENTS.md (new section: 45 lines per file)
+- Init/CLAUDE.md, init_eng/CLAUDE.md (Cold Start Protocol updated)
+
+**Total Changes:** ~150 lines added/modified across 10 files
+
+### Why This Matters
+
+**User Feedback That Triggered This:**
+> "I stored detailed project phases in ARCHITECTURE.md, but Claude was skipping nested checklist items when I asked 'what's the plan?' It read ARCHITECTURE.md but missed the nested tasks."
+
+The issue wasn't a bug - it was semantic confusion. AI correctly treats ARCHITECTURE.md as a reference document (WHY), not an action list (WHAT). By explicitly clarifying file purposes, we prevent users from making this natural but problematic choice.
+
+### Principle Applied
+
+**Real feedback → Minimal targeted fix → Document for future**
+
+Instead of immediately implementing all hypothetical improvements (DOCS_MAP common mistakes, video guides, etc.), we:
+1. Applied Priority 1 critical fixes (explicit guidance)
+2. Created GitHub issue for Priority 2-3 (wait for more feedback)
+3. Documented reasoning in FUTURE_IMPROVEMENTS.md
+
+This follows the framework's own philosophy: accumulate real use cases before adding complexity.
+
+---
+
 ## [1.3.0] - 2025-10-12
 
 ### 🚀 Release Automation: /release Command

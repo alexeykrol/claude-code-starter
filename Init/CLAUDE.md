@@ -68,6 +68,9 @@
 2. ✅ **IF Status = "✅ FILLED":**
    - Read full PROJECT_INTAKE.md (понять проект)
    - Read BACKLOG.md (текущие задачи и статус)
+     - **BACKLOG.md = single source для чек-листов и задач**
+     - Когда пользователь спросит "что делать?" → показывай из BACKLOG.md
+     - ARCHITECTURE.md = справка WHY, BACKLOG.md = план WHAT
 
 3. ⏸️ **IF user asks to write code:**
    - Read ARCHITECTURE.md (структура системы)

@@ -4,12 +4,17 @@
 **Version:** [0.1.0]
 **Last Updated:** [DATE]
 
-> ⚠️ **SINGLE SOURCE OF TRUTH**
+> **📋 Authoritative Source:** This is the SINGLE SOURCE OF TRUTH for:
+> - ✅ **Detailed implementation plan** with checklists
+> - ✅ **Current status** of all features (TODO/IN PROGRESS/DONE)
+> - ✅ **Sprint roadmap** and task breakdown
 >
-> This document is the ONLY authoritative source for:
-> - Current implementation status
-> - Feature priorities
-> - Development roadmap
+> **⚠️ NOT in ARCHITECTURE.md:**
+> ARCHITECTURE.md explains WHY (technology choices, design principles).
+> THIS file contains WHAT to do (tasks, checklists, status).
+>
+> **For AI Agents:**
+> When user asks for checklist or "what's next?" → Read THIS file, not ARCHITECTURE.md
 >
 > All AI agents and developers MUST check this file before starting work.
 

@@ -655,6 +655,50 @@ See **WORKFLOW.md** for detailed sprint processes, including:
 
 ---
 
+## 📋 Where to Get Checklists and Tasks
+
+**CRITICAL for AI:**
+
+**When user asks:**
+- "Show me checklist for current phase"
+- "What's left to do?"
+- "What are the tasks in Sprint 1?"
+- "Give me work plan"
+
+**✅ CORRECT:**
+1. Read **BACKLOG.md** → detailed plan with checklists is there
+2. Show statuses: ✅ DONE / 🚧 IN PROGRESS / ⏳ TODO
+3. BACKLOG.md = single source of truth for tasks
+4. If architectural reference needed → then ARCHITECTURE.md
+
+**❌ WRONG:**
+- ❌ Don't read ARCHITECTURE.md for operational checklists
+- ❌ ARCHITECTURE.md = reference about WHY (technologies, principles), not about WHAT to do now
+- ❌ Don't generate checklist "from scratch" if BACKLOG.md exists
+- ❌ Don't try to extract tasks from "Phase 1, Phase 2" sections in ARCHITECTURE.md
+
+**Why this matters:**
+If detailed tasks are stored in ARCHITECTURE.md, AI may skip nested items
+due to large file size. BACKLOG.md = structured task list, AI reads all items.
+
+**Example of correct response:**
+```
+User: "Show what's left to do in Sprint 1"
+
+AI Response:
+1. ✅ Reading BACKLOG.md...
+2. Show "Sprint 1" section with checklists
+3. Explain status of each task
+4. If implementation details needed → check ARCHITECTURE.md
+```
+
+**Exception:**
+If BACKLOG.md is empty/not filled → can use general plan
+from ARCHITECTURE.md as fallback, but suggest user to create BACKLOG.md
+with detailed tasks.
+
+---
+
 ## 🔄 Version History
 
 - **[DATE]:** Initial template created
