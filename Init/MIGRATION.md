@@ -86,16 +86,49 @@
 
 ## Подготовка к миграции
 
-### Шаг 1: Скопируйте Init/ в проект
+### ⚠️ КРИТИЧНО: Предварительные требования
+
+**Перед запуском `/migrate` ОБЯЗАТЕЛЬНО выполните эти шаги:**
+
+#### 1. Скопируйте фреймворк в ваш проект
+
+Миграция требует наличия шаблонов фреймворка и slash-команд в вашем проекте.
 
 ```bash
-# Если вы в репозитории claude-code-starter
+# Перейдите в ваш проект
 cd /path/to/your/project
-cp -r /path/to/claude-code-starter/Init/* .
-cp -r /path/to/claude-code-starter/Init/.claude .
+
+# Скопируйте Init/ со всеми шаблонами
+cp -r /path/to/claude-code-starter/Init .
+
+# Скопируйте slash-команды (КРИТИЧНО!)
+mkdir -p .claude/commands
+cp /path/to/claude-code-starter/Init/.claude/commands/*.md .claude/commands/
 ```
 
-### Шаг 2: Сделайте бэкап (опционально, но рекомендуется)
+**Что это даёт:**
+- ✅ `Init/` - шаблоны фреймворка (CLAUDE.md, PROJECT_INTAKE.md, etc.)
+- ✅ `.claude/commands/` - slash-команды (/migrate, /migrate-finalize, etc.)
+
+**⚠️ Без этих файлов миграция не запустится!**
+
+#### 2. Проверьте что всё на месте
+
+```bash
+# Проверьте наличие Init/
+ls Init/
+
+# Проверьте наличие slash-команд
+ls .claude/commands/migrate.md
+```
+
+Должны увидеть:
+- ✅ `Init/CLAUDE.md`, `PROJECT_INTAKE.md`, `SECURITY.md`, etc.
+- ✅ `.claude/commands/migrate.md`, `migrate-finalize.md`, etc.
+
+---
+
+### Шаг 1: Сделайте бэкап (рекомендуется)
 
 ```bash
 # Создайте git commit перед миграцией
@@ -106,7 +139,7 @@ git commit -m "Pre-migration snapshot"
 tar -czf backup-before-migration.tar.gz .
 ```
 
-### Шаг 3: Подготовьте проект
+### Шаг 2: Подготовьте проект
 
 **Убедитесь что:**
 - [ ] Проект в git (рекомендуется)
@@ -114,7 +147,7 @@ tar -czf backup-before-migration.tar.gz .
 - [ ] У вас есть доступ к истории проекта
 - [ ] Вы знаете где находятся важные документы
 
-### Шаг 3.5: (Опционально) Создайте .migrationignore
+### Шаг 3: (Опционально) Создайте .migrationignore
 
 **Если в проекте есть файлы, которые НЕ должны мигрироваться:**
 
@@ -170,7 +203,7 @@ docs/deprecated/
 
 См. `Init/.migrationignore.example` для полного примера с комментариями.
 
-### Шаг 4: Запустите Claude Code
+### Шаг 4: Перезапустите Claude Code для загрузки команд
 
 ```bash
 # В корне вашего проекта

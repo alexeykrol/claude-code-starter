@@ -86,16 +86,49 @@ STAGE 2: Finalization
 
 ## Migration Preparation
 
-### Step 1: Copy Init/ to Project
+### ⚠️ CRITICAL: Prerequisites
+
+**Before running `/migrate` you MUST complete these steps:**
+
+#### 1. Copy Framework to Your Project
+
+Migration requires framework templates and slash commands to be present in your project.
 
 ```bash
-# If you are in claude-code-starter repository
+# Navigate to your project
 cd /path/to/your/project
-cp -r /path/to/claude-code-starter/Init/* .
-cp -r /path/to/claude-code-starter/Init/.claude .
+
+# Copy Init/ with all templates
+cp -r /path/to/claude-code-starter/Init .
+
+# Copy slash commands (CRITICAL!)
+mkdir -p .claude/commands
+cp /path/to/claude-code-starter/Init/.claude/commands/*.md .claude/commands/
 ```
 
-### Step 2: Make Backup (optional but recommended)
+**What this provides:**
+- ✅ `Init/` - framework templates (CLAUDE.md, PROJECT_INTAKE.md, etc.)
+- ✅ `.claude/commands/` - slash commands (/migrate, /migrate-finalize, etc.)
+
+**⚠️ Migration will NOT start without these files!**
+
+#### 2. Verify Everything is in Place
+
+```bash
+# Check Init/ exists
+ls Init/
+
+# Check slash commands exist
+ls .claude/commands/migrate.md
+```
+
+You should see:
+- ✅ `Init/CLAUDE.md`, `PROJECT_INTAKE.md`, `SECURITY.md`, etc.
+- ✅ `.claude/commands/migrate.md`, `migrate-finalize.md`, etc.
+
+---
+
+### Step 1: Make Backup (recommended)
 
 ```bash
 # Create git commit before migration
@@ -106,7 +139,7 @@ git commit -m "Pre-migration snapshot"
 tar -czf backup-before-migration.tar.gz .
 ```
 
-### Step 3: Prepare Project
+### Step 2: Prepare Project
 
 **Make sure that:**
 - [ ] Project is in git (recommended)
@@ -114,7 +147,7 @@ tar -czf backup-before-migration.tar.gz .
 - [ ] You have access to project history
 - [ ] You know where important documents are located
 
-### Step 3.5: (Optional) Create .migrationignore
+### Step 3: (Optional) Create .migrationignore
 
 **If your project has files that should NOT be migrated:**
 
@@ -191,7 +224,7 @@ docs/deprecated/
 
 **Note:** If `.migrationignore` is not created, AI will analyze files during `/migrate` and offer to create it automatically based on detected non-meta files.
 
-### Step 4: Launch Claude Code
+### Step 4: Restart Claude Code to Load Commands
 
 ```bash
 # In your project root
