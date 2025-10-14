@@ -132,6 +132,27 @@ The framework provides **14 ready-made documentation templates** that:
 | **.claude/settings.json** | Access permissions for Claude Code |
 | **.env.example** | Environment variables template |
 
+#### ⚡ How Slash Commands Work
+
+**Important to understand:** Slash commands in Claude Code are **prompt expansions**, not executable scripts.
+
+**What happens when you use `/migrate`:**
+1. You type `/migrate`
+2. Claude reads `.claude/commands/migrate.md` (detailed instructions)
+3. Claude follows these instructions step-by-step automatically
+4. You see progress as Claude executes the workflow
+
+**Example:**
+- `/migrate` → Claude reads 612-line migration guide → executes automatically
+- `/commit` → Claude reads commit workflow → creates structured git commit
+- `/pr` → Claude reads PR workflow → analyzes changes → creates pull request
+
+**Key insight:** Commands ARE instructions for Claude, not shell scripts. This means:
+- ✅ Claude executes them intelligently based on context
+- ✅ You can interrupt and guide the process
+- ✅ Commands adapt to your project structure
+- ❌ They're not instant like shell commands (Claude thinks first!)
+
 ---
 
 ## 💰 Token Economics & ROI
