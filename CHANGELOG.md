@@ -7,6 +7,170 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.4.2] - 2025-10-13
+
+### 🔧 Migration UX Improvements: Real-World Validation
+
+**Goal:** Fix critical setup friction discovered during real migration of multiagents project.
+
+### Problem Identified
+
+During test migration of a real project ([multiagents](https://github.com/alexeykrol)), we discovered 3 critical setup issues that added 15-20 minutes before migration could even start:
+
+1. **Slash commands location unclear** (+10 min) - Users tried copying root `.claude/` → got only `settings.json`
+2. **Init/ templates missing** (+5 min) - Migration assumes templates exist but they don't in target projects
+3. **Slash commands misconception** - Users expected instant execution like shell scripts
+
+**Evidence:** Detailed migration log in `MIGRATION_ANALYSIS.md` with timestamps, token metrics, and ROI calculations.
+
+### Added
+
+#### 📊 MIGRATION_ANALYSIS.md
+**New File:** Comprehensive analysis document (~465 lines)
+
+**Content:**
+- **Executive Summary:** Migration was 56% faster, 29% more token-efficient than expected
+- **What Worked Well:** 5 items (logical flow, archive system, documentation quality, token efficiency)
+- **Critical Issues (P0):** 3 issues with detailed recommendations and ROI
+- **Medium/Low Priority Issues:** 4 additional improvements identified
+- **Success Metrics:** Comparison table (time, tokens, conflicts, errors)
+- **Recommended Actions:** Immediate (this week), Short-term (this month), Long-term (next version)
+- **ROI Calculation:** 90 min work saves 15 min/user → payback after 6 migrations
+
+**Purpose:** Real-world validation data for framework improvements, not hypothetical scenarios.
+
+### Changed
+
+#### 🚨 CRITICAL: Migration Prerequisites Documentation (P0 - Issue #1)
+
+**Files Modified:**
+- `Init/MIGRATION.md` (Russian)
+- `init_eng/MIGRATION.md` (English)
+
+**Changes:**
+- **Added "⚠️ КРИТИЧНО: Предварительные требования"** section at start of preparation
+- Step-by-step instructions to copy Init/ templates
+- Explicit instructions to copy slash commands from `Init/.claude/commands/`
+- Verification commands: `ls Init/`, `ls .claude/commands/migrate.md`
+- Clear warning: "⚠️ Без этих файлов миграция не запустится!"
+
+**Impact:**
+- ✅ Saves 15 minutes per user migration
+- ✅ Prevents confusion about slash commands location
+- ✅ Clear expectations before starting
+- ✅ Explicit verification steps
+
+#### 💡 Slash Commands Clarification (P2 - Issue #3)
+
+**Files Modified:**
+- `README.md` (English)
+- `README_RU.md` (Russian)
+
+**Changes:**
+- **Added "⚡ How Slash Commands Work"** section in Automation
+- Explained: Slash commands = **prompt expansions**, NOT executable scripts
+- Concrete example: `/migrate` → reads 612-line instruction manual → executes intelligently
+- Key insights:
+  - ✅ Claude executes them based on context
+  - ✅ You can interrupt and guide
+  - ✅ Commands adapt to project structure
+  - ❌ Not instant like shell commands (Claude thinks first!)
+
+**Impact:**
+- ✅ Sets correct user expectations
+- ✅ Explains "thinking" time before execution
+- ✅ Reduces confusion about command behavior
+
+### Metrics
+
+**Migration Performance (Real Data):**
+```
+Time: 40 min (expected: 90 min) = 56% faster ✅
+Tokens: 25k (expected: 35k) = 29% more efficient ✅
+Conflicts: 0 (clean migration) ✅
+Setup Friction: 3 issues = 15-20 min lost ❌
+```
+
+**ROI of These Fixes:**
+```
+Work: 2 P0 fixes = 90 minutes development time
+Saves: 15 minutes per user migration
+Payback: After 6 migrations
+```
+
+### Impact
+
+**For Users:**
+- ✅ Clear prerequisites before starting migration
+- ✅ Realistic expectations about slash commands
+- ✅ 15 minutes saved per migration
+- ✅ No confusion about command locations
+
+**For Framework:**
+- ✅ Based on real migration, not theory
+- ✅ Addresses actual pain points with evidence
+- ✅ ROI-driven prioritization (P0 first, P2-P3 tracked for future)
+- ✅ Establishes pattern: test → analyze → improve
+
+**Token Economics (From Real Migration):**
+```
+Expected: 35k tokens
+Actual: 25k tokens
+Efficiency: 29% better than baseline
+```
+
+### Files Modified
+
+**Documentation:**
+- Init/MIGRATION.md (+35 lines, prerequisites section)
+- init_eng/MIGRATION.md (+35 lines, prerequisites section)
+- README.md (+18 lines, slash commands explanation)
+- README_RU.md (+18 lines, slash commands explanation)
+
+**Analysis:**
+- MIGRATION_ANALYSIS.md (new file, +465 lines)
+
+**Total Changes:** ~571 lines added/modified across 5 files
+
+### Why This Matters
+
+**Real-World Validation:**
+
+User feedback from actual migration:
+> "Slash commands не в корне `.claude/`, а в `Init/.claude/commands/`"
+> "Init/ templates отсутствуют в целевом проекте"
+> "Slash-команда `/migrate` это не скрипт, а инструкция на 612 строк"
+
+Instead of guessing what users need, we:
+1. Ran real migration on multiagents project
+2. Logged every friction point with timestamps
+3. Calculated exact time cost (15 minutes)
+4. Fixed P0 issues immediately
+5. Documented P1-P3 for future releases
+
+**Philosophy Applied:**
+- Real use cases → Targeted fixes → Measurable impact
+- No hypothetical improvements without validation
+- ROI-driven prioritization
+- Evidence-based development
+
+### Next Steps
+
+**Remaining from MIGRATION_ANALYSIS.md:**
+
+**Short-term (This Month):**
+- Add Init/ check to /migrate command (30 min)
+- Add .claude/commands check to /migrate command (30 min)
+- Create /migrate-test validation command (1 hour)
+
+**Long-term (Next Version):**
+- Package as npm/script for one-command setup (4-6 hours)
+- Consider including .claude/ in Init/ (1 hour + testing)
+
+**Tracked in:** MIGRATION_ANALYSIS.md → "Recommended Actions" section
+
+---
+
 ## [1.4.1] - 2025-10-13
 
 ### 📚 Documentation Enhancement: Token Economics & Navigation
