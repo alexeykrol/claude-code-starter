@@ -118,33 +118,201 @@
 
 ---
 
-## Phase 4: v2.0.0 Planning - Long-term
+## Phase 4: v2.0.0 - Modular Context Management (2025 Q4 - 2026 Q1)
 
-> **Статус:** ⏳ Планирование, сбор идей
+> **Статус:** ✅ Roadmap готов, разбит на issues
+> **Vision:** От "project-level" к "module-level" управлению контекстом
 
-### Возможные направления:
+### Философия v2.0.0
 
-- [ ] **4.1** Advanced Migration Features
-  - Автоматическое разрешение типичных конфликтов
-  - Machine learning для определения структуры legacy проекта
-  - Интеграция с популярными фреймворками (Next.js, Vite, etc.)
+**Ключевая проблема:** AI не должен помнить всё. AI должен знать:
+1. Что я делаю СЕЙЧАС? (Module CLAUDE.md)
+2. Где проект в целом? (PROJECT_SNAPSHOT.md)
+3. Какая текущая цель спринта? (BACKLOG.md)
 
-- [ ] **4.2** Enhanced Slash Commands
-  - /analyze - автоматический анализ проекта
-  - /optimize - предложения по оптимизации
-  - /audit - проверка соответствия best practices
+**Цитата пользователя:** "проблема философски тоже баг" - проблемы требуют системных решений
 
-- [ ] **4.3** Multi-language Support
-  - Добавить китайский (zh)
-  - Добавить испанский (es)
-  - Система автоматической синхронизации переводов
+---
 
-- [ ] **4.4** Integration Ecosystem
-  - VS Code extension
-  - GitHub Actions для автоматических проверок
-  - Интеграция с другими AI coding tools
+### Phase 4.1: v2.0.0 Foundation - Hierarchical CLAUDE.md (6-8 часов)
 
-**Статус:** На стадии идей, ждем user feedback
+**GitHub Issue:** [#13](https://github.com/alexeykrol/claude-code-starter/issues/13)
+
+**Задачи:**
+- [ ] **4.1.1** Создать MODULE_CLAUDE_TEMPLATE.md (Issue #15)
+  - Шаблон для module-specific контекста
+  - Примеры для auth, api, ui модулей
+  - Синхронизация с init_eng/
+
+- [ ] **4.1.2** Обновить root CLAUDE.md template
+  - Добавить "Module Map" секцию
+  - Инструкции: когда читать module CLAUDE.md
+  - Token savings расчеты
+
+- [ ] **4.1.3** Документация модульной архитектуры
+  - Примеры в README.md
+  - DO/DON'T для module boundaries
+  - Добавить в DOCS_MAP.md
+
+- [ ] **4.1.4** Создать /module-init slash команду
+  - Генерация MODULE_CLAUDE.md из template
+  - Интерактивный wizard
+  - Тестирование на реальных проектах
+
+**Цель:** Hierarchical CLAUDE.md система (root + module-specific)
+**Метрики:** 85% экономия токенов на модульных проектах
+
+---
+
+### Phase 4.2: v2.1.0 - Sprint Focus Declaration (4-6 часов)
+
+**GitHub Issue:** [#14](https://github.com/alexeykrol/claude-code-starter/issues/14)
+**Зависимости:** Требует #13 (Hierarchical CLAUDE.md)
+
+**Задачи:**
+- [ ] **4.2.1** Добавить Sprint Focus Declaration в BACKLOG.md template
+  - Поля: Module, Context, Scope, Out of scope, Files, Dependencies
+  - Примеры для разных типов модулей
+  - Синхронизация с init_eng/
+
+- [ ] **4.2.2** Интеграция с CLAUDE.md Cold Start Protocol
+  - Шаг: "Read BACKLOG.md Focus Declaration"
+  - Логика: Load module CLAUDE.md based on focus
+  - Token savings documentation
+
+- [ ] **4.2.3** Связь с PROJECT_SNAPSHOT.md
+  - Поле "Current Focus"
+  - Link к BACKLOG.md Focus Declaration
+  - Quick summary (Module, Files, Lines)
+
+- [ ] **4.2.4** Обновить PROCESS.md
+  - "Update Sprint Focus" в sprint start checklist
+  - "Clear Sprint Focus" в sprint completion
+  - Когда менять focus (new phase, new module)
+
+**Цель:** Explicit scope definition → AI знает что загружать
+**Метрики:** 90% token savings на focused sprints
+
+---
+
+### Phase 4.3: v2.2.0 - Checkpoint Workflow Integration (3-4 часа)
+
+**GitHub Issue:** [#16](https://github.com/alexeykrol/claude-code-starter/issues/16)
+**Зависимости:** #11 (/finalize команда), Claude Code /rewind
+
+**Задачи:**
+- [ ] **4.3.1** Интеграция с PROCESS.md
+  - Добавить checkpoint step в Sprint Completion Checklist
+  - Naming convention: `sprint-[N]-[module]-complete`
+  - Инструкция документировать в PROJECT_SNAPSHOT.md
+
+- [ ] **4.3.2** Обновить PROJECT_SNAPSHOT.md template
+  - Секция "📍 Checkpoints"
+  - Поля: Name, Date, State, Resume command
+  - Archive old checkpoints
+
+- [ ] **4.3.3** Улучшить CLAUDE.md Cold Start
+  - Checkpoint awareness
+  - Suggest /rewind if checkpoint exists
+  - Load checkpoint state vs full history
+
+- [ ] **4.3.4** Интеграция с /finalize (Issue #11)
+  - После meta-file updates → suggest checkpoint
+  - Provide /rewind command with pre-filled name
+  - Auto-update PROJECT_SNAPSHOT.md
+
+**Цель:** Clean resume points через /rewind → no context pollution
+**Метрики:** 90% reduction in context noise на long-term projects
+
+---
+
+### Phase 4.4: v2.3.0 - Best Practices & Documentation (8-10 часов)
+
+**GitHub Issue:** [#17](https://github.com/alexeykrol/claude-code-starter/issues/17)
+**Зависимости:** #13, #14, #15, #16 (все v2.0 фичи реализованы)
+
+**Задачи:**
+- [ ] **4.4.1** Создать MODULAR_BEST_PRACTICES.md
+  - Decision tree: когда использовать модульный контекст
+  - Module organization patterns (3 варианта)
+  - Sprint focus best practices
+  - Checkpoint strategy
+  - Token economics & ROI calculations
+  - Common anti-patterns
+
+- [ ] **4.4.2** Интеграция с README
+  - "When to Use Modular Context" секция
+  - Quick decision matrix
+  - Before/after примеры с token counts
+
+- [ ] **4.4.3** Обновить templates
+  - "Should I use modules?" комментарий в CLAUDE.md
+  - Example module maps
+  - ARCHITECTURE.md modularity секция
+
+- [ ] **4.4.4** Interactive Examples
+  - `examples/modular-project/` directory
+  - 3 organization patterns
+  - Token usage measurements
+  - Setup process documentation
+
+- [ ] **4.4.5** Migration Guide
+  - MIGRATION_TO_MODULAR.md
+  - Step-by-step from single to modular
+  - Validation checklist
+  - Common problems & solutions
+
+**Цель:** Comprehensive guide → developers know when/how to use v2.0
+**Метрики:** Reduced support questions, effective feature adoption
+
+---
+
+### v2.0.0 Timeline & Estimates
+
+| Phase | Effort | Dependencies | Priority |
+|-------|--------|--------------|----------|
+| v2.0.0 - Foundation (#13, #15) | 6-8h | None | High |
+| v2.1.0 - Sprint Focus (#14) | 4-6h | v2.0.0 | High |
+| v2.2.0 - Checkpoints (#16) | 3-4h | #11, v2.1.0 | Medium |
+| v2.3.0 - Best Practices (#17) | 8-10h | v2.2.0 | Medium |
+| **Total** | **21-28h** | Sequential | - |
+
+**Estimated completion:** Q4 2025 - Q1 2026
+**ROI:** ~87% token savings on large projects (50k+ lines)
+
+---
+
+### Success Metrics для v2.0.0
+
+**Token Efficiency:**
+- Large projects (50k+ lines): 85-90% savings vs full context load
+- Cold start with modules: 2-3k tokens (was: 15-20k)
+- Checkpoint resume: 90% less context noise
+
+**User Experience:**
+- AI focuses on relevant code only
+- Faster context loading
+- More accurate responses (less noise)
+- Cheaper sessions ($0.02 vs $0.15 per cold start)
+
+**Adoption:**
+- Works for projects 50k+ lines
+- Backwards compatible (single CLAUDE.md still works)
+- Optional (users choose when to modularize)
+- Clear migration path (single → modular)
+
+---
+
+### GitHub Issues
+
+**v2.0.0 Modular Context Management:**
+- [Issue #13](https://github.com/alexeykrol/claude-code-starter/issues/13) - Hierarchical CLAUDE.md Support
+- [Issue #14](https://github.com/alexeykrol/claude-code-starter/issues/14) - Sprint Focus Declaration
+- [Issue #15](https://github.com/alexeykrol/claude-code-starter/issues/15) - Module CLAUDE.md Template
+- [Issue #16](https://github.com/alexeykrol/claude-code-starter/issues/16) - Checkpoint Workflow Integration
+- [Issue #17](https://github.com/alexeykrol/claude-code-starter/issues/17) - Best Practices Documentation
+
+**Статус:** Roadmap ready, issues created, ready for implementation
 
 ---
 

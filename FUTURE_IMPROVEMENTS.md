@@ -155,6 +155,436 @@ Guide through each unchecked item.
 
 ---
 
+## 🎯 Priority 1B: Post-Compact Hook - Auto Context Restoration (PROPOSED)
+
+### Rationale
+
+**Critical discovery: v1.4.3 has a weakness!**
+
+The 5-layer reminder system (v1.4.3) works perfectly UNTIL the first compaction happens.
+
+**Problem identified:**
+- Claude Code compacts context at ~95% capacity
+- During compaction, CLAUDE.md instructions may be lost/compressed
+- After compaction, AI "forgets" the Sprint Completion Protocol
+- User must manually remind AI (as happened in supabase-bridge project)
+
+**Root cause:**
+1. CLAUDE.md loaded at session start ✅
+2. AI works with instructions ✅
+3. Context fills up → compaction triggered 🚨
+4. CLAUDE.md instructions compressed/lost in summary ❌
+5. AI continues with reduced context ❌
+6. **CLAUDE.md is NOT automatically re-read after compaction** ❌
+
+**Evidence:** User analysis + research shows this is a known Claude Code issue.
+
+### Proposed Implementation
+
+**Solution:** Post-Compaction Hook that restores critical context
+
+**Hook name:** `post-compact` or `after-compact`
+
+**What it does:**
+
+1. **Detects compaction event:**
+   - Hook triggers after compaction completes
+   - Or: workaround using `PreToolUse` + log analysis
+
+2. **Restores context:**
+   ```bash
+   #!/bin/bash
+   # Post-Compact Hook - Restore Sprint Completion Context
+
+   echo "🔄 Compaction occurred. Restoring sprint context..."
+
+   # Force re-read CLAUDE.md
+   echo "📖 Re-reading CLAUDE.md for instructions..."
+
+   # Check BACKLOG.md for incomplete tasks
+   echo "📋 Checking BACKLOG.md status..."
+
+   # Remind about Sprint Completion Checklist
+   echo "⚠️ REMINDER: If phase complete, read SPRINT_COMPLETION_CHECKLIST.md"
+
+   # Suggest /finalize if tasks done
+   echo "💡 TIP: Use /finalize to check meta-files"
+   ```
+
+3. **Displays reminder:**
+   ```
+   🔄 Context restored after compaction!
+
+   ✅ CLAUDE.md re-read
+   📋 Sprint Completion Protocol active
+
+   If you've completed tasks, remember to:
+   - Update BACKLOG.md
+   - Update PROJECT_SNAPSHOT.md
+   - Update CLAUDE.md
+   - Or use /finalize for automatic check
+   ```
+
+### Technical Approach
+
+**Challenge:** Claude Code doesn't have direct `PostCompact` hook yet.
+
+**Workarounds (from research):**
+
+1. **Advanced:** Use `PreToolUse` hook + session log analysis
+   - Hook checks log file for recent compaction event
+   - If detected → force CLAUDE.md re-read
+   - Complex but very effective
+
+2. **Simple:** Use `PreCompact` hook to save state
+   - Before compaction: save critical instructions to temp file
+   - User manually triggers re-read after compaction
+   - Less automated but simpler
+
+3. **Wait for official hook:** Request `PostCompact` hook from Anthropic
+   - File feature request
+   - May be added in future Claude Code versions
+
+### Integration with Existing Solutions
+
+**Complete protection = v1.4.3 + v1.5.0 + v1.6.0:**
+
+```
+Session Start:
+├─ v1.4.3: 5-layer reminders loaded ✅
+│
+├─ Work continues... ✅
+│
+├─ 🚨 COMPACTION at 95%
+│  └─ v1.6.0: Post-Compact Hook restores context ✅
+│     └─ CLAUDE.md re-read
+│     └─ Checklist reminder displayed
+│
+├─ Work continues with restored context ✅
+│
+└─ Sprint complete:
+   ├─ v1.4.3: Reminders still active ✅
+   ├─ v1.5.0: /finalize available as manual fallback ✅
+   └─ v1.6.0: Hook ensures reminders not lost ✅
+```
+
+### Benefits
+
+**For AI:**
+- ✅ Context restored automatically after compaction
+- ✅ No reliance on compressed summary
+- ✅ Sprint Completion Protocol always active
+
+**For Users:**
+- ✅ Don't need to manually remind AI after compaction
+- ✅ Consistent behavior throughout long sessions
+- ✅ Fewer forgotten meta-file updates
+
+**For Framework:**
+- ✅ Closes critical gap in v1.4.3
+- ✅ Makes 5-layer system truly robust
+- ✅ Combines automation (hooks) + fallbacks (/finalize)
+
+### Implementation Priority
+
+**Priority:** High (Priority 1B - Critical enhancement)
+**Effort:** ~4-6 hours
+- 2 hours: Research Claude Code hooks API
+- 2 hours: Implement hook script
+- 1 hour: Testing with real compaction scenarios
+- 1 hour: Documentation (README, templates)
+
+**Dependencies:**
+- v1.4.3 (already released)
+- v1.5.0 (/finalize command) - complementary, not blocking
+
+**Risk:** Medium (depends on hook API availability/stability)
+
+**Proposed for:** v1.6.0
+
+**Alternative if hooks not available:** Document manual compaction workflow in PROCESS.md
+
+---
+
+## 🚀 v2.0.0: Modular Context Management - Professional-Grade Workflow (PROPOSED)
+
+### Vision
+
+**Next evolution of the framework:** From "project-level" to "module-level" context management.
+
+**Core philosophy shift:**
+- Projects can be huge → AI doesn't need to remember ALL
+- Work happens on specific modules → AI should focus on RELEVANT parts only
+- Sprints create checkpoints → No need to remember intermediate dialogs
+- Memory = Architecture + Current Focus + Checkpoint
+
+**Problem this solves:**
+- Large projects (50k+ lines) overwhelm context window
+- AI wastes tokens on irrelevant code
+- Lack of clear focus → scattered attention
+- No clear "resume point" after compaction/breaks
+
+### Key Insights from Research
+
+**Insight 1: Sprint-based development**
+- Work happens in cycles (sprints)
+- Each successful sprint = checkpoint
+- Intermediate dialogs not important → only final state matters
+- Current system: PROJECT_SNAPSHOT.md already provides this! ✅
+
+**Insight 2: Modular focus**
+- At any moment, work on ONE module
+- Don't need AI to "remember" entire codebase
+- Need AI to deeply understand CURRENT module
+- Rest of project = high-level architecture reference only
+
+**Insight 3: Context hierarchy**
+- Level 1: Project-wide (CLAUDE.md, PROJECT_SNAPSHOT, BACKLOG)
+- Level 2: Module-specific (module/CLAUDE.md, focused files)
+- Level 3: Sprint-runtime (TodoWrite, /add files, checkpoints)
+
+### Proposed Architecture
+
+#### 1. Hierarchical CLAUDE.md System
+
+**Structure:**
+```
+project/
+├── CLAUDE.md (root - general architecture)
+├── PROJECT_SNAPSHOT.md (checkpoint state)
+├── BACKLOG.md (all phases + current focus)
+│
+├── src/
+│   ├── auth/
+│   │   ├── CLAUDE.md (module - auth specific)
+│   │   ├── service.ts
+│   │   └── controller.ts
+│   │
+│   ├── api/
+│   │   ├── CLAUDE.md (module - api specific)
+│   │   └── routes.ts
+│   │
+│   └── ui/
+│       ├── CLAUDE.md (module - ui specific)
+│       └── components/
+```
+
+**How it works:**
+- Claude Code automatically reads ALL applicable CLAUDE.md files
+- Root CLAUDE.md → general project rules, architecture overview
+- Module CLAUDE.md → specific implementation details, focused context
+- Together → complete but focused picture
+
+**Benefits:**
+- ✅ Minimal token usage (only relevant context)
+- ✅ Deep module understanding
+- ✅ Clear separation of concerns
+- ✅ Easy to maintain (update module, not entire doc)
+
+#### 2. Sprint Focus Declaration
+
+**Add to BACKLOG.md:**
+```markdown
+## 🎯 Current Sprint Focus
+
+**Module:** Auth Module
+**Location:** `src/auth/`
+**Context:** `src/auth/CLAUDE.md`
+
+**Relevant files (use /add):**
+- src/auth/service.ts
+- src/auth/controller.ts
+- src/user/model.ts
+
+**NOT relevant (ignore):**
+- src/api/* (different module)
+- src/ui/* (different module)
+
+**Scope:** Only authentication logic
+```
+
+**Root CLAUDE.md instruction:**
+```markdown
+## 🎯 Working with Modules
+
+**BEFORE starting work:**
+1. Check BACKLOG.md → "Current Sprint Focus"
+2. Read the module's CLAUDE.md
+3. Use /add ONLY for relevant files
+4. IGNORE files outside focus scope
+```
+
+**Benefits:**
+- ✅ Explicit focus declaration
+- ✅ AI knows what to load
+- ✅ AI knows what to ignore
+- ✅ User controls scope
+
+#### 3. Module CLAUDE.md Template
+
+**File:** `Init/templates/MODULE_CLAUDE.md`
+
+**Template structure:**
+```markdown
+# [MODULE_NAME] Module Context
+
+**Purpose:** [What this module does]
+
+## 🏗️ Architecture
+- Component 1: [Description]
+- Component 2: [Description]
+
+## 📂 File Structure
+- service.ts: Core logic
+- controller.ts: API endpoints
+
+## 🔧 Current Tasks
+See BACKLOG.md for complete list
+
+## 📝 Module-specific Rules
+- Coding standards
+- Testing approach
+- Dependencies
+
+## 🔗 Related Modules
+- Module X: For Y functionality
+```
+
+**Benefits:**
+- ✅ Consistent module documentation
+- ✅ Easy to create new modules
+- ✅ Self-documenting codebase
+
+#### 4. Checkpoint Workflow Integration
+
+**Add to PROCESS.md:**
+```markdown
+## 📸 Sprint Checkpoints
+
+### After successful sprint:
+1. Update meta-files (BACKLOG, SNAPSHOT, CLAUDE)
+2. Git commit
+3. 📸 Note checkpoint number for rollback
+
+### If something goes wrong:
+/rewind  # Return to last checkpoint
+```
+
+**Benefits:**
+- ✅ Clear resume points
+- ✅ Safety net for experiments
+- ✅ No need to "remember" failed attempts
+
+#### 5. Best Practices Documentation
+
+**New file:** `Init/MODULAR_WORKFLOW.md`
+
+**Content:**
+- How to structure large projects
+- When to create module CLAUDE.md
+- How to declare sprint focus
+- Managing context in 100k+ line codebases
+- Examples from real projects
+
+### Implementation Roadmap
+
+**Broken down into phases for gradual adoption:**
+
+#### v2.0.0 - Foundation (Core Concepts)
+**Goal:** Enable basic modular context support
+
+**Deliverables:**
+- [ ] Module CLAUDE.md template
+- [ ] Update root CLAUDE.md with modular instructions
+- [ ] Document hierarchical CLAUDE.md in README
+- [ ] Add examples to templates
+
+**Effort:** ~6-8 hours
+**Impact:** Foundation for all future modular features
+
+#### v2.1.0 - Sprint Focus System
+**Goal:** Formalize focus declaration
+
+**Deliverables:**
+- [ ] Add "Current Sprint Focus" section to BACKLOG.md template
+- [ ] Update AGENTS.md with focus management instructions
+- [ ] Create MODULAR_WORKFLOW.md guide
+- [ ] Add /add file examples
+
+**Effort:** ~4-6 hours
+**Impact:** Clear focus = better token efficiency
+
+#### v2.2.0 - Checkpoint Integration
+**Goal:** Integrate checkpoint workflow
+
+**Deliverables:**
+- [ ] Add checkpoint workflow to PROCESS.md
+- [ ] Document /rewind usage
+- [ ] Add checkpoint best practices
+- [ ] Create checkpoint examples
+
+**Effort:** ~3-4 hours
+**Impact:** Safety net for experimentation
+
+#### v2.3.0 - Advanced Features
+**Goal:** Professional-grade tooling
+
+**Deliverables:**
+- [ ] Sub-agent templates (optional)
+- [ ] Multi-module coordination guide
+- [ ] Token optimization strategies
+- [ ] Large codebase case studies
+
+**Effort:** ~8-10 hours
+**Impact:** Scales to enterprise projects
+
+### Success Metrics
+
+**How to know v2.0 is successful:**
+1. Users can work on 100k+ line projects without context issues
+2. Token usage per sprint reduced by 40-60%
+3. AI maintains focus on relevant code only
+4. Clear resume points after breaks/compaction
+5. Positive user feedback on large project management
+
+### Migration Path
+
+**For existing projects:**
+1. Start with root CLAUDE.md (already have)
+2. Identify main modules
+3. Create module CLAUDE.md for largest/most active modules
+4. Add Sprint Focus to BACKLOG.md
+5. Gradually adopt checkpoint workflow
+
+**No breaking changes** - all features are additive!
+
+### Related Issues
+
+**To be created:**
+- Issue #13: Hierarchical CLAUDE.md support
+- Issue #14: Sprint Focus Declaration system
+- Issue #15: Module CLAUDE.md template
+- Issue #16: Checkpoint workflow integration
+- Issue #17: Best practices for modular projects
+
+### Philosophy
+
+**Quote from user:**
+> "Проблема философски тоже баг"
+> (A problem philosophically is also a bug)
+
+**Application:**
+- Bug: Context overflow on large projects
+- Fix: Modular context management
+- Bug: AI loses focus
+- Fix: Sprint Focus Declaration
+- Bug: No clear resume point
+- Fix: Checkpoint workflow
+
+**v2.0 = Systematic solution to philosophical problems**
+
+---
+
 ## Background
 
 ### Issue Identified
