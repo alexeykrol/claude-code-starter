@@ -206,3 +206,32 @@ storybook-static/
 .ionide/
 
 # End of https://www.toptal.com/developers/gitignore/api/node,react,vue,angular,python,java,go,rust
+
+# ==========================================
+# Claude Code Starter Framework Specific
+# ==========================================
+
+# Development/testing directory - excluded from repo
+# Used for testing init-project.sh before releases
+dev/
+
+# ✅ IMPORTANT: DO NOT IGNORE (these are part of the framework):
+#
+# Root meta-files (framework development context):
+#   - CLAUDE.md (AI context for developing THIS framework)
+#   - BACKLOG.md (framework development tasks)
+#   - PROJECT_SNAPSHOT.md (framework state tracking)
+#
+# Template directories (user-facing templates):
+#   - Init/ (Russian templates - 21 files)
+#   - init_eng/ (English templates - 21 files)
+#
+# Release archives (distributed to users):
+#   - init-starter.zip (Russian templates archive)
+#   - init-starter-en.zip (English templates archive)
+#
+# Installation script:
+#   - init-project.sh (183 lines - deploys templates)
+#
+# Documentation (public):
+#   - README.md, README_RU.md, CHANGELOG.md, etc.
