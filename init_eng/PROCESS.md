@@ -73,9 +73,21 @@ A phase is considered complete when:
 
 ---
 
-## 📝 Reminders for AI Assistant
+## 📝 🚨🚨🚨 CRITICAL FOR AI ASSISTANT 🚨🚨🚨
 
-**🚨 CRITICAL - READ CAREFULLY:**
+> **For AI agents:** Read this BEFORE completing any phase/sprint!
+
+### 🎯 Trigger: When to read this checklist?
+
+**MANDATORY to read when:**
+- ✅ Last task of phase completed (TodoWrite → completed)
+- ✅ User says "done", "finishing", "let's wrap up"
+- ✅ You're about to say "all tasks completed"
+- ✅ Planning to end the session
+
+**⚠️ EVEN IF user doesn't remind - YOU MUST DO THIS YOURSELF!**
+
+---
 
 ### After completing each phase:
 

@@ -24,6 +24,53 @@
 - Feature priorities
 - Development roadmap
 
+---
+
+## 🏁 Sprint Completion Protocol (MANDATORY!)
+
+> **🚨 CRITICAL:** Read this section BEFORE saying "done"!
+
+### WHEN: Last task completed
+
+**BEFORE telling user "done", MANDATORY:**
+
+1. ✅ **Read PROCESS.md** → Phase completion checklist (lines 78-110)
+2. ✅ **Update BACKLOG.md:**
+   - Mark completed tasks [x]
+   - Update phase status (In Progress → ✅ Complete)
+   - Recalculate progress table (%)
+3. ✅ **Update PROJECT_SNAPSHOT.md:**
+   - Update "Last Updated" date
+   - Change phase status to ✅
+   - Add completed tasks to "✅ Completed Tasks"
+   - Update "🔜 Next Stage"
+4. ✅ **Update CLAUDE.md:**
+   - Section "🔄 Current Project State"
+   - Mark completed tasks
+   - Specify next step
+5. ✅ **Git commit** with meta-file updates
+
+### 📝 Message Template:
+
+```
+✅ Tasks completed!
+
+📋 Before ending sprint, I'll update meta-files:
+   - BACKLOG.md (tasks, progress)
+   - PROJECT_SNAPSHOT.md (status, date)
+   - CLAUDE.md (current state)
+
+Update now? (Recommended: YES)
+```
+
+### 🎯 Quick Access:
+
+**Use `/finalize`** (if command available) for automatic check
+
+**ONLY after updating meta-files → can say "done"!**
+
+---
+
 ### Key Files Quick Reference:
 ```bash
 # Architecture & Planning

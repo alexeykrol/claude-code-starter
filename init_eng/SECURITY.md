@@ -62,6 +62,64 @@ Every application must satisfy **TWO** independent criteria:
 
 ---
 
+### 🔐 .gitignore Validation Checklist (Project Setup)
+
+> **🚨 CRITICAL:** Check THIS before first commit!
+
+**AFTER creating .gitignore ALWAYS perform:**
+
+#### 1. Find real files with secrets
+```bash
+ls -la | grep -E "config|\.env|secret|key|credentials"
+```
+
+#### 2. Verify pattern matching
+**⚠️ IMPORTANT:** Patterns must EXACTLY match file names!
+
+**Example problem:**
+```bash
+# If real file: wp-config-prod.php (dash -)
+# .gitignore MUST be: wp-config-*.php (with dash!)
+# NOT: wp-config_*.php (underscore _ - WON'T match!)
+```
+
+**Common patterns:**
+- [ ] `.env`, `.env.local`, `.env.*` (environment variables)
+- [ ] `*-config.php`, `config-*.php` (PHP config files)
+- [ ] `*.key`, `*.pem`, `*.p12` (private keys)
+- [ ] `secrets/`, `credentials/` (directories with secrets)
+- [ ] `*.zip`, `*-backup.*` (archives that may contain configs)
+
+#### 3. Test that files are ignored
+```bash
+git status --ignored
+```
+
+**Expected result:**
+- ✅ Files with secrets in "Ignored files" section
+- ❌ If in "Untracked files" → STOP! Fix .gitignore!
+
+#### 4. Verify NOT committed
+```bash
+git ls-files | grep -E "\.env$|config.*\.php$|secret|key|\.pem$"
+```
+
+**Expected result:**
+- ✅ Only examples: `.env.example`, `config.example.php`
+- ❌ If real secrets → STOP! Remove from Git!
+
+**If secrets already in Git:**
+```bash
+# Remove from history (CAREFUL!)
+git filter-branch --force --index-filter \
+  "git rm --cached --ignore-unmatch path/to/file" \
+  --prune-empty --tag-name-filter cat -- --all
+```
+
+**📝 Tip:** Use `/security` slash command for automatic check
+
+---
+
 ### 🟦 Stage 2: ARCHITECTURE & DESIGN
 
 **Design security into the system from the start**

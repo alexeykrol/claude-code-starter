@@ -145,6 +145,34 @@ Savings: $1.20 = 80%! 💰
 
 ---
 
+## 🚨 TRIGGER: Before Ending Session (CRITICAL!)
+
+> **For AI Agents:** Read this BEFORE saying "done" or ending the session!
+
+### WHEN to read this checklist:
+
+**MANDATORY before:**
+- ✅ Telling user "all tasks completed"
+- ✅ Last task of phase/sprint is finished
+- ✅ Planning to end the session
+- ✅ User says "done", "finished", "let's wrap up"
+
+### ⏸️ STOP! Execute checklist:
+
+1. **Read PROCESS.md (lines 78-110)** - Sprint completion checklist
+2. **Verify:** All meta-files updated?
+   - BACKLOG.md (mark tasks ✅, update progress)
+   - PROJECT_SNAPSHOT.md (status, date, next tasks)
+   - CLAUDE.md ("🔄 Current State" section)
+3. **Git commit** meta-files
+4. **ONLY AFTER** → can say "done"
+
+**🎯 Quick access:** Use `/finalize` for automatic check (if command available)
+
+**⚠️ DON'T skip these steps! Critical for next session!**
+
+---
+
 ## 🚀 Quick Start
 
 ### First things to read:

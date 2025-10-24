@@ -1,8 +1,157 @@
-# Future Improvements - Documentation Enhancement (v1.3.2+)
+# Future Improvements - Sprint Completion & Documentation
 
 **Created:** 2025-10-13
-**Priority:** Medium (Priority 2-3)
-**Context:** User feedback about confusion between ARCHITECTURE.md and BACKLOG.md for storing operational checklists
+**Last Updated:** 2025-10-23
+**Priority:** High (Priority 1 - Sprint Completion) + Medium (Priority 2-3 - Documentation)
+**Context:** User feedback about AI forgetting to update meta-files after sprint completion
+
+---
+
+## 🚨 Priority 1: Sprint Completion Enforcement (NEW - 2025-10-23)
+
+### Issue Identified
+
+**Real-world case (supabase-bridge project):**
+
+AI agent completed Phase 4 tasks but:
+1. ❌ Did NOT update PROJECT_SNAPSHOT.md
+2. ❌ Did NOT update CLAUDE.md
+3. ✅ Partially updated BACKLOG.md
+4. ❌ Only updated after user reminder: "А в каких мета файлах описан твой цикл?"
+
+**Root Cause:**
+
+- Instructions exist in PROCESS.md (lines 78-110)
+- But AI doesn't proactively read them
+- No automatic trigger "now you should update meta-files"
+- User must remind AI every time
+
+### Security Issue (Related)
+
+AI created .gitignore with wrong pattern:
+```
+.gitignore:     wp-config_*.php  (underscore)
+Real files:     wp-config-*.php  (dash)
+Result: Credentials NOT ignored! Security risk!
+```
+
+AI didn't validate .gitignore against real files.
+
+---
+
+## ✅ v1.4.3 Solution (Priority 1 - IMPLEMENTED - 2025-10-23)
+
+### Documentation Improvements (5 files updated):
+
+1. **Init/CLAUDE.md** - Added "🚨 ТРИГГЕР: Перед завершением работы"
+   - Clear trigger when to read checklist
+   - Reference to PROCESS.md and `/finalize` command
+
+2. **Init/AGENTS.md** - Added "🏁 Sprint Completion Protocol"
+   - Step-by-step mandatory checklist
+   - Template message for user
+
+3. **Init/PROCESS.md** - Strengthened warning
+   - Added "🚨🚨🚨" triple emphasis
+   - Clear triggers: when to read checklist
+   - "ДАЖЕ ЕСЛИ пользователь не напоминает - ТЫ ДОЛЖЕН САМ!"
+
+4. **Init/SECURITY.md** - Added ".gitignore Validation Checklist"
+   - 4-step validation process
+   - Check pattern matching (dash vs underscore!)
+   - Test with `git status --ignored`
+   - Verify no secrets in git history
+
+5. **Init/SPRINT_COMPLETION_CHECKLIST.md** - NEW FILE
+   - Standalone short checklist (easy to find)
+   - Step-by-step guide for all 3 meta-files
+   - Git commit template
+   - Common mistakes to avoid
+
+---
+
+## 🎯 Priority 1: `/finalize` Slash Command (PROPOSED - Not Yet Implemented)
+
+### Rationale
+
+**Even with documentation improvements, AI may still forget!**
+
+Need "safety net" slash command that:
+- User or AI can invoke manually
+- Checks if meta-files are up to date
+- Prompts to update if missing
+- Guides through the update process
+
+### Proposed Implementation
+
+**Command:** `/finalize` or `/sprint-complete`
+
+**What it does:**
+
+1. **Checks BACKLOG.md:**
+   - Are there tasks marked [x] but phase still "In Progress"?
+   - Prompt: "Phase X has completed tasks. Mark as ✅ Complete?"
+
+2. **Checks PROJECT_SNAPSHOT.md:**
+   - Is "Last Updated" date old?
+   - Prompt: "Update PROJECT_SNAPSHOT.md with current date and completed tasks?"
+
+3. **Checks CLAUDE.md:**
+   - Does "🔄 Текущее состояние" section exist?
+   - Prompt: "Update CLAUDE.md current state?"
+
+4. **Offers git commit:**
+   - Template: "docs: complete Phase X - sprint meta-files update"
+   - Shows diff before committing
+
+5. **Final validation:**
+   - "All meta-files updated! ✅"
+   - Or: "Still missing: [list] ⚠️"
+
+### Slash Command Specification
+
+**File:** `Init/.claude/commands/finalize.md`
+
+```markdown
+# /finalize - Sprint/Phase Completion Helper
+
+Check if all meta-files are updated after completing a sprint/phase.
+
+## Behavior:
+
+1. Read BACKLOG.md → check for completed tasks without phase marked ✅
+2. Read PROJECT_SNAPSHOT.md → check if date is current
+3. Read CLAUDE.md → check if "Текущее состояние" exists
+4. For each missing update → prompt user
+5. Offer to create git commit with all updates
+
+## Output:
+
+Show checklist:
+- [ ] BACKLOG.md updated
+- [ ] PROJECT_SNAPSHOT.md updated
+- [ ] CLAUDE.md updated
+- [ ] Git commit created
+
+Guide through each unchecked item.
+```
+
+### Benefits
+
+- ✅ Works even if AI forgets documentation
+- ✅ User can invoke proactively: `/finalize` before ending session
+- ✅ AI can invoke as reminder: "Should I run `/finalize`?"
+- ✅ Consistent process every time
+- ✅ Reduces human error (forgot to update X)
+
+### Implementation Priority
+
+**Priority:** High (Priority 1)
+**Effort:** ~3-4 hours
+**Impact:** Prevents meta-file desync on EVERY project
+**Risk:** Low (doesn't change existing functionality)
+
+**Proposed for:** v1.5.0 or v1.4.4 (minor release)
 
 ---
 
