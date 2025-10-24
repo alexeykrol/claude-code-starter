@@ -133,21 +133,36 @@ Project_init/
 
 ---
 
-## 🔜 Следующий этап: Priority 2-3 Improvements
+## 🔜 Следующий этап: v2.0.0 Modular Context Management
 
-**Планируемые улучшения (v1.5.0+):**
+**Статус:** ✅ Roadmap готов, разбит на GitHub Issues #13-#17
 
-### Задачи:
-1. Добавить "Common Mistakes" секцию в DOCS_MAP.md
-2. Расширить Best Practices в README с примерами DO/DON'T
-3. Создать видео-туториал или GIF (Priority 3)
-4. Улучшить шаблоны с предупреждениями anti-patterns
+### Roadmap:
+- **v1.5.0** - /finalize Slash Command (Issue #11) - Priority 1
+- **v1.6.0** - Post-Compact Hook (Issue #12) - Priority 1B
+- **v2.0.0** - Hierarchical CLAUDE.md (Issues #13, #15) - 6-8 часов
+- **v2.1.0** - Sprint Focus Declaration (Issue #14) - 4-6 часов
+- **v2.2.0** - Checkpoint Workflow (Issue #16) - 3-4 часа
+- **v2.3.0** - Best Practices Documentation (Issue #17) - 8-10 часов
 
-**Примерное время:** ~5-8 часов (для Priority 2)
+**Vision:** От "project-level" к "module-level" управлению контекстом
 
-**Зависимости:** User feedback, реальные кейсы использования
+**Цель:** Работа с проектами 50k+ lines без context pollution
 
-**Статус:** Ожидание накопления user feedback (не спешим с гипотетическими решениями)
+**ROI:** ~87% экономия токенов на больших проектах
+
+**Timeline:** Q4 2025 - Q1 2026 (21-28 часов total)
+
+**GitHub Issues:**
+- [Issue #11](https://github.com/alexeykrol/claude-code-starter/issues/11) - /finalize command
+- [Issue #12](https://github.com/alexeykrol/claude-code-starter/issues/12) - Post-Compact Hook
+- [Issue #13](https://github.com/alexeykrol/claude-code-starter/issues/13) - Hierarchical CLAUDE.md
+- [Issue #14](https://github.com/alexeykrol/claude-code-starter/issues/14) - Sprint Focus Declaration
+- [Issue #15](https://github.com/alexeykrol/claude-code-starter/issues/15) - Module CLAUDE.md Template
+- [Issue #16](https://github.com/alexeykrol/claude-code-starter/issues/16) - Checkpoint Workflow
+- [Issue #17](https://github.com/alexeykrol/claude-code-starter/issues/17) - Best Practices
+
+**Детали:** См. FUTURE_IMPROVEMENTS.md и BACKLOG.md Phase 4
 
 ---
 
@@ -211,6 +226,15 @@ bash init-project.sh --target=dev
 ---
 
 ## 🔄 История последних обновлений
+
+### 2025-10-24 - v2.0.0 Roadmap Complete
+- Реализовано: Comprehensive v2.0.0 Modular Context Management roadmap
+- GitHub Issues: Создано 5 issues (#13-#17) с детальными спецификациями
+- Документация: ~280 строк в FUTURE_IMPROVEMENTS.md, обновлен BACKLOG.md
+- Vision: "AI не должен помнить всё, а только релевантное СЕЙЧАС"
+- ROI: ~87% экономия токенов на проектах 50k+ lines
+- Timeline: Q4 2025 - Q1 2026 (21-28 часов)
+- Философия: "проблема философски тоже баг" - системные решения для философских проблем
 
 ### 2025-10-24 - v1.4.3 Released
 - Реализовано: Sprint Completion Enforcement (5-уровневая система)
