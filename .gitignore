@@ -215,6 +215,9 @@ storybook-static/
 # Used for testing init-project.sh before releases
 dev/
 
+# Test directories - excluded from repo
+test2/
+
 # ✅ IMPORTANT: DO NOT IGNORE (these are part of the framework):
 #
 # Root meta-files (framework development context):
