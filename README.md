@@ -1,4 +1,4 @@
-# Claude Code Starter
+# Claude Code Starter (test)
 
 Ready-to-use meta-documentation framework for structured AI-assisted development with Claude Code.
 
