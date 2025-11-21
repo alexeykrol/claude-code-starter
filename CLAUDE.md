@@ -1,4 +1,4 @@
-# Контекст репозитория Claude Code Starter для Claude Code
+# Контекст репозитория Claude Code Starter для Claude Code.
 
 > Этот файл автоматически загружается в контекст каждой сессии Claude Code
 
