@@ -238,3 +238,7 @@ test2/
 #
 # Documentation (public):
 #   - README.md, README_RU.md, CHANGELOG.md, etc.
+
+# Dialog export utility (compiled, needed for /ui and /watch commands)
+!.claude-export/dist/
+!Init/.claude-export/dist/
