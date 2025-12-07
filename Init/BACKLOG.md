@@ -17,8 +17,8 @@
 > When user asks for checklist or "what's next?" → Read THIS file, not ARCHITECTURE.md
 >
 > **📋 После завершения каждой фазы:**
-> - Обнови этот файл согласно [`PROCESS.md`](./PROCESS.md)
-> - Обнови [`PROJECT_SNAPSHOT.md`](./PROJECT_SNAPSHOT.md) с текущим прогрессом
+> - Обнови этот файл согласно [`CLAUDE.md`](./CLAUDE.md)
+> - Обнови [`SNAPSHOT.md`](./SNAPSHOT.md) с текущим прогрессом
 > - См. [`DEVELOPMENT_PLAN_TEMPLATE.md`](./DEVELOPMENT_PLAN_TEMPLATE.md) для методологии планирования
 >
 > All AI agents and developers MUST check this file before starting work.
