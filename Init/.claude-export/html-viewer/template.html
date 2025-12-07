@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Claude Export - Dialog Viewer</title>
+  <style>
+    :root {
+      --bg-primary: #1a1a2e;
+      --bg-secondary: #16213e;
+      --bg-tertiary: #0f3460;
+      --text-primary: #eee;
+      --text-secondary: #aaa;
+      --text-muted: #666;
+      --accent: #e94560;
+      --accent-dim: #c73e54;
+      --success: #4ade80;
+      --warning: #fbbf24;
+      --border: #333;
+      --user-bg: #1e3a5f;
+      --assistant-bg: #2d2d44;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      min-height: 100vh;
+      line-height: 1.6;
+    }
+
+    .container {
+      max-width: 1600px;
+      margin: 0 auto;
+      padding: 30px 20px 20px 20px;
+    }
+
+    header {
+      margin-bottom: 20px;
+      padding-bottom: 15px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .header-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    h1 {
+      font-size: 1.5rem;
+      font-weight: 500;
+      color: var(--accent);
+    }
+
+    .header-controls {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .search-box {
+      padding: 8px 12px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text-primary);
+      font-family: inherit;
+      font-size: 1.05rem;
+      width: 250px;
+    }
+
+    .search-box:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+
+    .stats {
+      font-size: 1.05rem;
+      color: var(--text-secondary);
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 1fr 2fr;
+      gap: 20px;
+      height: calc(100vh - 200px);
+    }
+
+    .panel {
+      background: var(--bg-secondary);
+      border-radius: 8px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .panel-header {
+      padding: 12px 16px;
+      background: var(--bg-tertiary);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .panel-title {
+      font-size: 1.1rem;
+      font-weight: 400;
+    }
+
+    .panel-content {
+      flex: 1;
+      overflow-y: auto;
+    }
+
+    .item-list {
+      padding: 0;
+      margin: 0;
+      list-style: none;
+    }
+
+    .item-card {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .item-card:hover {
+      background: var(--bg-tertiary);
+    }
+
+    .item-card.selected {
+      background: var(--user-bg);
+    }
+
+    .item-row-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+    }
+
+    .item-row-top-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .item-date {
+      font-size: 1.1rem;
+      color: var(--text-primary);
+      white-space: nowrap;
+    }
+
+    .item-meta {
+      font-size: 1.05rem;
+      color: var(--text-muted);
+      white-space: nowrap;
+    }
+
+    .item-row-bottom {
+      font-size: 1.1rem;
+      color: var(--text-secondary);
+      line-height: 1.4;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .visibility-badge {
+      font-size: 0.9rem;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-weight: 500;
+    }
+
+    .visibility-badge.public {
+      background: rgba(74, 222, 128, 0.2);
+      color: var(--success);
+    }
+
+    .visibility-badge.private {
+      background: rgba(251, 191, 36, 0.2);
+      color: var(--warning);
+    }
+
+    .dialog-view {
+      padding: 16px;
+    }
+
+    .dialog-empty {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      color: var(--text-muted);
+      font-size: 1.1rem;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    /* Markdown content styling */
+    .markdown-content h3 {
+      padding: 12px 16px;
+      margin: 16px 0 0 0;
+      border-radius: 8px 8px 0 0;
+      font-size: 0.95rem;
+      font-weight: 600;
+    }
+
+    .markdown-content h3 + p,
+    .markdown-content h3 + ul,
+    .markdown-content h3 + pre,
+    .markdown-content h3 + blockquote {
+      padding: 12px 16px;
+      margin: 0 0 16px 0;
+      border-radius: 0 0 8px 8px;
+    }
+
+    .markdown-content h3.msg-user {
+      background: var(--user-bg);
+      border-left: 3px solid var(--accent);
+      color: var(--accent);
+    }
+
+    .markdown-content h3.msg-user + p,
+    .markdown-content h3.msg-user + ul,
+    .markdown-content h3.msg-user + pre,
+    .markdown-content h3.msg-user + blockquote {
+      background: var(--user-bg);
+      border-left: 3px solid var(--accent);
+    }
+
+    .markdown-content h3.msg-assistant {
+      background: var(--assistant-bg);
+      border-left: 3px solid var(--success);
+      color: var(--success);
+    }
+
+    .markdown-content h3.msg-assistant + p,
+    .markdown-content h3.msg-assistant + ul,
+    .markdown-content h3.msg-assistant + pre,
+    .markdown-content h3.msg-assistant + blockquote {
+      background: var(--assistant-bg);
+      border-left: 3px solid var(--success);
+    }
+
+    .markdown-content hr {
+      border: none;
+      height: 1px;
+      background: var(--border);
+      margin: 16px 0;
+    }
+
+    .markdown-content pre {
+      background: var(--bg-tertiary);
+      padding: 12px;
+      border-radius: 6px;
+      overflow-x: auto;
+    }
+
+    .markdown-content code {
+      background: var(--bg-tertiary);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 0.9em;
+    }
+
+    .markdown-content pre code {
+      background: none;
+      padding: 0;
+    }
+
+    .markdown-content h1, .markdown-content h2 {
+      margin: 1rem 0 0.5rem 0;
+      color: var(--text-primary);
+    }
+
+    .markdown-content h1 { font-size: 1.3rem; }
+    .markdown-content h2 { font-size: 1.2rem; }
+
+    .markdown-content ul, .markdown-content ol {
+      margin: 0.5rem 0;
+      padding-left: 1.5rem;
+    }
+
+    .markdown-content li {
+      margin: 0.25rem 0;
+    }
+
+    .markdown-content a {
+      color: #4a9eff;
+      text-decoration: none;
+    }
+
+    .markdown-content a:hover {
+      text-decoration: underline;
+    }
+
+    .markdown-content blockquote {
+      border-left: 3px solid var(--border);
+      margin: 0.75rem 0;
+      padding-left: 1rem;
+      color: var(--text-secondary);
+    }
+
+    .markdown-content table {
+      border-collapse: collapse;
+      margin: 0.75rem 0;
+      width: 100%;
+    }
+
+    .markdown-content th, .markdown-content td {
+      border: 1px solid var(--border);
+      padding: 0.5rem;
+      text-align: left;
+    }
+
+    .markdown-content th {
+      background: var(--bg-tertiary);
+    }
+
+    .btn {
+      padding: 6px 12px;
+      border: none;
+      border-radius: 4px;
+      font-family: inherit;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .btn-secondary {
+      background: var(--bg-tertiary);
+      color: var(--text-primary);
+      border: 1px solid var(--border);
+    }
+
+    .btn-secondary:hover {
+      background: var(--border);
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: var(--bg-secondary);
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--border);
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--text-muted);
+    }
+
+    /* Modal */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.7);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-overlay.show {
+      display: flex;
+    }
+
+    .modal {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      width: 700px;
+      max-width: 90vw;
+      max-height: 80vh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .modal-header {
+      padding: 16px 20px;
+      background: var(--bg-tertiary);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .modal-title {
+      font-size: 1.2rem;
+      color: var(--accent);
+    }
+
+    .modal-close {
+      background: none;
+      border: none;
+      color: var(--text-secondary);
+      font-size: 1.5rem;
+      cursor: pointer;
+      padding: 0 8px;
+    }
+
+    .modal-close:hover {
+      color: var(--text-primary);
+    }
+
+    .modal-body {
+      padding: 20px;
+      overflow-y: auto;
+      font-size: 1.1rem;
+      line-height: 1.8;
+    }
+
+    .modal-body h3 {
+      color: var(--accent);
+      margin: 16px 0 8px 0;
+      font-size: 1.15rem;
+    }
+
+    .modal-body h3:first-child {
+      margin-top: 0;
+    }
+
+    .modal-body ul {
+      margin: 0;
+      padding-left: 1.5rem;
+    }
+
+    .modal-body li {
+      margin: 6px 0;
+    }
+
+    .modal-body a {
+      color: #4a9eff;
+      text-decoration: none;
+    }
+
+    .modal-body a:hover {
+      text-decoration: underline;
+    }
+
+    /* Responsive */
+    @media (max-width: 1200px) {
+      .layout {
+        grid-template-columns: 1fr;
+        height: auto;
+      }
+
+      .panel {
+        max-height: 50vh;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .header-controls {
+        flex-wrap: wrap;
+      }
+
+      .search-box {
+        width: 100%;
+      }
+    }
+
+    </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="header-top">
+        <h1>Claude Export <span style="font-weight: 400; font-size: 1rem; color: #888;">__VERSION__ · __DATETIME__</span> <span style="font-weight: 400; font-size: 1rem; color: #aaa; margin-left: 20px;" id="stats">Loading...</span></h1>
+        <div class="header-controls">
+          <input type="text" class="search-box" id="searchBox" placeholder="Search dialogs...">
+          <button class="btn btn-secondary" onclick="showHelp()" title="Help">?</button>
+        </div>
+      </div>
+    </header>
+
+    <div class="layout">
+      <!-- Left Panel: Dialogs List -->
+      <div class="panel">
+        <div class="panel-header">
+          <span class="panel-title">Dialogs</span>
+          <span class="item-meta" id="dialogCount"></span>
+        </div>
+        <div class="panel-content" id="leftPanel">
+          <div class="dialog-empty">Loading...</div>
+        </div>
+      </div>
+
+      <!-- Right Panel: Dialog Viewer -->
+      <div class="panel">
+        <div class="panel-header">
+          <span class="panel-title" id="dialogTitle" style="flex: 1;">Select a dialog</span>
+          <button class="btn btn-secondary" id="scrollBtn" onclick="toggleScroll()" title="Scroll to last message">↓ Last</button>
+        </div>
+        <div class="panel-content" id="dialogPanel">
+          <div class="dialog-empty">
+            <span>Select a dialog to view</span>
+            <span style="font-size: 0.95rem;">This is a read-only viewer</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <footer style="text-align: center; padding: 1rem 0.5rem 1.5rem; color: #888; font-size: 1.1rem;">
+      © Alex Krol 2025 ·
+      <a href="https://github.com/alexeykrol" target="_blank" style="color: #4a9eff; text-decoration: none;">GitHub</a> ·
+      <a href="https://facebook.com/alexeykrol" target="_blank" style="color: #4a9eff; text-decoration: none;">Facebook</a> ·
+      <a href="https://linkedin.com/in/alexeykrol" target="_blank" style="color: #4a9eff; text-decoration: none;">LinkedIn</a>
+    </footer>
+  </div>
+
+  <!-- Help Modal -->
+  <div class="modal-overlay" id="helpModal" onclick="closeHelp(event)">
+    <div class="modal" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <span class="modal-title">Claude Export — Помощь</span>
+        <button class="modal-close" onclick="closeHelp()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <h3>📋 Навигация</h3>
+        <ul>
+          <li>Выберите диалог в левой панели для просмотра</li>
+          <li>Используйте поиск для фильтрации по содержимому</li>
+          <li>Кнопка "↓ Last" — перейти к последнему сообщению</li>
+        </ul>
+
+        <h3>📁 Структура</h3>
+        <ul>
+          <li>Диалоги экспортированы из Claude Code сессий</li>
+          <li>Каждый диалог содержит историю общения с AI</li>
+          <li>Формат: Markdown с подсветкой User/Assistant</li>
+        </ul>
+
+        <h3>🔗 Ссылки</h3>
+        <ul>
+          <li><a href="https://github.com/alexeykrol/claude-export" target="_blank">GitHub — исходный код и документация</a></li>
+          <li><a href="https://claude.ai" target="_blank">Claude AI — официальный сайт</a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ===== EMBEDDED DATA =====
+    // This will be replaced by the generator with actual dialog data
+    const DIALOGS_DATA = __DIALOGS_DATA__;
+    const PROJECT_INFO = __PROJECT_INFO__;
+
+    // ===== Simple Markdown Parser =====
+    function parseMarkdown(text) {
+      // Headers
+      text = text.replace(/^### (.*$)/gim, '<h3>$1</h3>');
+      text = text.replace(/^## (.*$)/gim, '<h2>$1</h2>');
+      text = text.replace(/^# (.*$)/gim, '<h1>$1</h1>');
+
+      // Bold and italic
+      text = text.replace(/\*\*\*(.*?)\*\*\*/g, '<strong><em>$1</em></strong>');
+      text = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+      text = text.replace(/\*(.*?)\*/g, '<em>$1</em>');
+
+      // Code blocks
+      text = text.replace(/```(\w*)\n([\s\S]*?)```/g, '<pre><code>$2</code></pre>');
+      text = text.replace(/`([^`]+)`/g, '<code>$1</code>');
+
+      // Links
+      text = text.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank">$1</a>');
+
+      // Lists
+      text = text.replace(/^\s*[-*]\s+(.*)$/gim, '<li>$1</li>');
+      text = text.replace(/(<li>.*<\/li>)/s, '<ul>$1</ul>');
+
+      // Blockquotes
+      text = text.replace(/^>\s+(.*)$/gim, '<blockquote>$1</blockquote>');
+
+      // Horizontal rules
+      text = text.replace(/^---$/gim, '<hr>');
+
+      // Paragraphs
+      text = text.replace(/\n\n/g, '</p><p>');
+      text = '<p>' + text + '</p>';
+
+      // Clean up empty paragraphs
+      text = text.replace(/<p>\s*<\/p>/g, '');
+      text = text.replace(/<p>(<h[1-6]>)/g, '$1');
+      text = text.replace(/(<\/h[1-6]>)<\/p>/g, '$1');
+      text = text.replace(/<p>(<pre>)/g, '$1');
+      text = text.replace(/(<\/pre>)<\/p>/g, '$1');
+      text = text.replace(/<p>(<ul>)/g, '$1');
+      text = text.replace(/(<\/ul>)<\/p>/g, '$1');
+      text = text.replace(/<p>(<blockquote>)/g, '$1');
+      text = text.replace(/(<\/blockquote>)<\/p>/g, '$1');
+      text = text.replace(/<p>(<hr>)/g, '$1');
+      text = text.replace(/(<hr>)<\/p>/g, '$1');
+
+      return text;
+    }
+
+    // ===== Application State =====
+    let dialogs = [];
+    let filteredDialogs = [];
+    let selectedDialog = null;
+    let isAtBottom = false;
+
+    // ===== Initialization =====
+    document.addEventListener('DOMContentLoaded', () => {
+      dialogs = DIALOGS_DATA;
+      filteredDialogs = dialogs;
+
+      // Update stats
+      document.getElementById('stats').textContent =
+        `Project: ${PROJECT_INFO.name} · ${dialogs.length} dialog(s)`;
+      document.getElementById('dialogCount').textContent = `${dialogs.length} items`;
+
+      // Setup search
+      document.getElementById('searchBox').addEventListener('input', filterDialogs);
+
+      // Render list
+      renderDialogs();
+    });
+
+    // ===== Filter =====
+    function filterDialogs() {
+      const query = document.getElementById('searchBox').value.toLowerCase();
+
+      if (!query) {
+        filteredDialogs = dialogs;
+      } else {
+        filteredDialogs = dialogs.filter(d => {
+          const inSummary = (d.summaryShort || d.summary || '').toLowerCase().includes(query);
+          const inFilename = d.filename.toLowerCase().includes(query);
+          const inContent = d.content.toLowerCase().includes(query);
+          return inSummary || inFilename || inContent;
+        });
+      }
+
+      document.getElementById('dialogCount').textContent = `${filteredDialogs.length} items`;
+      renderDialogs();
+    }
+
+    // ===== Render List =====
+    function renderDialogs() {
+      const panel = document.getElementById('leftPanel');
+
+      if (filteredDialogs.length === 0) {
+        panel.innerHTML = '<div class="dialog-empty">No dialogs found</div>';
+        return;
+      }
+
+      const list = document.createElement('ul');
+      list.className = 'item-list';
+      list.innerHTML = filteredDialogs.map((d, index) => `
+        <li class="item-card ${selectedDialog === index ? 'selected' : ''}"
+            data-index="${index}"
+            onclick="selectDialog(${index})">
+          <div class="item-row-top">
+            <span class="item-date">${formatDateTime(d.sessionDateTime, d.date)}</span>
+            <span class="item-meta">${d.size || ''}</span>
+          </div>
+          <div class="item-row-bottom">
+            ${escapeHtml(d.summaryShort || d.summary || 'No summary')}
+          </div>
+        </li>
+      `).join('');
+
+      panel.innerHTML = '';
+      panel.appendChild(list);
+    }
+
+    // ===== Select Dialog =====
+    function selectDialog(index) {
+      selectedDialog = index;
+      const dialog = filteredDialogs[index];
+
+      // Update selection in list
+      document.querySelectorAll('.item-card').forEach((card, i) => {
+        card.classList.toggle('selected', parseInt(card.dataset.index) === index);
+      });
+
+      // Update title
+      const title = dialog.summaryFull || dialog.summary || dialog.filename;
+      document.getElementById('dialogTitle').textContent = title;
+      document.getElementById('dialogTitle').title = title;
+
+      // Render content
+      const panel = document.getElementById('dialogPanel');
+      const html = parseMarkdown(dialog.content);
+      panel.innerHTML = `<div class="dialog-view markdown-content">${html}</div>`;
+
+      // Style headers
+      panel.querySelectorAll('h3').forEach(h3 => {
+        const text = h3.textContent || '';
+        if (text.includes('User') || text.includes('👤')) {
+          h3.classList.add('msg-user');
+        } else if (text.includes('Claude') || text.includes('🤖')) {
+          h3.classList.add('msg-assistant');
+        }
+      });
+
+      resetScrollBtn();
+    }
+
+    // ===== Scroll Toggle =====
+    function toggleScroll() {
+      const panel = document.getElementById('dialogPanel');
+      const btn = document.getElementById('scrollBtn');
+
+      if (isAtBottom) {
+        panel.scrollTop = 0;
+        btn.textContent = '↓ Last';
+        btn.title = 'Scroll to last message';
+        isAtBottom = false;
+      } else {
+        panel.scrollTop = panel.scrollHeight;
+        btn.textContent = '↑ First';
+        btn.title = 'Scroll to first message';
+        isAtBottom = true;
+      }
+    }
+
+    function resetScrollBtn() {
+      const btn = document.getElementById('scrollBtn');
+      btn.textContent = '↓ Last';
+      btn.title = 'Scroll to last message';
+      isAtBottom = false;
+    }
+
+    // ===== Utilities =====
+    function formatDateTime(isoString, fallbackDate) {
+      if (isoString) {
+        const d = new Date(isoString);
+        const year = d.getFullYear();
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        const hours = String(d.getHours()).padStart(2, '0');
+        const minutes = String(d.getMinutes()).padStart(2, '0');
+        return `${year}-${month}-${day}, ${hours}:${minutes}`;
+      }
+      return fallbackDate || 'Unknown';
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    function showHelp() {
+      document.getElementById('helpModal').classList.add('show');
+    }
+
+    function closeHelp(event) {
+      if (!event || event.target === event.currentTarget) {
+        document.getElementById('helpModal').classList.remove('show');
+      }
+    }
+
+    // Close modal on Escape key
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closeHelp();
+      }
+    });
+  </script>
+</body>
+</html>
