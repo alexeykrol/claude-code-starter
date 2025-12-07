@@ -662,8 +662,8 @@ function App() {
 
 #### Мета-файлы:
 - [ ] BACKLOG.md — задачи отмечены ✅
-- [ ] PROJECT_SNAPSHOT.md — модуль добавлен
-- [ ] PROCESS.md — чеклист выполнен
+- [ ] SNAPSHOT.md — модуль добавлен
+- [ ] CLAUDE.md — чеклист выполнен
 
 ### Граф зависимостей модулей:
 
@@ -737,8 +737,8 @@ function App() {
 ## 📚 Related Documentation
 
 - **BACKLOG.md** - Current implementation status and roadmap
-- **PROJECT_SNAPSHOT.md** - Current project state snapshot
-- **PROCESS.md** - Documentation update process after each phase
+- **SNAPSHOT.md** - Current project state snapshot
+- **CLAUDE.md** - Documentation update process after each phase
 - **DEVELOPMENT_PLAN_TEMPLATE.md** - Planning methodology
 - **AGENTS.md** - AI assistant working instructions
 - **WORKFLOW.md** - Development processes and sprint workflow

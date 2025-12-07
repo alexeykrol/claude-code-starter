@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Claude Code Starter - Smart Project Initialization Script
-# Version: 1.2.0
+# Version: 2.0.0
 # Usage: bash init-project.sh [--lang=ru|en]
 
 set -e
@@ -47,7 +47,7 @@ fi
 
 echo -e "${BLUE}╔════════════════════════════════════════════════════════════╗${NC}"
 echo -e "${BLUE}║       Claude Code Starter - Project Initialization        ║${NC}"
-echo -e "${BLUE}║                    Version 1.2.0                           ║${NC}"
+echo -e "${BLUE}║                    Version 2.0.0                           ║${NC}"
 echo -e "${BLUE}╚════════════════════════════════════════════════════════════╝${NC}"
 echo ""
 
@@ -121,6 +121,27 @@ if [ $TOTAL_COUNT -eq 0 ]; then
     rm "$ZIP_FILE"
 
     echo -e "${GREEN}✅ Шаблоны установлены!${NC}"
+
+    # Add npm scripts for dialog export if package.json exists
+    if [ -f "package.json" ]; then
+        echo -e "${BLUE}📦 Добавление npm scripts...${NC}"
+        if ! grep -q "dialog:export" package.json; then
+            node -e "
+const fs = require('fs');
+const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'));
+pkg.scripts = pkg.scripts || {};
+pkg.scripts['dialog:export'] = 'node .claude-export/dist/cli.js export';
+pkg.scripts['dialog:ui'] = 'node .claude-export/dist/cli.js ui';
+pkg.scripts['dialog:watch'] = 'node .claude-export/dist/cli.js watch';
+pkg.scripts['dialog:list'] = 'node .claude-export/dist/cli.js list';
+fs.writeFileSync('package.json', JSON.stringify(pkg, null, 2) + '\n');
+"
+            echo -e "${GREEN}✅ Добавлены dialog:* scripts${NC}"
+        else
+            echo -e "${YELLOW}⚠️  dialog:* scripts уже существуют${NC}"
+        fi
+    fi
+
     echo ""
     echo -e "${GREEN}╔════════════════════════════════════════════════════════════╗${NC}"
     echo -e "${GREEN}║                    🎉 Готово!                              ║${NC}"
@@ -161,6 +182,38 @@ else
         echo -e "${GREEN}✅ CLAUDE.md скопирован в корень для автозагрузки${NC}"
     else
         echo -e "${YELLOW}⚠️  CLAUDE.md уже существует, пропускаем копирование${NC}"
+    fi
+
+    # Copy .claude-export utility
+    if [ -d "$TEMPLATES_DIR/.claude-export" ]; then
+        cp -r "$TEMPLATES_DIR/.claude-export" ./.claude-export
+        echo -e "${GREEN}✅ .claude-export утилита установлена${NC}"
+    fi
+
+    # Copy .claude folder with commands
+    if [ -d "$TEMPLATES_DIR/.claude" ]; then
+        mkdir -p .claude/commands
+        cp -r "$TEMPLATES_DIR/.claude/commands/"* .claude/commands/
+        cp "$TEMPLATES_DIR/.claude/.last_session" .claude/.last_session 2>/dev/null || true
+        echo -e "${GREEN}✅ .claude/commands/ установлены${NC}"
+    fi
+
+    # Add npm scripts for dialog export if package.json exists
+    if [ -f "package.json" ]; then
+        echo -e "${BLUE}📦 Добавление npm scripts...${NC}"
+        if ! grep -q "dialog:export" package.json; then
+            node -e "
+const fs = require('fs');
+const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'));
+pkg.scripts = pkg.scripts || {};
+pkg.scripts['dialog:export'] = 'node .claude-export/dist/cli.js export';
+pkg.scripts['dialog:ui'] = 'node .claude-export/dist/cli.js ui';
+pkg.scripts['dialog:watch'] = 'node .claude-export/dist/cli.js watch';
+pkg.scripts['dialog:list'] = 'node .claude-export/dist/cli.js list';
+fs.writeFileSync('package.json', JSON.stringify(pkg, null, 2) + '\n');
+"
+            echo -e "${GREEN}✅ Добавлены dialog:* scripts${NC}"
+        fi
     fi
 
     echo -e "${GREEN}✅ Шаблоны готовы в папке: $TEMPLATES_DIR/${NC}"

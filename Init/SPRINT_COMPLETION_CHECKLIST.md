@@ -40,7 +40,7 @@
 
 ---
 
-### Step 2: Update PROJECT_SNAPSHOT.md
+### Step 2: Update SNAPSHOT.md
 
 - [ ] Update "Last Updated" date at the top
 - [ ] Change phase status to ✅
@@ -98,14 +98,14 @@
 
 ```bash
 # Add all meta-files
-git add BACKLOG.md PROJECT_SNAPSHOT.md CLAUDE.md
+git add BACKLOG.md SNAPSHOT.md CLAUDE.md
 
 # Create commit with descriptive message
 git commit -m "docs: complete Phase X - sprint meta-files update
 
 Updated meta-files after completing Phase X (Auth Module):
 - BACKLOG.md: Marked tasks as completed, updated progress
-- PROJECT_SNAPSHOT.md: Updated status, date, next phase
+- SNAPSHOT.md: Updated status, date, next phase
 - CLAUDE.md: Updated current state section
 
 Phase X Progress: 100% (5/5 tasks)
@@ -123,7 +123,7 @@ Next Phase: Phase Y (Authorization)
 
 📋 Обновлены мета-файлы:
    - BACKLOG.md (задачи, прогресс: 100%)
-   - PROJECT_SNAPSHOT.md (статус, дата, следующие задачи)
+   - SNAPSHOT.md (статус, дата, следующие задачи)
    - CLAUDE.md (текущее состояние)
 
 📊 Прогресс: X/X задач выполнено
@@ -164,7 +164,7 @@ The `/finalize` command automates this checklist:
 
 **What it does:**
 - Checks BACKLOG.md for completed tasks
-- Prompts you to update PROJECT_SNAPSHOT.md
+- Prompts you to update SNAPSHOT.md
 - Reminds about CLAUDE.md update
 - Helps create git commit
 - Validates all files are updated
@@ -175,7 +175,7 @@ The `/finalize` command automates this checklist:
 
 ## 📖 Related Documents
 
-- **PROCESS.md** - Full process documentation (lines 78-110)
+- **CLAUDE.md** - Full process documentation (lines 78-110)
 - **WORKFLOW.md** - Sprint workflow details
 - **CLAUDE.md** - Context for AI agents (includes trigger)
 - **AGENTS.md** - Sprint Completion Protocol section
