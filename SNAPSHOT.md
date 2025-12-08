@@ -5,7 +5,7 @@
 ## Current State
 
 **Version:** 2.0.1
-**Status:** Dialog Export UI fixes applied
+**Status:** Privacy management and UI testing completed
 **Branch:** feat/framework-v2.0
 
 ## What's New in v2.0
@@ -61,6 +61,9 @@ claude-code-starter/
 - [x] Teacher UI — Force Sync working
 - [x] Student UI — template replacement fixed
 - [x] Path encoding — underscore/dash variations support
+- [x] Manual summaries — 6 dialogs (SUMMARY_SHORT/FULL format)
+- [x] CLI testing — list, export, init, watch verified
+- [x] Privacy management — Teacher UI → Student UI sync tested
 
 ## Next Phase
 
