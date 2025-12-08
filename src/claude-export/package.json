@@ -1,0 +1,54 @@
+{
+  "name": "claude-export",
+  "version": "2.3.0",
+  "description": "Export Claude Code dialogs to project's .dialog/ folder with Git visibility control",
+  "main": "dist/cli.js",
+  "bin": {
+    "claude-export": "./dist/cli.js"
+  },
+  "files": [
+    "dist",
+    "public",
+    "html-viewer"
+  ],
+  "scripts": {
+    "build": "tsc && npm run copy-assets",
+    "copy-assets": "npm run copy-public",
+    "copy-public": "cp -r public ../../dist/claude-export/",
+    "dev": "ts-node src/cli.ts",
+    "start": "node dist/cli.js",
+    "prepublishOnly": "npm run build",
+    "dialog:export": "node .claude-export/dist/cli.js export",
+    "dialog:ui": "node .claude-export/dist/cli.js ui",
+    "dialog:list": "node .claude-export/dist/cli.js list"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "keywords": [
+    "claude",
+    "claude-code",
+    "anthropic",
+    "export",
+    "dialog",
+    "conversation",
+    "history",
+    "markdown"
+  ],
+  "author": "",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": ""
+  },
+  "dependencies": {
+    "chokidar": "^3.5.3",
+    "express": "^4.18.2"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/node": "^20.10.5",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.3.3"
+  }
+}

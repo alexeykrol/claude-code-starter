@@ -238,3 +238,24 @@ test2/
 #
 # Documentation (public):
 #   - README.md, README_RU.md, CHANGELOG.md, etc.
+
+# Dialog export utility (compiled, needed for /ui and /watch commands)
+!.claude-export/dist/
+!Init/.claude-export/dist/
+
+# Archived historical files
+archive/
+
+# Node.js
+node_modules/
+
+# Build output (keep dist/claude-export for distribution)
+# dist/
+
+# TypeScript cache
+*.tsbuildinfo
+
+# Claude dialogs
+dialog/2025-12-07_session-df57cf3d.md
+dialog/2025-11-09_session-2339b90e.md
+dialog/2025-11-23_session-333311de.md
