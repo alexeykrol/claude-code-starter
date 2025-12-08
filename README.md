@@ -92,7 +92,7 @@ When working with Claude Code or other AI agents:
 The framework provides **14 ready-made documentation templates** that:
 - ✅ **Auto-load** into Claude Code context (via `CLAUDE.md`)
 - ✅ **Save tokens** through modular architecture
-- ✅ **Cold Start Protocol v1.4.0** - 85% token savings (5x cheaper!) on session reloads
+- ✅ **Cold Start Protocol** — 85% token savings (5x cheaper!) on session reloads
 - ✅ **PROJECT_SNAPSHOT.md** - instant project state overview
 - ✅ **Modular focus** - loads only current module
 - ✅ **Single source of truth** for AI and team
