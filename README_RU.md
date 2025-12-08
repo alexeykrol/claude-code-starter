@@ -479,8 +479,8 @@ MIT License - используйте свободно в своих проект
 
 Если что-то непонятно:
 1. Прочитайте `CLAUDE.md` - протоколы Cold Start и Completion
-2. Изучите `ARCHITECTURE.md` - структура кода и дизайн
-3. Посмотрите `SNAPSHOT.md` - текущее состояние проекта
+2. Изучите `.claude/ARCHITECTURE.md` - структура кода и дизайн
+3. Посмотрите `.claude/SNAPSHOT.md` - текущее состояние проекта
 4. Откройте [Issue](https://github.com/alexeykrol/claude-code-starter/issues)
 
 ---

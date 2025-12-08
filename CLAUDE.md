@@ -22,7 +22,7 @@ cat .claude/.last_session
 - If `"status": "active"` → Previous session crashed:
   1. `git status` — check uncommitted changes
   2. `npm run dialog:export` — export missed dialogs
-  3. Read `SNAPSHOT.md` for context
+  3. Read `.claude/SNAPSHOT.md` for context
   4. Ask: "Continue or commit first?"
 - If `"status": "clean"` → OK, continue to Step 1
 
@@ -32,11 +32,11 @@ echo '{"status": "active", "timestamp": "'$(date -Iseconds)'"}' > .claude/.last_
 ```
 
 ### Step 2: Load Context
-Read `SNAPSHOT.md` — current version, what's in progress
+Read `.claude/SNAPSHOT.md` — current version, what's in progress
 
 ### Step 3: Context (on demand)
-- `BACKLOG.md` — tasks
-- `ARCHITECTURE.md` — code structure
+- `.claude/BACKLOG.md` — tasks
+- `.claude/ARCHITECTURE.md` — code structure
 
 ### Step 4: Confirm
 ```
@@ -55,11 +55,11 @@ npm run build
 ```
 
 ### 2. Update Metafiles
-- `BACKLOG.md` — mark completed tasks `[x]`
-- `SNAPSHOT.md` — update version and status
+- `.claude/BACKLOG.md` — mark completed tasks `[x]`
+- `.claude/SNAPSHOT.md` — update version and status
 - `CHANGELOG.md` — add entry (if release)
 - `README.md` + `README_RU.md` — update if major features added
-- `ARCHITECTURE.md` — update if code structure changed
+- `.claude/ARCHITECTURE.md` — update if code structure changed
 
 ### 3. Export Dialogs
 ```bash
@@ -94,16 +94,18 @@ echo '{"status": "clean", "timestamp": "'$(date -Iseconds)'"}' > .claude/.last_s
 claude-code-starter/
 ├── src/claude-export/      # Source code (TypeScript)
 ├── dist/claude-export/     # Compiled JavaScript
-├── .claude/commands/       # 19 slash commands
+├── .claude/
+│   ├── commands/           # 19 slash commands
+│   ├── SNAPSHOT.md         # Current state
+│   ├── ARCHITECTURE.md     # Code structure
+│   └── BACKLOG.md          # Tasks
 ├── dialog/                 # Development dialogs
 │
 ├── package.json            # npm scripts
 ├── tsconfig.json           # TypeScript config
 ├── CLAUDE.md               # THIS FILE
-├── SNAPSHOT.md             # Current state
-├── ARCHITECTURE.md         # Code structure
-├── BACKLOG.md              # Tasks
 ├── CHANGELOG.md            # Version history
+├── README.md / README_RU.md
 └── init-project.sh         # Installer (for distribution)
 ```
 

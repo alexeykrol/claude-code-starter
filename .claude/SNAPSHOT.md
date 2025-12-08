@@ -4,8 +4,8 @@
 
 ## Current State
 
-**Version:** 2.0.2
-**Status:** Summary parsing simplified, marker system implemented
+**Version:** 2.0.3
+**Status:** AI metafiles moved to .claude/, documentation updated
 **Branch:** feat/framework-v2.0
 
 ## What's New in v2.0
@@ -37,17 +37,18 @@
 claude-code-starter/
 ├── src/claude-export/     ✅ Source code
 ├── dist/claude-export/    ✅ Compiled
-├── Init/                  ✅ User templates (RU)
-├── .claude/commands/      ✅ Framework commands
+├── .claude/
+│   ├── commands/          ✅ Framework commands
+│   ├── SNAPSHOT.md        ✅ This file
+│   ├── ARCHITECTURE.md    ✅ Code structure
+│   └── BACKLOG.md         ✅ Tasks
 ├── dialog/                ✅ Dev dialogs
 │
-├── package.json           ✅ NEW
-├── tsconfig.json          ✅ NEW
-├── ARCHITECTURE.md        ✅ NEW
-├── CLAUDE.md              ✅ Updated
-├── SNAPSHOT.md            ✅ This file
-├── BACKLOG.md             ✅ Updated for v2.0
-└── CHANGELOG.md           ✅
+├── package.json           ✅ npm scripts
+├── tsconfig.json          ✅ TypeScript config
+├── CLAUDE.md              ✅ AI protocols
+├── CHANGELOG.md           ✅ Version history
+└── README.md / README_RU.md
 ```
 
 ## Completed Tasks (Phase 1 & 2)
@@ -68,6 +69,9 @@ claude-code-starter/
 - [x] **Summary parsing** — simplified from 37 to 17 lines (-54% code)
 - [x] **Marker system** — SUMMARY: PENDING/ACTIVE for generation tracking
 - [x] **UI auto-refresh** — 10-second interval for data updates
+- [x] **README updates** — both EN and RU versions updated for v2.0
+- [x] **File reorganization** — AI metafiles moved to .claude/
+- [x] **Completion Protocol** — enhanced to include README.md + README_RU.md
 
 ## Next Phase
 

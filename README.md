@@ -125,16 +125,18 @@ npm run dialog:list     # List all sessions
 claude-code-starter/
 ├── src/claude-export/      # TypeScript source code
 ├── dist/claude-export/     # Compiled JavaScript
-├── .claude/commands/       # 19 slash commands
+├── .claude/
+│   ├── commands/           # 19 slash commands
+│   ├── SNAPSHOT.md         # Current project state
+│   ├── ARCHITECTURE.md     # Code structure documentation
+│   └── BACKLOG.md          # Tasks and roadmap
 ├── dialog/                 # Exported development dialogs
 │
 ├── package.json            # npm scripts
 ├── tsconfig.json           # TypeScript config
 ├── CLAUDE.md               # AI agent protocols
-├── SNAPSHOT.md             # Current project state
-├── ARCHITECTURE.md         # Code structure documentation
-├── BACKLOG.md              # Tasks and roadmap
-└── CHANGELOG.md            # Version history
+├── CHANGELOG.md            # Version history
+└── README.md / README_RU.md
 ```
 
 ### Core Components
@@ -142,9 +144,9 @@ claude-code-starter/
 | Component | Purpose |
 |-----------|---------|
 | **CLAUDE.md** | Auto-loads in Claude Code — protocols and triggers |
-| **SNAPSHOT.md** | Current state for quick context loading |
-| **ARCHITECTURE.md** | Code structure and design decisions |
-| **BACKLOG.md** | Implementation phases and tasks |
+| **.claude/SNAPSHOT.md** | Current state for quick context loading |
+| **.claude/ARCHITECTURE.md** | Code structure and design decisions |
+| **.claude/BACKLOG.md** | Implementation phases and tasks |
 | **src/claude-export/** | Dialog export system source code |
 | **.claude/commands/** | 19 slash commands for automation |
 
@@ -373,12 +375,11 @@ Framework (this repo)
 │
 ├── AI Protocols
 │   ├── CLAUDE.md                   # Cold Start & Completion
-│   └── .claude/commands/           # 19 slash commands
-│
-└── Meta-documentation
-    ├── SNAPSHOT.md                 # Current state
-    ├── ARCHITECTURE.md             # Code structure
-    └── BACKLOG.md                  # Tasks and roadmap
+│   └── .claude/
+│       ├── commands/               # 19 slash commands
+│       ├── SNAPSHOT.md             # Current state
+│       ├── ARCHITECTURE.md         # Code structure
+│       └── BACKLOG.md              # Tasks and roadmap
 ```
 
 **Key principle:** Framework uses itself for development (dogfooding)
@@ -475,8 +476,8 @@ Framework inspired by:
 
 If something is unclear:
 1. Read `CLAUDE.md` - Cold Start and Completion protocols
-2. Study `ARCHITECTURE.md` - code structure and design
-3. Check `SNAPSHOT.md` - current project state
+2. Study `.claude/ARCHITECTURE.md` - code structure and design
+3. Check `.claude/SNAPSHOT.md` - current project state
 4. Open [Issue](https://github.com/alexeykrol/claude-code-starter/issues)
 
 ---

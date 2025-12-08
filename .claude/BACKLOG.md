@@ -70,6 +70,8 @@
 - [x] Export sync fix — текущий диалог обновляется при завершении спринта
 - [x] Summary parsing — simplified, marker-based (PENDING/ACTIVE)
 - [x] UI auto-refresh — 10-second data polling
+- [x] Documentation — README.md + README_RU.md updated for v2.0
+- [x] File organization — AI metafiles moved to .claude/
 
 ---
 
@@ -101,16 +103,18 @@
 claude-code-starter/
 ├── src/claude-export/     ✅ Исходный код
 ├── dist/claude-export/    ✅ Скомпилировано
-├── .claude/commands/      ✅ 19 slash commands
+├── .claude/
+│   ├── commands/          ✅ 19 slash commands
+│   ├── SNAPSHOT.md        ✅ Состояние проекта
+│   ├── ARCHITECTURE.md    ✅ Документация кода
+│   └── BACKLOG.md         ✅ Этот файл
 ├── dialog/                ✅ Экспорт диалогов
 │
 ├── package.json           ✅ npm scripts
 ├── tsconfig.json          ✅ TypeScript config
 ├── CLAUDE.md              ✅ Протоколы AI
-├── SNAPSHOT.md            ✅ Состояние проекта
-├── ARCHITECTURE.md        ✅ Документация кода
-├── BACKLOG.md             ✅ Этот файл
-└── CHANGELOG.md           ⏳ Обновить при релизе
+├── CHANGELOG.md           ⏳ Обновить при релизе
+└── README.md / README_RU.md
 ```
 
 ---
@@ -135,10 +139,10 @@ claude-code-starter/
 
 ## 🔗 Связанные документы
 
-- [SNAPSHOT.md](./SNAPSHOT.md) — текущее состояние
-- [ARCHITECTURE.md](./ARCHITECTURE.md) — структура кода
-- [CLAUDE.md](./CLAUDE.md) — протоколы AI
-- [CHANGELOG.md](./CHANGELOG.md) — полная история
+- [SNAPSHOT.md](./.claude/SNAPSHOT.md) — текущее состояние
+- [ARCHITECTURE.md](./.claude/ARCHITECTURE.md) — структура кода
+- [CLAUDE.md](../CLAUDE.md) — протоколы AI
+- [CHANGELOG.md](../CHANGELOG.md) — полная история
 
 ---
 
