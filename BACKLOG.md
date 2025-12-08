@@ -34,7 +34,7 @@
 
 ---
 
-## Phase 2: Protocol Verification 🔄
+## Phase 2: Protocol Verification ✅
 
 ### Cold Start Protocol:
 - [x] Step 0: Crash Recovery (check .last_session)
@@ -50,6 +50,16 @@
 - [x] Step 4: Git commit
 - [x] Step 5: Ask about push
 - [x] Step 6: Mark session clean
+
+### Dialog Export UI:
+- [x] Teacher UI (localhost:3333) — управление видимостью
+- [x] Force Sync — синхронизация текущей сессии
+- [x] Student UI (html-viewer/index.html) — статический просмотр
+
+### Fixes Applied:
+- [x] Template replacement order (Student UI) — DIALOGS_DATA last
+- [x] Path encoding variations (findClaudeProjectDir) — underscore/dash support
+- [x] Force Sync, Watcher, CLI Export — автоматически исправлены
 
 ---
 

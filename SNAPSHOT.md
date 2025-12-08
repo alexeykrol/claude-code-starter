@@ -4,8 +4,8 @@
 
 ## Current State
 
-**Version:** 2.0.0
-**Status:** Restructuring complete
+**Version:** 2.0.1
+**Status:** Dialog Export UI fixes applied
 **Branch:** feat/framework-v2.0
 
 ## What's New in v2.0
@@ -58,6 +58,9 @@ claude-code-starter/
 - [x] Verify Completion Protocol (/fi)
 - [x] Update BACKLOG.md for v2.0.0
 - [x] Remove distribution files (Init/, init_eng/, zip)
+- [x] Teacher UI — Force Sync working
+- [x] Student UI — template replacement fixed
+- [x] Path encoding — underscore/dash variations support
 
 ## Next Phase
 

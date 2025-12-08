@@ -31,17 +31,15 @@ import {
   setVisibility,
   isPublic
 } from './gitignore';
-import { SessionWatcher } from './watcher';
 
 let currentProjectPath: string = process.cwd();
-let watcher: SessionWatcher | null = null;
 
 const app: Application = express();
 
 app.use(express.json());
 
-// Serve static files
-app.use(express.static(path.join(__dirname, '..', 'src', 'public')));
+// Serve static files (public/ is copied to dist/claude-export/ during build)
+app.use(express.static(path.join(__dirname, 'public')));
 
 // API: Get current project info
 app.get('/api/project', (req: Request, res: Response) => {
@@ -442,7 +440,7 @@ app.get('/api/search', (req: Request, res: Response) => {
 
 // Serve index.html for all other routes
 app.get('*', (req: Request, res: Response) => {
-  res.sendFile(path.join(__dirname, '..', 'src', 'public', 'index.html'));
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
 export function startServer(port: number = 3333, projectPath?: string, outputDir?: string): void {
@@ -454,14 +452,10 @@ export function startServer(port: number = 3333, projectPath?: string, outputDir
   const outputPath = outputDir ? path.resolve(outputDir) : currentProjectPath;
   const dialogFolder = getDialogFolder(outputPath);
 
-  // Start watcher for automatic export (with optional outputDir)
-  watcher = new SessionWatcher(currentProjectPath, { outputDir });
-  watcher.start();
-
   app.listen(port, () => {
     console.log('');
     console.log('═'.repeat(60));
-    console.log('  Claude Export UI + Auto-Watch');
+    console.log('  Claude Export UI');
     console.log('═'.repeat(60));
     console.log(`  URL:      http://localhost:${port}`);
     console.log(`  Source:   ${currentProjectPath}`);
@@ -469,7 +463,6 @@ export function startServer(port: number = 3333, projectPath?: string, outputDir
       console.log(`  Output:   ${outputPath}`);
     }
     console.log(`  Dialogs:  ${dialogFolder}`);
-    console.log(`  Watch:    Active (auto-export enabled)`);
     console.log('═'.repeat(60));
     console.log('');
     console.log('Press Ctrl+C to stop');
@@ -489,10 +482,7 @@ export function startServer(port: number = 3333, projectPath?: string, outputDir
 
   // Graceful shutdown
   process.on('SIGINT', () => {
-    console.log('\nStopping watcher...');
-    if (watcher) {
-      watcher.stop();
-    }
+    console.log('\nStopping server...');
     process.exit(0);
   });
 }

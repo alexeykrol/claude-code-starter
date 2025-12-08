@@ -172,6 +172,18 @@ export function findClaudeProjectDir(realProjectPath: string): string | null {
     return '-' + withoutLeading;
   }
 
+  // Try with underscore → dash conversion (Claude may convert underscores)
+  const withDashes = normalized.replace(/_/g, '-');
+  if (withDashes !== normalized && fs.existsSync(path.join(PROJECTS_DIR, withDashes))) {
+    return withDashes;
+  }
+
+  // Try with dash → underscore conversion
+  const withUnderscores = normalized.replace(/-([^\/])/g, '_$1');
+  if (withUnderscores !== normalized && fs.existsSync(path.join(PROJECTS_DIR, withUnderscores))) {
+    return withUnderscores;
+  }
+
   // Search for matching directory
   if (!fs.existsSync(PROJECTS_DIR)) {
     return null;
@@ -832,12 +844,16 @@ export function generateStaticHtml(targetProjectPath: string): string {
   const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
   const dateTimeStr = `${dateStr}, ${timeStr}`;
 
-  template = template.replace('__DIALOGS_DATA__', JSON.stringify(dialogsData));
+  // Replace simple placeholders first, before embedding dialog content
+  // (dialog content may mention these placeholders in conversation)
   template = template.replace('__PROJECT_INFO__', JSON.stringify(projectInfo));
   template = template.replace('__VERSION__', 'v2.3.0');
   template = template.replace('__DATE__', dateStr);
   template = template.replace('__DATETIME__', dateTimeStr);
   template = template.replace('__PROJECT_NAME__', projectName);
+
+  // Replace dialog data last (may contain placeholder strings in content)
+  template = template.replace('__DIALOGS_DATA__', JSON.stringify(dialogsData));
 
   // Write output
   fs.writeFileSync(outputPath, template);
