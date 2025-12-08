@@ -7,6 +7,44 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.1.0] - 2025-12-07
+
+### Added
+- **Migration system** — Complete system for installing framework into new and existing projects
+  - **migration/** directory with installation infrastructure
+  - **init-project.sh** — Main installation script (500+ lines)
+    - Detects project type (new/legacy)
+    - Detects old framework versions
+    - Creates backup → commits to git (safety first!)
+    - Analyzes legacy projects (structure, tech stack, TODOs)
+    - Generates meta files with project-specific data
+    - Updates README with framework link
+    - Creates migration report
+  - **build-distribution.sh** — Distribution package builder
+    - Packages framework files into distributable .tar.gz
+    - Generates SHA256 checksum
+    - Ready for GitHub releases
+  - **Meta file templates** (SNAPSHOT, BACKLOG, ARCHITECTURE)
+    - Variable substitution ({{PROJECT_NAME}}, {{TECH_STACK}}, etc.)
+    - Separate templates for new vs legacy projects
+  - **MIGRATION_GUIDE.md** — User-facing installation guide
+  - **FRAMEWORK_GUIDE.template.md** — Usage guide for projects
+  - **migration/README.md** — Developer documentation
+
+### Changed
+- Framework now fully self-contained in `migration/` for distribution
+- Meta files can be auto-generated from project analysis
+- Installation now requires git (for safety commits)
+
+### Architecture
+- New directory: `migration/` — Distribution and installation system
+  - `templates/` — Meta file templates
+  - `scripts/` — Helper scripts (future)
+  - Installation and build scripts
+  - User and developer documentation
+
+---
+
 ## [2.0.5] - 2025-12-07
 
 ### Fixed
