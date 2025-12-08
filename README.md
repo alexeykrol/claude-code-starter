@@ -1,6 +1,6 @@
-# Claude Code Starter (test) + test2 + t3
+# Claude Code Starter
 
-Ready-to-use meta-documentation framework for structured AI-assisted development with Claude Code.
+Meta-framework for structured AI-assisted development with Claude Code — now with code layer!
 
 > **⚠️ Important Note:**
 > This framework is designed for **beginners practicing vibe-coding**, not professional developers. It covers a tiny fraction of AI coding agents' capabilities and will evolve and be modified as practical experience accumulates.
@@ -10,18 +10,27 @@ Ready-to-use meta-documentation framework for structured AI-assisted development
 > - For complete beginners: [Free AI Intro Course](https://alexeykrol.com/courses/ai_intro/) (Russian)
 
 [![GitHub](https://img.shields.io/badge/GitHub-claude--code--starter-blue)](https://github.com/alexeykrol/claude-code-starter)
-[![Version](https://img.shields.io/badge/version-1.4.2-orange.svg)](https://github.com/alexeykrol/claude-code-starter)
+[![Version](https://img.shields.io/badge/version-2.0.2-orange.svg)](https://github.com/alexeykrol/claude-code-starter)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
 ---
 
 > **🇷🇺 Русская версия:** [README_RU.md](README_RU.md)
->
-> **📁 Шаблоны доступны на двух языках:**
-> - `Init/` — русские шаблоны (Russian templates)
-> - `init_eng/` — английские шаблоны (English templates)
 
 📋 **[Full version history →](CHANGELOG.md)**
+
+---
+
+## 🆕 What's New in v2.0
+
+**Framework is now a full meta-layer over Claude Code!**
+
+- ✅ **TypeScript codebase** (`src/`, `dist/`) with npm project structure
+- ✅ **Dialog export system** — export conversations to markdown
+- ✅ **Web UI** (localhost:3333) — manage dialog visibility and privacy
+- ✅ **Crash recovery** — automatic session state tracking
+- ✅ **Completion Protocol** (`/fi`) — build, export, commit, push automation
+- ✅ **Simplified architecture** — cleaner, more maintainable structure
 
 ---
 
@@ -68,69 +77,76 @@ The framework provides **14 ready-made documentation templates** that:
 - ✅ **Standardized processes** via Makefile
 
 
-## 🚀 Installation
+## 🚀 Quick Start
 
-1. **Download files** from [Releases](https://github.com/alexeykrol/claude-code-starter/releases):
-   - `init-starter.zip` (Russian) or `init-starter-en.zip` (English)
-   - `init-project.sh`
+### Clone the repository:
+```bash
+git clone https://github.com/alexeykrol/claude-code-starter.git
+cd claude-code-starter
+```
 
-2. **Copy both files** to your project folder
+### Install dependencies:
+```bash
+npm install
+```
 
-3. **Run installation** (open terminal in your project folder):
-   ```bash
-   bash init-project.sh
-   ```
+### Build the project:
+```bash
+npm run build
+```
 
-4. **Launch Claude Code:**
-   ```bash
-   claude
-   ```
+### Launch Claude Code:
+```bash
+claude
+```
 
-5. **Exit and restart** (to load slash commands):
-   ```bash
-   exit
-   claude
-   ```
+### Start working:
+```
+start
+```
 
-6. **Start the framework:**
-   ```
-   start
-   ```
+**Done!** The framework is ready to use.
 
-**Done!** AI will analyze your project and guide you through next steps.
+### Available Commands
 
-
-**For projects with existing documentation:** Full migration guide in `init_eng/MIGRATION.md`
+```bash
+npm run build           # Compile TypeScript
+npm run dialog:export   # Export dialogs to markdown
+npm run dialog:ui       # Launch Web UI (localhost:3333)
+npm run dialog:watch    # Auto-export watcher
+npm run dialog:list     # List all sessions
+```
 
 ---
 
-## 📦 What's in init_eng/
+## 📦 Framework Structure
 
-### Main Documentation Files
+```
+claude-code-starter/
+├── src/claude-export/      # TypeScript source code
+├── dist/claude-export/     # Compiled JavaScript
+├── .claude/commands/       # 19 slash commands
+├── dialog/                 # Exported development dialogs
+│
+├── package.json            # npm scripts
+├── tsconfig.json           # TypeScript config
+├── CLAUDE.md               # AI agent protocols
+├── SNAPSHOT.md             # Current project state
+├── ARCHITECTURE.md         # Code structure documentation
+├── BACKLOG.md              # Tasks and roadmap
+└── CHANGELOG.md            # Version history
+```
 
-| File | Purpose | ✅ FOR WHAT | ❌ NOT FOR WHAT |
-|------|---------|------------|----------------|
-| **CLAUDE.md** | 🤖 Auto-loads in Claude Code | Navigation, quick links to other docs | ❌ Duplicating detailed rules |
-| **PROJECT_INTAKE.md** | ⭐ START HERE - project requirements | User Personas, User Flows, requirements | ❌ Implementation tasks, code details |
-| **SECURITY.md** | 🔐 Security best practices | Security rules, guidelines, checklists | ❌ Project-specific patterns (→ AGENTS.md) |
-| **ARCHITECTURE.md** | 🏗️ WHY of architectural decisions | Technology choices, design principles, module structure | ❌ Operational checklists, current tasks |
-| **BACKLOG.md** | 📋 Detailed plan + status | Implementation phases with checklists, task status, roadmap | ❌ WHY explanations (→ ARCHITECTURE.md) |
-| **PROJECT_SNAPSHOT.md** | 📸 Project snapshot | Current phase, progress (%), module status - for Cold Start | ❌ Detailed tasks (→ BACKLOG.md) |
-| **PROCESS.md** | 🔄 Reminders to update meta-files | Checklist for AI after each phase | ❌ Development processes (→ WORKFLOW.md) |
-| **DEVELOPMENT_PLAN_TEMPLATE.md** | 📐 Planning methodology | HOW to plan modular development | ❌ Specific project plan (→ BACKLOG.md) |
-| **AGENTS.md** | 🎯 Project-specific AI patterns | Patterns unique to THIS project | ❌ Universal rules (→ SECURITY.md, WORKFLOW.md) |
-| **WORKFLOW.md** | 🔄 Development processes | Sprint workflows, git processes, commit templates | ❌ Project-specific patterns |
-| **PLAN_TEMPLATE.md** | 📝 Planning template | Use as template for feature planning | Use as-is, fill when needed |
-| **README-TEMPLATE.md** | 📖 README template for project | Fill and rename to README.md | Keep as template until ready |
+### Core Components
 
-### Automation
-
-| File/Folder | Purpose |
-|------------|---------|
-| **Makefile** | Standardized commands (`make dev`, `make build`, etc) |
-| **.claude/commands/** | Slash commands: `/commit`, `/pr`, `/migrate`, `/security`, etc |
-| **.claude/settings.json** | Access permissions for Claude Code |
-| **.env.example** | Environment variables template |
+| Component | Purpose |
+|-----------|---------|
+| **CLAUDE.md** | Auto-loads in Claude Code — protocols and triggers |
+| **SNAPSHOT.md** | Current state for quick context loading |
+| **ARCHITECTURE.md** | Code structure and design decisions |
+| **BACKLOG.md** | Implementation phases and tasks |
+| **src/claude-export/** | Dialog export system source code |
+| **.claude/commands/** | 19 slash commands for automation |
 
 #### ⚡ How Slash Commands Work
 
@@ -344,32 +360,28 @@ Read more in `Init/ARCHITECTURE.md` (section "Module Architecture")
 
 ---
 
-## 📊 Project Structure with Framework
+## 📊 Framework Architecture
 
-After copying templates, your project will look like this:
+The framework follows a **meta-layer** approach:
 
 ```
-your-project/
-├── .claude/
-│   ├── commands/           # Slash commands (/commit, /pr, etc)
-│   └── settings.json       # Claude Code access permissions
+Framework (this repo)
+├── Core System
+│   ├── src/claude-export/          # Dialog export engine
+│   ├── dist/claude-export/         # Compiled code
+│   └── package.json                # npm scripts
 │
-├── src/                    # Your code
-│   ├── features/           # Feature modules
-│   ├── lib/               # Utilities and services
-│   └── ...
+├── AI Protocols
+│   ├── CLAUDE.md                   # Cold Start & Completion
+│   └── .claude/commands/           # 19 slash commands
 │
-├── CLAUDE.md              # 🤖 Auto-loads in Claude Code
-├── PROJECT_INTAKE.md      # ⭐ Project requirements
-├── SECURITY.md            # 🔐 Security rules
-├── ARCHITECTURE.md        # 🏗️ Architectural decisions
-├── BACKLOG.md            # 📋 Implementation status
-├── AGENTS.md             # 🎯 AI instructions
-├── WORKFLOW.md           # 🔄 Development processes
-├── Makefile              # 🛠️ Standard commands
-├── .env.example          # 🔒 Variables template
-└── README.md             # 📖 Project documentation (from README-TEMPLATE.md)
+└── Meta-documentation
+    ├── SNAPSHOT.md                 # Current state
+    ├── ARCHITECTURE.md             # Code structure
+    └── BACKLOG.md                  # Tasks and roadmap
 ```
+
+**Key principle:** Framework uses itself for development (dogfooding)
 
 ---
 
@@ -437,32 +449,35 @@ Framework inspired by:
 
 ## ⭐ Roadmap
 
-### v1.0 (Current)
-- ✅ Basic documentation templates
-- ✅ Slash commands for git and security
-- ✅ Makefile for standardization
-- ✅ Modular architecture
+### v2.0.2 (Current)
+- ✅ TypeScript codebase with npm project structure
+- ✅ Dialog export system (CLI, Web UI, auto-watch)
+- ✅ Crash recovery and completion protocols
+- ✅ Summary parsing with marker system
+- ✅ Privacy management (Teacher/Student UI)
+- ✅ Simplified architecture
 
-### v1.1 (Planned)
-- [ ] Examples for Next.js
-- [ ] Examples for Vue 3
-- [x] English version
-- [ ] Video tutorials
+### v2.1 (In Progress)
+- [ ] Auto-generate summaries for PENDING dialogs
+- [ ] Enhanced Web UI with filtering and search
+- [ ] Export to multiple formats (PDF, HTML)
+- [ ] Migration tools for legacy projects
 
-### v2.0 (Future)
-- [ ] CLI for automatic initialization
-- [ ] Integration with popular templates
-- [ ] VS Code plugins
-- [ ] AI-powered code review templates
+### v3.0 (Future)
+- [ ] VS Code extension
+- [ ] Multi-project workspace support
+- [ ] Team collaboration features
+- [ ] AI-powered insights from dialog history
 
 ---
 
 ## 💬 Questions?
 
 If something is unclear:
-1. Read `Init/PROJECT_INTAKE.md` - detailed comments there
-2. Study `Init/CLAUDE.md` - Quick Start there
-3. Open [Issue](https://github.com/alexeykrol/claude-code-starter/issues)
+1. Read `CLAUDE.md` - Cold Start and Completion protocols
+2. Study `ARCHITECTURE.md` - code structure and design
+3. Check `SNAPSHOT.md` - current project state
+4. Open [Issue](https://github.com/alexeykrol/claude-code-starter/issues)
 
 ---
 
