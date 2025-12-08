@@ -6,13 +6,23 @@ description: Sprint/Phase completion protocol
 
 Execute the Completion Protocol from `CLAUDE.md`:
 
-1. `npm run build` (or `make build`) — verify build passes
-2. Update versions if needed (grep for version strings)
-3. Update metafiles:
-   - `BACKLOG.md` — mark completed tasks `[x]`, update progress
-   - `SNAPSHOT.md` — update date, phase status
-   - `CHANGELOG.md` — add entry
+1. `npm run build` — verify build passes
+2. Update metafiles:
+   - `BACKLOG.md` — mark completed tasks `[x]`
+   - `SNAPSHOT.md` — update date and status
+   - `CHANGELOG.md` — add entry (if release)
    - `ARCHITECTURE.md` — if architecture changed
-4. `git add -A && git commit`
+3. Export dialogs:
+   ```bash
+   npm run dialog:export
+   ```
+4. Git commit:
+   ```bash
+   git add -A && git status
+   git commit -m "type: description"
+   ```
 5. Ask: "Push to remote?"
-6. Mark session as clean: `echo '{"status": "clean"}' > .claude/.last_session`
+6. Mark session clean:
+   ```bash
+   echo '{"status": "clean", "timestamp": "'$(date -Iseconds)'"}' > .claude/.last_session
+   ```

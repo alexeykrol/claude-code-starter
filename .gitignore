@@ -242,3 +242,23 @@ test2/
 # Dialog export utility (compiled, needed for /ui and /watch commands)
 !.claude-export/dist/
 !Init/.claude-export/dist/
+
+# Claude dialogs
+dialog/2025-12-05_session-5706c1e6.md
+dialog/2025-12-05_session-d56fe9ef.md
+dialog/2025-12-05_session-ee3fd728.md
+dialog/2025-12-05_session-c57618da.md
+dialog/2025-12-05_session-cb0e649c.md
+dialog/2025-12-05_session-cf37c95f.md
+dialog/2025-12-06_session-a1fda585.md
+# Archived historical files
+archive/
+
+# Node.js
+node_modules/
+
+# Build output (keep dist/claude-export for distribution)
+# dist/
+
+# TypeScript cache
+*.tsbuildinfo

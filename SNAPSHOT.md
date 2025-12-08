@@ -4,63 +4,84 @@
 
 ## Current State
 
-**Version:** 2.0.0 (Released: 2025-12-07)
-**Status:** PR #28 ready for merge
+**Version:** 2.0.0
+**Status:** Restructuring complete
 **Branch:** feat/framework-v2.0
 
 ## What's New in v2.0
 
-| Change | Result |
-|--------|--------|
-| CLAUDE.md + PROCESS.md | → single CLAUDE.md (427→221 lines, -48%) |
-| PROJECT_SNAPSHOT.md | → SNAPSHOT.md (shorter name) |
-| Crash Recovery | .claude/.last_session status tracking |
-| Dialog Export | .claude-export/ utility integrated |
-| /fi command | Completion Protocol trigger |
-| npm scripts | Auto-injection of dialog:* commands |
+### Structural Changes
+| Before | After |
+|--------|-------|
+| Docs only | Docs + Code |
+| `.claude-export/` (hidden) | `src/claude-export/` (visible) |
+| No package.json | Full npm project |
+| No ARCHITECTURE.md | Documented code structure |
 
-## Key Files Changed
+### New Files
+- `package.json` — npm scripts and dependencies
+- `tsconfig.json` — TypeScript configuration
+- `ARCHITECTURE.md` — code documentation
+- `src/claude-export/` — source code
+
+### Removed
+- `init_eng/` — will be regenerated
+- `init-starter.zip` — will be regenerated
+- `init-starter-en.zip` — will be regenerated
+- `dev/`, `test/`, `t2.md` — temporary files
+- Historical files → `archive/`
+
+## Current Structure
 
 ```
-Init/
-├── CLAUDE.md           ✅ Rewritten (v2.0 format)
-├── SNAPSHOT.md         ✅ Renamed from PROJECT_SNAPSHOT.md
-├── PROCESS.md          ❌ Deleted (merged into CLAUDE.md)
-├── .claude/
-│   ├── commands/fi.md  ✅ New (completion protocol)
-│   └── .last_session   ✅ New (crash recovery)
-└── .claude-export/     ✅ New (dialog export utility)
-
-init-project.sh         ✅ Updated to v2.0.0
-init-starter.zip        ✅ Regenerated (316KB)
+claude-code-starter/
+├── src/claude-export/     ✅ Source code
+├── dist/claude-export/    ✅ Compiled
+├── Init/                  ✅ User templates (RU)
+├── .claude/commands/      ✅ Framework commands
+├── dialog/                ✅ Dev dialogs
+│
+├── package.json           ✅ NEW
+├── tsconfig.json          ✅ NEW
+├── ARCHITECTURE.md        ✅ NEW
+├── CLAUDE.md              ✅ Updated
+├── SNAPSHOT.md            ✅ This file
+├── BACKLOG.md             ✅ Updated for v2.0
+└── CHANGELOG.md           ✅
 ```
 
-## Pending Tasks
+## Completed Tasks (Phase 1 & 2)
 
-- [ ] Merge PR #28 to main
-- [ ] Sync init_eng/ (English version)
-- [ ] Update README.md / README_RU.md
-- [ ] Regenerate init-starter-en.zip
+- [x] Restructure to src/, dist/, package.json
+- [x] Update CLAUDE.md with full protocols
+- [x] Verify Cold Start Protocol
+- [x] Verify Completion Protocol (/fi)
+- [x] Update BACKLOG.md for v2.0.0
+- [x] Remove distribution files (Init/, init_eng/, zip)
 
-## Protocols
+## Next Phase
 
-### Cold Start
-1. Check `.claude/.last_session` for crash recovery
-2. Read `SNAPSHOT.md` for current state
-3. Read `BACKLOG.md` for tasks (on demand)
+- [ ] Create new Init/ templates for v2.0
+- [ ] init-project.sh — installation script
+- [ ] README.md / README_RU.md documentation
 
-### Completion (triggers: "finish", "done", "заверши")
-1. Build project
-2. Update metafiles (BACKLOG.md, SNAPSHOT.md, CHANGELOG.md)
-3. Git commit
-4. Ask about push
-5. Mark session clean
+## npm Commands
 
-## Links
+```bash
+npm install              # Install dependencies
+npm run build            # Compile TypeScript
+npm run dialog:export    # Export dialogs
+npm run dialog:ui        # Web UI :3333
+npm run dialog:watch     # Auto-export
+```
 
-- **PR #28:** https://github.com/alexeykrol/claude-code-starter/pull/28
-- **Repository:** https://github.com/alexeykrol/claude-code-starter
+## Key Concept
+
+Framework is now a **meta-layer over Claude Code** that:
+1. Adds structured protocols (Cold Start, Completion)
+2. Provides crash recovery
+3. Enables dialog export
+4. Standardizes documentation
 
 ---
-
-*This file is the quick-start context for AI sessions*
+*Quick-start context for AI sessions*

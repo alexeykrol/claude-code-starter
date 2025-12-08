@@ -1,51 +1,74 @@
 # CLAUDE.md — AI Agent Instructions
 
 **Framework:** Claude Code Starter v2.0
-**Purpose:** Meta-documentation framework for AI-assisted development
+**Type:** Meta-framework extending Claude Code capabilities
 
 ## Triggers
 
 **"start", "начать":**
-→ Execute Cold Start Protocol (section below)
+→ Execute Cold Start Protocol
 
 **"заверши", "завершить", "finish", "done":**
-→ Execute Completion Protocol (section below)
+→ Execute Completion Protocol
+
+---
 
 ## Cold Start Protocol
 
-### Step 1: Quick Status
-Read `SNAPSHOT.md` — current version, what's in progress, pending tasks
+### Step 0: Crash Recovery
+```bash
+cat .claude/.last_session
+```
+- If `"status": "active"` → Previous session crashed:
+  1. `git status` — check uncommitted changes
+  2. `npm run dialog:export` — export missed dialogs
+  3. Read `SNAPSHOT.md` for context
+  4. Ask: "Continue or commit first?"
+- If `"status": "clean"` → OK, continue to Step 1
 
-### Step 2: Context (on demand)
-- `BACKLOG.md` — detailed tasks
-- `FUTURE_IMPROVEMENTS.md` — roadmap
-- `Init/CLAUDE.md` — template for users (reference)
+### Step 1: Mark Session Active
+```bash
+echo '{"status": "active", "timestamp": "'$(date -Iseconds)'"}' > .claude/.last_session
+```
 
-### Step 3: Confirm
+### Step 2: Load Context
+Read `SNAPSHOT.md` — current version, what's in progress
+
+### Step 3: Context (on demand)
+- `BACKLOG.md` — tasks
+- `ARCHITECTURE.md` — code structure
+
+### Step 4: Confirm
 ```
 Context loaded. Directory: [pwd]
-Framework: v2.0 (PR #28 pending / merged)
-Ready to work! What's the task?
+Framework: Claude Code Starter v2.0
+Ready to work!
 ```
+
+---
 
 ## Completion Protocol
 
-Execute on trigger words. Steps:
+### 1. Build (if code changed)
+```bash
+npm run build
+```
 
-### 1. Update Metafiles
-- `BACKLOG.md` — mark completed tasks `[x]`
-- `SNAPSHOT.md` — update date, status
+### 2. Update Metafiles
+- `BACKLOG.md` — mark completed `[x]`
+- `SNAPSHOT.md` — update status
 - `CHANGELOG.md` — add entry (if release)
 
-### 2. Git Commit
+### 3. Export Dialogs
 ```bash
-git add -A
-git status
+npm run dialog:export
+```
+
+### 4. Git Commit
+```bash
+git add -A && git status
 git commit -m "$(cat <<'EOF'
 type: Brief description
-
-- Detail 1
-- Detail 2
 
 🤖 Generated with [Claude Code](https://claude.com/claude-code)
 
@@ -54,98 +77,64 @@ EOF
 )"
 ```
 
-Commit types: `feat:`, `fix:`, `docs:`, `refactor:`, `chore:`
+### 5. Ask About Push
 
-### 3. Ask About Push
+### 6. Mark Session Clean
+```bash
+echo '{"status": "clean", "timestamp": "'$(date -Iseconds)'"}' > .claude/.last_session
 ```
-Commit created. Push to remote?
-```
+
+---
 
 ## Repository Structure
 
 ```
-Project_init/
-├── Init/                   # Russian templates (v2.0)
-│   ├── CLAUDE.md          # AI instructions template
-│   ├── SNAPSHOT.md        # Project state template
-│   ├── .claude/commands/  # 18 slash commands
-│   └── .claude-export/    # Dialog export utility (NEW!)
+claude-code-starter/
+├── src/claude-export/      # Source code (TypeScript)
+├── dist/claude-export/     # Compiled JavaScript
+├── .claude/commands/       # 19 slash commands
+├── dialog/                 # Development dialogs
 │
-├── init_eng/              # English templates (sync pending)
-│
-├── init-project.sh        # Installer v2.0.0
-├── init-starter.zip       # Russian archive (316KB)
-├── init-starter-en.zip    # English archive (sync pending)
-│
-├── CLAUDE.md              # THIS FILE (framework context)
-├── SNAPSHOT.md            # Current state (v2.0)
-├── BACKLOG.md             # Tasks
-├── CHANGELOG.md           # Version history
-└── README.md / README_RU.md
+├── package.json            # npm scripts
+├── tsconfig.json           # TypeScript config
+├── CLAUDE.md               # THIS FILE
+├── SNAPSHOT.md             # Current state
+├── ARCHITECTURE.md         # Code structure
+├── BACKLOG.md              # Tasks
+├── CHANGELOG.md            # Version history
+└── init-project.sh         # Installer (for distribution)
 ```
 
-## Development Workflow
+## npm Scripts
 
-### Making Changes to Templates
-1. Edit files in `Init/` (Russian version)
-2. Sync to `init_eng/` (English version)
-3. Update CHANGELOG.md
-4. Regenerate ZIP archives
-5. Use `/release` for version bumps
-
-### Testing Installation
 ```bash
-# Test in temp directory
-mkdir /tmp/test-project && cd /tmp/test-project
-cp /path/to/init-starter.zip .
-cp /path/to/init-project.sh .
-bash init-project.sh
+npm run build           # Compile TypeScript
+npm run dialog:export   # Export dialogs to dialog/
+npm run dialog:ui       # Web UI on :3333
+npm run dialog:watch    # Auto-export watcher
+npm run dialog:list     # List sessions
 ```
-
-## Key Concepts (v2.0)
-
-### Simplified Structure
-- CLAUDE.md + PROCESS.md → single CLAUDE.md (-48% lines)
-- PROJECT_SNAPSHOT.md → SNAPSHOT.md (shorter name)
-- Clear trigger words for protocols
-
-### New Features
-- Crash recovery via `.last_session`
-- Dialog export utility integrated
-- `/fi` completion command
-- npm scripts auto-injection
-
-### Principles
-- **Single Source of Truth** — one place per concept
-- **Token Economy** — minimal context loading
-- **Security by Default** — see SECURITY.md
 
 ## Slash Commands
 
-Framework-specific:
-- `/release` — create new release
-- `/commit` — create git commit
-- `/pr` — create pull request
+**Core:** `/fi`, `/commit`, `/pr`, `/release`
+**Dev:** `/fix`, `/feature`, `/review`, `/test`, `/security`
+**Quality:** `/explain`, `/refactor`, `/optimize`
+**Migration:** `/migrate`, `/migrate-resolve`, `/migrate-finalize`, `/migrate-rollback`
 
-Template commands (in Init/.claude/commands/):
-- `/fix`, `/feature`, `/review`, `/test`
-- `/security`, `/explain`, `/refactor`, `/optimize`
-- `/migrate`, `/migrate-resolve`, `/migrate-finalize`
-- `/fi` — completion protocol (NEW!)
+## Key Principles
+
+1. **Framework as AI Extension** — not just docs, but functionality
+2. **Privacy by Default** — dialogs private in .gitignore
+3. **Local Processing** — no external APIs
+4. **Token Economy** — minimal context loading
 
 ## Warnings
 
-- DO NOT change version manually — use `/release`
-- DO NOT modify Init/ without syncing init_eng/
-- DO NOT commit without updating CHANGELOG.md
-- ALWAYS read SNAPSHOT.md before starting work
-- ALWAYS sync both language versions
-
-## Links
-
-- **Repository:** https://github.com/alexeykrol/claude-code-starter
-- **PR #28:** https://github.com/alexeykrol/claude-code-starter/pull/28
-- **Courses:** https://alexeykrol.com/courses/
+- DO NOT skip Crash Recovery check
+- DO NOT forget `npm run build` after code changes
+- DO NOT commit without updating metafiles
+- ALWAYS mark session clean at completion
 
 ---
 *Framework: Claude Code Starter v2.0 | Updated: 2025-12-07*
