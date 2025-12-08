@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.0.1] - 2025-12-07
+
+### Fixed
+- **Dialog export sync bug** — `runExport()` now calls `syncCurrentSession()` to update current active session during Completion Protocol
+  - Previously: `npm run dialog:export` only exported new sessions, skipping already-exported current session
+  - Now: Current session is always synced, ensuring latest messages appear in UI after `/fi` completion
+  - Files changed: `src/claude-export/cli.ts` (added import and call to syncCurrentSession)
+
+---
+
 ## [2.0.0] - 2025-12-07
 
 ### 🚀 Major Release: Framework Restructuring

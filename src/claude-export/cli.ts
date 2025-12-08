@@ -21,7 +21,8 @@ import {
   PROJECTS_DIR,
   generateStaticHtml,
   hasSummary,
-  getCurrentSessionId
+  getCurrentSessionId,
+  syncCurrentSession
 } from './exporter';
 import { getDialogFolder, ensureDialogFolder, addToGitignore, getDialogFiles } from './gitignore';
 
@@ -141,6 +142,18 @@ async function runExport(projectPath: string): Promise<void> {
     console.log('All sessions already exported.');
   } else {
     console.log(`Exported ${newExports.length} new sessions to ${dialogFolder}`);
+  }
+
+  // Sync current active session (update if already exported)
+  console.log('\nSyncing current active session...');
+  const syncResult = syncCurrentSession(projectPath);
+
+  if (syncResult) {
+    if (syncResult.added > 0) {
+      console.log(`Updated current session: +${syncResult.added} message(s)`);
+    } else {
+      console.log('Current session already up-to-date');
+    }
   }
 
   // Generate summaries for exported dialogs (except current session)

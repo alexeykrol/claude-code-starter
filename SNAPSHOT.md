@@ -5,7 +5,7 @@
 ## Current State
 
 **Version:** 2.0.1
-**Status:** Privacy management and UI testing completed
+**Status:** Dialog export sync bug fixed, all protocols verified
 **Branch:** feat/framework-v2.0
 
 ## What's New in v2.0
@@ -64,6 +64,7 @@ claude-code-starter/
 - [x] Manual summaries — 6 dialogs (SUMMARY_SHORT/FULL format)
 - [x] CLI testing — list, export, init, watch verified
 - [x] Privacy management — Teacher UI → Student UI sync tested
+- [x] **Dialog export sync bug** — fixed runExport to call syncCurrentSession
 
 ## Next Phase
 

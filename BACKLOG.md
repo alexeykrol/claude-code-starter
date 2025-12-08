@@ -60,12 +60,14 @@
 - [x] Template replacement order (Student UI) — DIALOGS_DATA last
 - [x] Path encoding variations (findClaudeProjectDir) — underscore/dash support
 - [x] Force Sync, Watcher, CLI Export — автоматически исправлены
+- [x] **Dialog export sync bug** — runExport не вызывал syncCurrentSession (2025-12-07)
 
 ### Testing Completed:
 - [x] Manual summaries — 6 dialogs (SUMMARY_SHORT/FULL)
 - [x] CLI commands — list, export, init, watch
 - [x] Privacy management — .gitignore → Student UI sync
 - [x] Recovery — directory deletion incident resolved
+- [x] Export sync fix — текущий диалог обновляется при завершении спринта
 
 ---
 
