@@ -84,9 +84,9 @@ claude-code-starter/
 
 ## Next Phase
 
-- [ ] Create new Init/ templates for v2.0
-- [ ] init-project.sh — installation script
-- [ ] README.md / README_RU.md documentation
+- [ ] Test migration system on real legacy projects
+- [ ] Create additional templates as needed
+- [ ] Gather user feedback on installation process
 
 ## npm Commands
 
