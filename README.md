@@ -45,7 +45,7 @@ Meta-framework for structured AI-assisted development with Claude Code — now w
 - ✅ **Auto-installation** — detects new vs legacy projects, backs up old versions
 - ✅ **Project analysis** — auto-generates meta files from project structure
 - ✅ **Safe migration** — automatic backup + git commits for rollback
-- ✅ **Distribution builder** — creates .tar.gz packages for releases
+- ✅ **Distribution package** — `starter.zip` (60KB) ready for download
 - ✅ **Student UI sync fix** — html-viewer updates on Cold Start Protocol
 
 ### v2.0 Features
@@ -92,13 +92,13 @@ When working with Claude Code or other AI agents:
 The framework provides **14 ready-made documentation templates** that:
 - ✅ **Auto-load** into Claude Code context (via `CLAUDE.md`)
 - ✅ **Save tokens** through modular architecture
-- ✅ **Cold Start Protocol v1.4.0** - 85% token savings (5x cheaper!) on session reloads
+- ✅ **Cold Start Protocol** — 85% token savings (5x cheaper!) on session reloads
 - ✅ **PROJECT_SNAPSHOT.md** - instant project state overview
 - ✅ **Modular focus** - loads only current module
 - ✅ **Single source of truth** for AI and team
 - ✅ **Built-in security** (SECURITY.md)
 - ✅ **Slash commands** for automation (/commit, /pr, /migrate, etc.)
-- ✅ **Standardized processes** via Makefile
+- ✅ **Standardized processes** — npm scripts for all operations
 
 
 ## 🚀 Quick Start (for framework development)
@@ -322,7 +322,7 @@ Each module:
 - Can be **tested separately**
 - **Doesn't depend** on other modules
 
-Read more in `Init/ARCHITECTURE.md` (section "Module Architecture")
+Read more in `.claude/ARCHITECTURE.md` (section "Module Architecture")
 
 ---
 
@@ -332,7 +332,7 @@ Read more in `Init/ARCHITECTURE.md` (section "Module Architecture")
 
 1. **Launch** `claude` in project root
 2. **CLAUDE.md auto-loads** into context
-3. **Ask AI to read PROJECT_INTAKE.md** and ask questions
+3. **Ask AI to read SNAPSHOT.md** for current project state
 4. **Work modularly**: one module → testing → next module
 
 ### Maintenance and Evolution
@@ -345,20 +345,6 @@ Read more in `Init/ARCHITECTURE.md` (section "Module Architecture")
 ---
 
 ## 💡 Best Practices
-
-### For PROJECT_INTAKE.md
-
-✅ **DO:**
-- Start with "**WHY?**" - problem → solution → value
-- Create 2-3 User Personas with names and pain points
-- Describe User Flows step-by-step (not abstractions!)
-- Separate features into **unique** (build) vs **standard** (integrate ready-made)
-- Plan modular structure
-
-❌ **DON'T:**
-- Leave [FILL IN] without filling
-- Write abstractly without specifics
-- Plan to build standard features from scratch (Auth, Payments, etc)
 
 ### For working with Claude Code
 
@@ -421,7 +407,7 @@ The framework is alive and evolving. To get updates:
 git pull origin main
 
 # Compare changes and update your projects manually
-diff Init/CLAUDE.md your-project/CLAUDE.md
+diff CLAUDE.md your-project/CLAUDE.md
 ```
 
 **Recommendation:** Don't overwrite your filled files - copy only new sections.

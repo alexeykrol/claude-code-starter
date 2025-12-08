@@ -50,7 +50,7 @@ git log <last-release-commit>..HEAD --oneline
 - Какие файлы изменены?
 - Новые фичи или багфиксы?
 - Breaking changes?
-- Изменения в шаблонах (Init/, init_eng/)?
+- Изменения в шаблонах (migration/templates/)?
 
 ### Шаг 3: Определить тип релиза
 
@@ -148,7 +148,7 @@ CURRENT_VERSION="1.2.5"
 
 - [Новая фича 1]
   - Описание
-  - Файлы: Init/file.md, init_eng/file.md
+  - Файлы: migration/templates/file.template.md
 - [Новая фича 2]
 
 ### Fixed
@@ -172,8 +172,7 @@ CURRENT_VERSION="1.2.5"
 ### Files Modified
 
 **Templates:**
-- Init/FILE.md (+X lines)
-- init_eng/FILE.md (+X lines)
+- migration/templates/FILE.template.md (+X lines)
 
 **Documentation:**
 - README.md
