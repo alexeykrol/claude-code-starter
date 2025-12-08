@@ -37,20 +37,22 @@ Usage:
   claude-export <command> [project-path] [options]
 
 Commands:
-  init [path]     Initialize claude-export for a project (first-time setup)
-  watch [path]    Start background watcher that auto-exports new sessions
-  ui [path]       Start web UI for browsing and managing dialogs
-  export [path]   Export all sessions once and exit
-  list [path]     List all available sessions for the project
-  help            Show this help message
+  init [path]         Initialize claude-export for a project (first-time setup)
+  watch [path]        Start background watcher that auto-exports new sessions
+  ui [path]           Start web UI for browsing and managing dialogs
+  export [path]       Export all sessions once and exit
+  generate-html [path] Generate static HTML viewer for students
+  list [path]         List all available sessions for the project
+  help                Show this help message
 
 Arguments:
-  [path]          Path to target project (default: current directory)
+  [path]              Path to target project (default: current directory)
 
 Options:
-  --port <number>    Port for UI server (default: 3333)
-  --output <path>    Export to different directory (keep session source)
-  --verbose, -v      Enable verbose logging for watcher
+  --port <number>     Port for UI server (default: 3333)
+  --output <path>     Export to different directory (keep session source)
+  --verbose, -v       Enable verbose logging for watcher
+  --no-html           Skip HTML viewer generation during export
 
 Examples:
   claude-export init                     # Initialize current project
@@ -131,7 +133,7 @@ function showList(projectPath: string): void {
   console.log(`\nTotal: ${sessions.length} sessions, ${dialogs.length} exported`);
 }
 
-async function runExport(projectPath: string): Promise<void> {
+async function runExport(projectPath: string, options: { noHtml?: boolean } = {}): Promise<void> {
   console.log(`\nProject: ${projectPath}`);
   console.log('Exporting sessions...\n');
 
@@ -176,16 +178,32 @@ async function runExport(projectPath: string): Promise<void> {
     }
   }
 
-  // Generate static HTML viewer
-  try {
-    const htmlPath = generateStaticHtml(projectPath);
-    console.log(`Generated: ${htmlPath}`);
-  } catch (err) {
-    console.error(`Warning: Could not generate HTML viewer: ${err}`);
+  // Generate static HTML viewer (unless --no-html flag is set)
+  if (!options.noHtml) {
+    try {
+      const htmlPath = generateStaticHtml(projectPath);
+      console.log(`Generated: ${htmlPath}`);
+    } catch (err) {
+      console.error(`Warning: Could not generate HTML viewer: ${err}`);
+    }
   }
 
   console.log('\nNote: New dialogs are added to .gitignore by default (private)');
   console.log('Use "npm run dialog:ui" to manage visibility.');
+}
+
+async function runGenerateHtml(projectPath: string): Promise<void> {
+  console.log(`\nProject: ${projectPath}`);
+  console.log('Generating static HTML viewer...\n');
+
+  try {
+    const htmlPath = generateStaticHtml(projectPath);
+    console.log(`Generated: ${htmlPath}`);
+    console.log('\nHTML viewer updated with all closed sessions.');
+  } catch (err) {
+    console.error(`Error: Could not generate HTML viewer: ${err}`);
+    process.exit(1);
+  }
 }
 
 async function runInit(projectPath: string): Promise<void> {
@@ -280,6 +298,8 @@ async function main(): Promise<void> {
       i++;
     } else if (args[i] === '--verbose' || args[i] === '-v') {
       options.verbose = true;
+    } else if (args[i] === '--no-html') {
+      options.noHtml = true;
     } else if (!args[i].startsWith('-')) {
       filteredArgs.push(args[i]);
     }
@@ -310,7 +330,12 @@ async function main(): Promise<void> {
 
     case 'export':
     case 'e':
-      await runExport(projectPath);
+      await runExport(projectPath, { noHtml: options.noHtml as boolean });
+      break;
+
+    case 'generate-html':
+    case 'html':
+      await runGenerateHtml(projectPath);
       break;
 
     case 'list':

@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.0.5] - 2025-12-07
+
+### Fixed
+- **Student UI sync** — `html-viewer/index.html` now updates on Cold Start Protocol (Step 0.5) instead of Completion Protocol
+  - **Problem:** html-viewer was generated during Completion Protocol when current session is still active, so the last closed session was missing from student UI
+  - **Solution:** Moved HTML generation to Cold Start Protocol Step 0.5 (after session becomes closed)
+  - **Implementation:**
+    - Added `--no-html` flag to `export` command
+    - Added new `generate-html` command for separate HTML generation
+    - Updated CLAUDE.md protocols:
+      - Completion Protocol Step 3: `npm run dialog:export --no-html`
+      - Cold Start Protocol Step 0.5: `node dist/claude-export/cli.js generate-html` + auto-commit
+  - Files changed: `src/claude-export/cli.ts`, `CLAUDE.md`
+  - Result: Students now see complete dialog history including the most recent closed session
+
+---
+
 ## [2.0.1] - 2025-12-07
 
 ### Fixed
