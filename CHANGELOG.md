@@ -7,7 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [2.1.0] - 2025-12-07
+## [2.1.0] - 2025-12-08
+
+### Fixed
+- **Complete project audit** — Removed all outdated references after migration system simplification
+  - Removed obsolete migration commands (migrate.md, migrate-resolve.md, migrate-finalize.md, migrate-rollback.md) — **−2,134 lines**
+  - Fixed 86+ Init/ directory references → migration/templates/ or .claude/
+  - Removed PROJECT_INTAKE.md references (file archived in v2.0)
+  - Fixed Makefile → npm scripts/package.json
+  - Fixed tar.gz → starter.zip distribution format
+  - Removed Cold Start Protocol v1.4.0 version (no separate versioning)
+  - Updated CLAUDE.md footer: v2.0 → v2.1.0
+
+### Changed
+- README.md and README_RU.md now reference actual file locations
+- .claude/ARCHITECTURE.md updated with migration/ structure
+- Section renamed: "Что входит в Init/" → "Файлы фреймворка"
+- Workflow now references SNAPSHOT.md instead of PROJECT_INTAKE.md
+
+### Migration System Release (2025-12-07)
+
+## ~~[2.1.0]~~ - 2025-12-07 (superseded by 2025-12-08)
 
 ### Added
 - **Migration system** — Complete system for installing framework into new and existing projects
