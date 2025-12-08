@@ -21,6 +21,22 @@ Meta-framework for structured AI-assisted development with Claude Code — now w
 
 ---
 
+## 🎯 Want to Use This Framework in YOUR Project?
+
+**Installation is simple!** Download `starter.zip` and run the installer:
+
+👉 **[Installation Guide →](migration/MIGRATION_GUIDE.md)**
+
+**What you get:**
+- ✅ Auto-install with project detection (new or legacy)
+- ✅ Safe migration with automatic backup
+- ✅ Ready-made templates for your project
+- ✅ 85% token savings on every Claude session
+
+**Takes 5 minutes.** Works with any project.
+
+---
+
 ## 🆕 What's New in v2.1
 
 **Complete migration system for framework installation!**
@@ -43,8 +59,9 @@ Meta-framework for structured AI-assisted development with Claude Code — now w
 
 ## 📑 Table of Contents
 
+- [Want to Use This Framework in YOUR Project?](#-want-to-use-this-framework-in-your-project)
 - [The Problem & Solution](#the-problem--solution)
-- [Quick Start](#-quick-start)
+- [Quick Start (for framework development)](#-quick-start)
 - [Framework Structure](#-framework-structure)
 - [Token Economics & ROI](#-token-economics--roi)
 - [Cold Start Protocol](#-cold-start-protocol-token-optimization)
@@ -84,7 +101,9 @@ The framework provides **14 ready-made documentation templates** that:
 - ✅ **Standardized processes** via Makefile
 
 
-## 🚀 Quick Start
+## 🚀 Quick Start (for framework development)
+
+**Note:** This section is for developers who want to contribute to the framework itself. If you want to use the framework in your project, see [Installation Guide](migration/MIGRATION_GUIDE.md) above.
 
 ### Clone the repository:
 ```bash
