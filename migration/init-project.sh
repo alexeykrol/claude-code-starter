@@ -1,7 +1,7 @@
 #!/bin/bash
 #
 # Claude Code Starter Framework — Installation Script
-# Version: 2.0.5
+# Version: 2.1.0
 #
 # This script installs the framework into new or existing projects.
 # It handles both clean installations and migrations from old versions.
@@ -9,7 +9,7 @@
 
 set -e  # Exit on error
 
-VERSION="2.0.5"
+VERSION="2.1.0"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_DIR="$(pwd)"
 
