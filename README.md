@@ -407,7 +407,7 @@ The framework is alive and evolving. To get updates:
 git pull origin main
 
 # Compare changes and update your projects manually
-diff Init/CLAUDE.md your-project/CLAUDE.md
+diff CLAUDE.md your-project/CLAUDE.md
 ```
 
 **Recommendation:** Don't overwrite your filled files - copy only new sections.
