@@ -4,8 +4,8 @@
 
 ## Current State
 
-**Version:** 2.0.3
-**Status:** AI metafiles moved to .claude/, documentation updated
+**Version:** 2.0.5
+**Status:** Student UI sync fixed - html-viewer updates on Cold Start
 **Branch:** feat/framework-v2.0
 
 ## What's New in v2.0
@@ -72,6 +72,10 @@ claude-code-starter/
 - [x] **README updates** — both EN and RU versions updated for v2.0
 - [x] **File reorganization** — AI metafiles moved to .claude/
 - [x] **Completion Protocol** — enhanced to include README.md + README_RU.md
+- [x] **Cold Start Protocol** — added Step 0.5 for closed session export
+- [x] **Student UI sync** — html-viewer now updates on Cold Start (not Completion)
+- [x] **CLI --no-html flag** — export without HTML generation
+- [x] **CLI generate-html command** — separate HTML generation for students
 
 ## Next Phase
 

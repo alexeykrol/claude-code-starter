@@ -21,10 +21,22 @@ cat .claude/.last_session
 ```
 - If `"status": "active"` → Previous session crashed:
   1. `git status` — check uncommitted changes
-  2. `npm run dialog:export` — export missed dialogs
+  2. `npm run dialog:export --no-html` — export missed dialogs
   3. Read `.claude/SNAPSHOT.md` for context
   4. Ask: "Continue or commit first?"
-- If `"status": "clean"` → OK, continue to Step 1
+- If `"status": "clean"` → OK, continue to Step 0.5
+
+### Step 0.5: Export Closed Sessions & Update Student UI
+```bash
+npm run dialog:export --no-html
+node dist/claude-export/cli.js generate-html
+git add html-viewer/index.html && git commit -m "chore: Update student UI with latest dialogs"
+```
+- Exports any closed sessions from previous work (without HTML generation)
+- Syncs current active session (if exists)
+- Generates html-viewer/index.html with ALL closed sessions (including last closed one)
+- Auto-commits student UI so students see complete dialog history
+- This ensures students see the most recent closed session
 
 ### Step 1: Mark Session Active
 ```bash
@@ -63,8 +75,11 @@ npm run build
 
 ### 3. Export Dialogs
 ```bash
-npm run dialog:export
+npm run dialog:export --no-html
 ```
+- Exports dialog sessions without generating html-viewer
+- Student UI (html-viewer) is NOT updated here (current session still active)
+- Student UI will be updated on next Cold Start (Step 0.5)
 
 ### 4. Git Commit
 ```bash
@@ -79,7 +94,18 @@ EOF
 )"
 ```
 
-### 5. Ask About Push
+### 5. Ask About Push & PR
+
+**Push:**
+- Ask user: "Push to remote?"
+- If yes: `git push`
+
+**Check PR status:**
+```bash
+git log origin/main..HEAD --oneline
+```
+- If **empty** → All merged, no PR needed
+- If **has commits** → Ask: "Create PR?"
 
 ### 6. Mark Session Clean
 ```bash
