@@ -7,6 +7,75 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.0.0] - 2025-12-07
+
+### 🚀 Major Release: Framework Restructuring
+
+**Goal:** Transform framework from documentation templates to a meta-layer over Claude Code with actual functionality.
+
+### Changed
+
+#### Framework Structure
+- **Added `src/claude-export/`** — TypeScript source code (5 modules: cli, exporter, server, watcher, gitignore)
+- **Added `dist/claude-export/`** — Compiled JavaScript output
+- **Added `package.json`** — npm project with scripts (build, dialog:export, dialog:ui, dialog:watch, dialog:list)
+- **Added `tsconfig.json`** — TypeScript configuration
+- **Added `ARCHITECTURE.md`** — Code structure documentation (170 lines)
+
+#### Core Protocols Enhanced
+- **CLAUDE.md** — Added complete Cold Start Protocol with Crash Recovery (Step 0)
+- **CLAUDE.md** — Added complete Completion Protocol with session marking
+- **Crash Recovery** — `.last_session` file tracks session state (active/clean)
+
+#### Documentation Updates
+- **SNAPSHOT.md** — Updated for v2.0.0 structure, removed outdated pending tasks
+- **BACKLOG.md** — Completely rewritten for v2.0.0, removed v1.x roadmap (495→126 lines)
+- **BACKLOG.md** — Added Phase 1-2 completion status, Phase 3-4 planning
+
+### Removed
+- **Init/** — Distribution templates (will be regenerated for v2.0)
+- **init_eng/** — English distribution (will be regenerated)
+- **init-starter.zip, init-starter-en.zip** — Distribution archives (will be regenerated)
+- **dev/, test/, html-viewer/, t2.md** — Temporary development files
+
+### Archived
+- **CONSISTENCY_AUDIT.md, DOCS_MAP.md, FUTURE_IMPROVEMENTS.md** → `archive/`
+- **MIGRATION_ANALYSIS.md, PROJECT_INTAKE.md, SPRINT_COMPLETION_CHECKLIST.md** → `archive/`
+
+### Technical Details
+
+**npm Commands:**
+```bash
+npm run build           # Compile TypeScript → dist/
+npm run dialog:export   # Export dialogs to .dialog/
+npm run dialog:ui       # Web UI on :3333
+npm run dialog:watch    # Auto-export watcher
+npm run dialog:list     # List sessions
+```
+
+**Cold Start Protocol:**
+1. Check `.last_session` for crash recovery
+2. Mark session active
+3. Load SNAPSHOT.md for quick context
+4. Load BACKLOG.md, ARCHITECTURE.md on demand
+
+**Completion Protocol:**
+1. `npm run build` verification
+2. Update metafiles (BACKLOG.md, SNAPSHOT.md, CHANGELOG.md)
+3. `npm run dialog:export`
+4. Git commit with co-author
+5. Ask about push
+6. Mark session clean in `.last_session`
+
+### Migration Notes
+
+This is a **breaking change** for existing installations:
+- Framework now contains code (src/, dist/) in addition to templates
+- New installation system will be created in Phase 3
+- Distribution packages will be regenerated with new structure
+
+---
+
 ## [1.4.3] - 2025-10-23
 
 ### 🚨 Sprint Completion Enforcement: AI Proactivity Improvements
