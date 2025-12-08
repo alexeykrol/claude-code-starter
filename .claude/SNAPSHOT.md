@@ -4,8 +4,8 @@
 
 ## Current State
 
-**Version:** 2.0.5
-**Status:** Student UI sync fixed - html-viewer updates on Cold Start
+**Version:** 2.1.0
+**Status:** Migration system complete - ready for distribution
 **Branch:** feat/framework-v2.0
 
 ## What's New in v2.0
@@ -76,6 +76,11 @@ claude-code-starter/
 - [x] **Student UI sync** — html-viewer now updates on Cold Start (not Completion)
 - [x] **CLI --no-html flag** — export without HTML generation
 - [x] **CLI generate-html command** — separate HTML generation for students
+- [x] **Migration system** — complete system for installing FW into projects
+- [x] **Meta file templates** — SNAPSHOT, BACKLOG, ARCHITECTURE templates
+- [x] **init-project.sh** — installation script with backup + commit safety
+- [x] **build-distribution.sh** — distribution package builder
+- [x] **Migration guides** — MIGRATION_GUIDE.md + FRAMEWORK_GUIDE.md
 
 ## Next Phase
 
