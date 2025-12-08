@@ -24,7 +24,15 @@ cat .claude/.last_session
   2. `npm run dialog:export` — export missed dialogs
   3. Read `.claude/SNAPSHOT.md` for context
   4. Ask: "Continue or commit first?"
-- If `"status": "clean"` → OK, continue to Step 1
+- If `"status": "clean"` → OK, continue to Step 0.5
+
+### Step 0.5: Export Closed Sessions
+```bash
+npm run dialog:export
+```
+- Exports any closed sessions from previous work
+- Syncs current active session (if exists)
+- This ensures new closed dialogs appear in UI immediately
 
 ### Step 1: Mark Session Active
 ```bash
