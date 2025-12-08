@@ -12,16 +12,18 @@
 
 import * as path from 'path';
 import * as fs from 'fs';
-import { startWatcher } from './watcher';
+import { startWatcher, requestSummary } from './watcher';
 import { startServer } from './server';
 import {
   getProjectSessions,
   exportNewSessions,
   getExportedDialogs,
   PROJECTS_DIR,
-  generateStaticHtml
+  generateStaticHtml,
+  hasSummary,
+  getCurrentSessionId
 } from './exporter';
-import { getDialogFolder, ensureDialogFolder, addToGitignore } from './gitignore';
+import { getDialogFolder, ensureDialogFolder, addToGitignore, getDialogFiles } from './gitignore';
 
 const VERSION = '2.3.0';
 
@@ -139,6 +141,26 @@ async function runExport(projectPath: string): Promise<void> {
     console.log('All sessions already exported.');
   } else {
     console.log(`Exported ${newExports.length} new sessions to ${dialogFolder}`);
+  }
+
+  // Generate summaries for exported dialogs (except current session)
+  const dialogFiles = getDialogFiles(projectPath);
+  const currentSessionId = getCurrentSessionId(projectPath);
+
+  const dialogsWithoutSummary = dialogFiles.filter(filePath => {
+    // Skip current session
+    if (currentSessionId && filePath.includes(currentSessionId.substring(0, 8))) {
+      return false;
+    }
+    // Check if has summary
+    return !hasSummary(filePath);
+  });
+
+  if (dialogsWithoutSummary.length > 0) {
+    console.log(`\nGenerating summaries for ${dialogsWithoutSummary.length} dialog(s)...`);
+    for (const filePath of dialogsWithoutSummary) {
+      requestSummary(filePath, false, true); // isFinal=true for completed sessions
+    }
   }
 
   // Generate static HTML viewer

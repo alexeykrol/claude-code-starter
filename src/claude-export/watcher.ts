@@ -44,7 +44,7 @@ const fileSizes = new Map<string, number>();
  * @param verbose - enable verbose logging
  * @param isFinal - true if this is a final summary for a closed dialog
  */
-function requestSummary(dialogPath: string, verbose: boolean = false, isFinal: boolean = false): void {
+export function requestSummary(dialogPath: string, verbose: boolean = false, isFinal: boolean = false): void {
   const log = (msg: string) => {
     const timestamp = new Date().toLocaleTimeString('ru-RU');
     console.log(`[${timestamp}] ${msg}`);

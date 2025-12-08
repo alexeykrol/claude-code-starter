@@ -13,9 +13,8 @@
   ],
   "scripts": {
     "build": "tsc && npm run copy-assets",
-    "copy-assets": "npm run copy-public && npm run copy-html-viewer",
+    "copy-assets": "npm run copy-public",
     "copy-public": "cp -r public ../../dist/claude-export/",
-    "copy-html-viewer": "cp -r ../../html-viewer ../../dist/",
     "dev": "ts-node src/cli.ts",
     "start": "node dist/cli.js",
     "prepublishOnly": "npm run build",

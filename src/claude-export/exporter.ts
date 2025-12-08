@@ -618,7 +618,12 @@ export function extractSummary(content: string): string | null {
  */
 export function hasSummary(filePath: string): boolean {
   const content = fs.readFileSync(filePath, 'utf-8');
-  return SUMMARY_PATTERN.test(content) || SUMMARIES_SECTION_PATTERN.test(content);
+  return (
+    SUMMARY_SHORT_PATTERN.test(content) ||
+    SUMMARY_FULL_PATTERN.test(content) ||
+    SUMMARY_PATTERN.test(content) ||
+    SUMMARIES_SECTION_PATTERN.test(content)
+  );
 }
 
 /**
@@ -655,6 +660,46 @@ export function getSummaryFull(filePath: string): string | null {
   }
   // Fallback to regular summary
   return extractSummary(content);
+}
+
+/**
+ * Get current session ID (from most recently modified Claude session)
+ * Returns null if no sessions exist
+ */
+export function getCurrentSessionId(projectPath: string): string | null {
+  const claudeProjectDir = findClaudeProjectDir(projectPath);
+
+  if (!claudeProjectDir) {
+    return null;
+  }
+
+  const sessionsPath = path.join(PROJECTS_DIR, claudeProjectDir);
+
+  if (!fs.existsSync(sessionsPath)) {
+    return null;
+  }
+
+  // Get all .jsonl session files (excluding agent sessions)
+  const sessionFiles = fs.readdirSync(sessionsPath)
+    .filter(f => f.endsWith('.jsonl') && !f.startsWith('agent-'))
+    .map(f => path.join(sessionsPath, f));
+
+  if (sessionFiles.length === 0) {
+    return null;
+  }
+
+  // Sort by modification time, newest first
+  sessionFiles.sort((a, b) => {
+    const statA = fs.statSync(a);
+    const statB = fs.statSync(b);
+    return statB.mtime.getTime() - statA.mtime.getTime();
+  });
+
+  // Most recently modified session is the current one
+  const currentSession = sessionFiles[0];
+  const filename = path.basename(currentSession, '.jsonl');
+
+  return filename; // Returns the full session ID
 }
 
 /**
@@ -752,21 +797,17 @@ export function getExportedDialogsWithSummaries(targetProjectPath: string): Arra
 
 /**
  * Get template path for static HTML viewer
+ * Always reads from project root html-viewer/template.html
  */
 function getTemplatePath(): string {
-  // First try relative to this file (for development)
-  const devPath = path.join(__dirname, '..', 'html-viewer', 'template.html');
-  if (fs.existsSync(devPath)) {
-    return devPath;
+  // Template is always in project root (not in dist/)
+  const templatePath = path.join(process.cwd(), 'html-viewer', 'template.html');
+
+  if (!fs.existsSync(templatePath)) {
+    throw new Error('Template not found. Make sure html-viewer/template.html exists in project root.');
   }
 
-  // Try from .claude-export installation
-  const installPath = path.join(process.cwd(), '.claude-export', 'html-viewer', 'template.html');
-  if (fs.existsSync(installPath)) {
-    return installPath;
-  }
-
-  throw new Error('Template not found. Make sure html-viewer/template.html exists.');
+  return templatePath;
 }
 
 /**
@@ -825,12 +866,15 @@ export function generateStaticHtml(targetProjectPath: string): string {
     return dateB - dateA;
   });
 
+  // Filter for public dialogs only (Student UI should only show public content)
+  const publicDialogs = dialogsData.filter(d => d.isPublic);
+
   // Project info
   const projectName = path.basename(targetProjectPath);
   const projectInfo = {
     name: projectName,
     path: targetProjectPath,
-    dialogCount: dialogsData.length,
+    dialogCount: publicDialogs.length,
     generatedAt: new Date().toISOString()
   };
 
@@ -853,7 +897,9 @@ export function generateStaticHtml(targetProjectPath: string): string {
   template = template.replace('__PROJECT_NAME__', projectName);
 
   // Replace dialog data last (may contain placeholder strings in content)
-  template = template.replace('__DIALOGS_DATA__', JSON.stringify(dialogsData));
+  // IMPORTANT: Escape </script> to prevent breaking out of script tag in HTML
+  const dialogsDataJson = JSON.stringify(publicDialogs).replace(/<\/script>/gi, '<\\/script>');
+  template = template.replace('__DIALOGS_DATA__', dialogsDataJson);
 
   // Write output
   fs.writeFileSync(outputPath, template);
