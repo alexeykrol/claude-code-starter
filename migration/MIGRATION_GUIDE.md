@@ -2,14 +2,15 @@
 
 ## Шаг 1: Скачайте фреймворк
 
-1. Откройте https://github.com/alexeykrol/claude-code-starter/releases
-2. Скачайте файл `starter.zip`
-3. Поместите `starter.zip` в корень вашего проекта
-4. Распакуйте архив (двойной клик на Mac/Windows или `unzip starter.zip`)
-5. Запустите VSCode (Visual Studio Code)
-6. Загрузите ваш проект в Explorer VSCode
-7. Откройте терминал (Terminal → New Terminal)
-8. Введите 
+1. Откройте https://github.com/alexeykrol/claude-code-starter/tree/main/migration
+2. Нажмите на файл `starter.zip`
+3. Нажмите кнопку "Download" (справа вверху)
+4. Поместите скачанный `starter.zip` в корень вашего проекта
+5. Распакуйте архив (двойной клик на Mac/Windows или `unzip starter.zip`)
+6. Запустите VSCode (Visual Studio Code)
+7. Загрузите ваш проект в Explorer VSCode
+8. Откройте терминал (Terminal → New Terminal)
+9. Введите 
 
 ```bash
 node --version
