@@ -79,7 +79,18 @@ EOF
 )"
 ```
 
-### 5. Ask About Push
+### 5. Ask About Push & PR
+
+**Push:**
+- Ask user: "Push to remote?"
+- If yes: `git push`
+
+**Check PR status:**
+```bash
+git log origin/main..HEAD --oneline
+```
+- If **empty** → All merged, no PR needed
+- If **has commits** → Ask: "Create PR?"
 
 ### 6. Mark Session Clean
 ```bash
