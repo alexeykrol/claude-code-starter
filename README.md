@@ -98,7 +98,7 @@ The framework provides **14 ready-made documentation templates** that:
 - ✅ **Single source of truth** for AI and team
 - ✅ **Built-in security** (SECURITY.md)
 - ✅ **Slash commands** for automation (/commit, /pr, /migrate, etc.)
-- ✅ **Standardized processes** via Makefile
+- ✅ **Standardized processes** — npm scripts for all operations
 
 
 ## 🚀 Quick Start (for framework development)
