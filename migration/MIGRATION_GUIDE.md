@@ -1,46 +1,39 @@
 # Установка Claude Code Starter Framework
 
-## Шаг 1: Скачайте фреймворк
+Один файл. Три команды. Готово.
 
-1. Скачайте `starter.zip` в корень вашего проекта
-2. Распакуйте архив (двойной клик на Mac/Windows или `unzip starter.zip`)
-3. Запустите VSCode (Visual Studio Code)
-4. Загрузите ваш проект в Explorer VSCode
-5. Откройте терминал (Terminal → New Terminal)
-6. Введите 
+---
+
+## Установка
+
+### Шаг 1: Скачайте установщик
 
 ```bash
-node --version
+curl -O https://raw.githubusercontent.com/alexeykrol/claude-code-starter/main/dist-release/init-project.sh
 ```
 
-**Если увидели версию** (например, `v20.0.0`) — переходите к **Шагу 2**.
+> **Альтернатива:** Скачайте файл вручную с [GitHub Releases](https://github.com/alexeykrol/claude-code-starter/releases)
 
-**Если увидели ошибку** — Node.js не установлен:
+### Шаг 2: Сделайте файл исполняемым
 
-1. Откройте https://nodejs.org/ в браузере
-2. Скачайте LTS версию для вашей системы (Windows/Mac/Linux)
-3. Установите Node.js (просто нажимайте "Далее"/"Next")
-4. Перезапустите VSCode
-5. Откройте терминал снова и повторите команду `node --version`
-6. Если всё ОК — переходите к **Шагу 2**. Если всё плохо — спросите у любого AI, приложите скриншот ошибки.
+```bash
+chmod +x init-project.sh
+```
 
-## Шаг 2: Установите фреймворк
-
-1. Введите команду 
+### Шаг 3: Запустите установку
 
 ```bash
 ./init-project.sh
 ```
 
-## Шаг 3: Готово!
+**Готово!** Фреймворк установлен.
 
-1. После установки и сообщения об успехе, введите в терминале команду:
-```bash
-claude
-```
+---
 
-2. Когда Claude загрузится, если он попросит подтвердить, доверяете ли вы этим файлам — введите `yes`
-3. Когда Claude загрузится, введите:
+## Запуск
+
+Откройте проект в Claude Code и введите:
+
 ```
 start
 ```
@@ -49,4 +42,51 @@ start
 
 ---
 
-**Что-то не работает?** https://github.com/alexeykrol/claude-code-starter/issues
+## Требования
+
+- **Git:** Проект должен быть git-репозиторием
+- **Node.js:** Версия 18+ (для dialog export функций)
+
+**Проверка Node.js:**
+```bash
+node --version
+```
+
+Если Node.js не установлен:
+1. Скачайте с https://nodejs.org/ (выбирайте LTS версию)
+2. Установите (просто нажимайте "Далее"/"Next")
+3. Перезапустите терминал
+
+---
+
+## Что делает установщик?
+
+✅ Распаковывает фреймворк из себя (self-extracting)
+✅ Устанавливает файлы в `.claude/`
+✅ Генерирует метафайлы (SNAPSHOT, BACKLOG, ARCHITECTURE)
+✅ Обновляет README.md и .gitignore
+✅ Создает git commit
+
+---
+
+## Миграция со старой версии
+
+Если у вас уже установлен фреймворк:
+
+✅ Автоматический бэкап в `.claude/.backup-YYYYMMDD-HHMMSS/`
+✅ Создается MIGRATION_REPORT.md с деталями
+✅ Откат через `git reset --hard HEAD~2`
+
+---
+
+## Проблемы?
+
+**"not a git repository"** → Выполните `git init && git add . && git commit -m "Initial commit"`
+**"command not found"** → Сделайте файл исполняемым: `chmod +x init-project.sh`
+**"node: command not found"** → Установите Node.js с https://nodejs.org/
+
+**Другие вопросы:** https://github.com/alexeykrol/claude-code-starter/issues
+
+---
+
+*Обновлено: 2025-12-08 | Версия: 2.1.0*
