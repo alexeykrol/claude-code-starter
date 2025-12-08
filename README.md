@@ -10,7 +10,7 @@ Meta-framework for structured AI-assisted development with Claude Code — now w
 > - For complete beginners: [Free AI Intro Course](https://alexeykrol.com/courses/ai_intro/) (Russian)
 
 [![GitHub](https://img.shields.io/badge/GitHub-claude--code--starter-blue)](https://github.com/alexeykrol/claude-code-starter)
-[![Version](https://img.shields.io/badge/version-2.0.2-orange.svg)](https://github.com/alexeykrol/claude-code-starter)
+[![Version](https://img.shields.io/badge/version-2.1.0-orange.svg)](https://github.com/alexeykrol/claude-code-starter)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
 ---
@@ -21,30 +21,37 @@ Meta-framework for structured AI-assisted development with Claude Code — now w
 
 ---
 
-## 🆕 What's New in v2.0
+## 🆕 What's New in v2.1
 
-**Framework is now a full meta-layer over Claude Code!**
+**Complete migration system for framework installation!**
 
+- ✅ **Migration system** (`migration/`) — install framework into any project
+- ✅ **Auto-installation** — detects new vs legacy projects, backs up old versions
+- ✅ **Project analysis** — auto-generates meta files from project structure
+- ✅ **Safe migration** — automatic backup + git commits for rollback
+- ✅ **Distribution builder** — creates .tar.gz packages for releases
+- ✅ **Student UI sync fix** — html-viewer updates on Cold Start Protocol
+
+### v2.0 Features
 - ✅ **TypeScript codebase** (`src/`, `dist/`) with npm project structure
 - ✅ **Dialog export system** — export conversations to markdown
 - ✅ **Web UI** (localhost:3333) — manage dialog visibility and privacy
 - ✅ **Crash recovery** — automatic session state tracking
 - ✅ **Completion Protocol** (`/fi`) — build, export, commit, push automation
-- ✅ **Simplified architecture** — cleaner, more maintainable structure
 
 ---
 
 ## 📑 Table of Contents
 
 - [The Problem & Solution](#the-problem--solution)
-- [Installation](#-installation)
-- [What's in init_eng/](#-whats-in-init_eng)
+- [Quick Start](#-quick-start)
+- [Framework Structure](#-framework-structure)
 - [Token Economics & ROI](#-token-economics--roi)
 - [Cold Start Protocol](#-cold-start-protocol-token-optimization)
 - [Philosophy: Modular Architecture](#-philosophy-modular-architecture)
 - [How to Work with the Framework](#-how-to-work-with-the-framework)
 - [Best Practices](#-best-practices)
-- [Project Structure](#-project-structure-with-framework)
+- [Framework Architecture](#-framework-architecture)
 - [Framework Updates](#-framework-updates)
 - [Contributing](#-contributing)
 - [Useful Links](#-useful-links)
