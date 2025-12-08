@@ -58,7 +58,7 @@ npm run build
 - `BACKLOG.md` — mark completed tasks `[x]`
 - `SNAPSHOT.md` — update version and status
 - `CHANGELOG.md` — add entry (if release)
-- `README.md` — update if major features added
+- `README.md` + `README_RU.md` — update if major features added
 - `ARCHITECTURE.md` — update if code structure changed
 
 ### 3. Export Dialogs
