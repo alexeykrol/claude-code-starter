@@ -45,7 +45,7 @@ Meta-framework for structured AI-assisted development with Claude Code — now w
 - ✅ **Auto-installation** — detects new vs legacy projects, backs up old versions
 - ✅ **Project analysis** — auto-generates meta files from project structure
 - ✅ **Safe migration** — automatic backup + git commits for rollback
-- ✅ **Distribution builder** — creates .tar.gz packages for releases
+- ✅ **Distribution package** — `starter.zip` (60KB) ready for download
 - ✅ **Student UI sync fix** — html-viewer updates on Cold Start Protocol
 
 ### v2.0 Features
