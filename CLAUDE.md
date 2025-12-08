@@ -55,9 +55,11 @@ npm run build
 ```
 
 ### 2. Update Metafiles
-- `BACKLOG.md` — mark completed `[x]`
-- `SNAPSHOT.md` — update status
+- `BACKLOG.md` — mark completed tasks `[x]`
+- `SNAPSHOT.md` — update version and status
 - `CHANGELOG.md` — add entry (if release)
+- `README.md` — update if major features added
+- `ARCHITECTURE.md` — update if code structure changed
 
 ### 3. Export Dialogs
 ```bash
