@@ -322,7 +322,7 @@ Each module:
 - Can be **tested separately**
 - **Doesn't depend** on other modules
 
-Read more in `Init/ARCHITECTURE.md` (section "Module Architecture")
+Read more in `.claude/ARCHITECTURE.md` (section "Module Architecture")
 
 ---
 
@@ -332,7 +332,7 @@ Read more in `Init/ARCHITECTURE.md` (section "Module Architecture")
 
 1. **Launch** `claude` in project root
 2. **CLAUDE.md auto-loads** into context
-3. **Ask AI to read PROJECT_INTAKE.md** and ask questions
+3. **Ask AI to read SNAPSHOT.md** for current project state
 4. **Work modularly**: one module → testing → next module
 
 ### Maintenance and Evolution
@@ -345,20 +345,6 @@ Read more in `Init/ARCHITECTURE.md` (section "Module Architecture")
 ---
 
 ## 💡 Best Practices
-
-### For PROJECT_INTAKE.md
-
-✅ **DO:**
-- Start with "**WHY?**" - problem → solution → value
-- Create 2-3 User Personas with names and pain points
-- Describe User Flows step-by-step (not abstractions!)
-- Separate features into **unique** (build) vs **standard** (integrate ready-made)
-- Plan modular structure
-
-❌ **DON'T:**
-- Leave [FILL IN] without filling
-- Write abstractly without specifics
-- Plan to build standard features from scratch (Auth, Payments, etc)
 
 ### For working with Claude Code
 

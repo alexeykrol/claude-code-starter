@@ -320,7 +320,7 @@ Claude загружает только нужный модуль (200 строк
 - Может быть **протестирован отдельно**
 - **Не зависит** от других модулей
 
-Подробнее читайте в `Init/ARCHITECTURE.md` (секция "Module Architecture")
+Подробнее читайте в `.claude/ARCHITECTURE.md` (секция "Module Architecture")
 
 ---
 
