@@ -68,6 +68,8 @@
 - [x] Privacy management — .gitignore → Student UI sync
 - [x] Recovery — directory deletion incident resolved
 - [x] Export sync fix — текущий диалог обновляется при завершении спринта
+- [x] Summary parsing — simplified, marker-based (PENDING/ACTIVE)
+- [x] UI auto-refresh — 10-second data polling
 
 ---
 

@@ -332,6 +332,12 @@ export function toMarkdown(messages: Message[], session: SessionInfo): string {
   // Author comment for parsing
   lines.push(`<!-- AUTHOR: ${author.name}${author.email ? ` <${author.email}>` : ''} -->`);
 
+  // Summary placeholder - will be filled by auto-generation later
+  // If file has SUMMARY: ACTIVE marker, it means summary was already generated
+  lines.push('<!-- SUMMARY: PENDING -->');
+  lines.push('<!-- SUMMARY_SHORT: Auto-generate this -->');
+  lines.push('<!-- SUMMARY_FULL: Auto-generate this -->');
+
   lines.push('');
   lines.push('# Claude Code Session');
   lines.push('');
@@ -594,18 +600,47 @@ const SUMMARY_FULL_PATTERN = /^<!-- SUMMARY_FULL: (.*?) -->$/m;
 const SUMMARIES_SECTION_PATTERN = /## Summaries\n+(?:- (.+)(?:\n|$))/;
 
 /**
- * Extract summary from dialog file content
- * Supports both <!-- SUMMARY: ... --> comment and ## Summaries section
+ * Extract header section from dialog file (everything before ## Dialog)
+ * Summary should ONLY be in this section (first ~100 lines max)
  */
-export function extractSummary(content: string): string | null {
-  // First try the comment format
-  const commentMatch = content.match(SUMMARY_PATTERN);
-  if (commentMatch) {
-    return commentMatch[1];
+function extractHeader(content: string): string {
+  const lines = content.split('\n');
+
+  // Find ## Dialog section
+  for (let i = 0; i < Math.min(lines.length, 100); i++) {
+    if (lines[i].trim() === '## Dialog') {
+      return lines.slice(0, i).join('\n');
+    }
   }
 
-  // Fallback to ## Summaries section (first bullet point)
-  const sectionMatch = content.match(SUMMARIES_SECTION_PATTERN);
+  // Fallback: first 100 lines
+  return lines.slice(0, 100).join('\n');
+}
+
+/**
+ * Extract SUMMARY comments from header only (first ~100 lines before ## Dialog)
+ * Simple and reliable - summary must be in metadata, not in dialog body
+ */
+function extractSummaryFromHeader(content: string, pattern: RegExp): string | null {
+  const header = extractHeader(content);
+  const match = header.match(pattern);
+  return match ? match[1] : null;
+}
+
+/**
+ * Extract summary from dialog file content
+ * Looks ONLY in header (before ## Dialog) - simple and reliable
+ */
+export function extractSummary(content: string): string | null {
+  // Try comment format in header
+  const commentSummary = extractSummaryFromHeader(content, SUMMARY_PATTERN);
+  if (commentSummary) {
+    return commentSummary;
+  }
+
+  // Fallback to ## Summaries section (first bullet point) in header
+  const header = extractHeader(content);
+  const sectionMatch = header.match(SUMMARIES_SECTION_PATTERN);
   if (sectionMatch) {
     return sectionMatch[1];
   }
@@ -614,15 +649,29 @@ export function extractSummary(content: string): string | null {
 }
 
 /**
- * Check if dialog file has a summary
+ * Check if dialog file has an ACTIVE summary (not PENDING)
+ * Returns false if summary is PENDING (needs generation)
  */
 export function hasSummary(filePath: string): boolean {
   const content = fs.readFileSync(filePath, 'utf-8');
+  const header = extractHeader(content);
+
+  // Check for ACTIVE marker (summary was generated)
+  if (header.includes('<!-- SUMMARY: ACTIVE -->')) {
+    return true;
+  }
+
+  // PENDING means summary needs to be generated
+  if (header.includes('<!-- SUMMARY: PENDING -->')) {
+    return false;
+  }
+
+  // Legacy check: if file has old-style summary comments or ## Summaries section
   return (
-    SUMMARY_SHORT_PATTERN.test(content) ||
-    SUMMARY_FULL_PATTERN.test(content) ||
-    SUMMARY_PATTERN.test(content) ||
-    SUMMARIES_SECTION_PATTERN.test(content)
+    SUMMARY_SHORT_PATTERN.test(header) ||
+    SUMMARY_FULL_PATTERN.test(header) ||
+    SUMMARY_PATTERN.test(header) ||
+    SUMMARIES_SECTION_PATTERN.test(header)
   );
 }
 
@@ -636,30 +685,22 @@ export function getSummary(filePath: string): string | null {
 
 /**
  * Get short summary from dialog file
- * Falls back to regular summary if SHORT not found
+ * Looks ONLY in header (first ~100 lines)
  */
 export function getSummaryShort(filePath: string): string | null {
   const content = fs.readFileSync(filePath, 'utf-8');
-  const shortMatch = content.match(SUMMARY_SHORT_PATTERN);
-  if (shortMatch) {
-    return shortMatch[1];
-  }
-  // Fallback to regular summary
-  return extractSummary(content);
+  const shortSummary = extractSummaryFromHeader(content, SUMMARY_SHORT_PATTERN);
+  return shortSummary || extractSummary(content);
 }
 
 /**
  * Get full summary from dialog file
- * Falls back to regular summary if FULL not found
+ * Looks ONLY in header (first ~100 lines)
  */
 export function getSummaryFull(filePath: string): string | null {
   const content = fs.readFileSync(filePath, 'utf-8');
-  const fullMatch = content.match(SUMMARY_FULL_PATTERN);
-  if (fullMatch) {
-    return fullMatch[1];
-  }
-  // Fallback to regular summary
-  return extractSummary(content);
+  const fullSummary = extractSummaryFromHeader(content, SUMMARY_FULL_PATTERN);
+  return fullSummary || extractSummary(content);
 }
 
 /**
@@ -761,12 +802,9 @@ export function getDialogWithSummary(filePath: string, projectPath: string): Dia
   const date = match ? match[1] : 'Unknown';
   const sessionId = match ? match[2] : filename;
 
-  // Extract both short and full summaries
-  const shortMatch = content.match(SUMMARY_SHORT_PATTERN);
-  const fullMatch = content.match(SUMMARY_FULL_PATTERN);
-
-  const summaryShort = shortMatch ? shortMatch[1] : extractSummary(content);
-  const summaryFull = fullMatch ? fullMatch[1] : extractSummary(content);
+  // Extract summaries from header only (simple and reliable)
+  const summaryShort = extractSummaryFromHeader(content, SUMMARY_SHORT_PATTERN) || extractSummary(content);
+  const summaryFull = extractSummaryFromHeader(content, SUMMARY_FULL_PATTERN) || extractSummary(content);
 
   return {
     filename,
@@ -836,11 +874,9 @@ export function generateStaticHtml(targetProjectPath: string): string {
     const date = match ? match[1] : 'Unknown';
     const sessionId = match ? match[2] : filename;
 
-    // Extract summaries
-    const shortMatch = content.match(SUMMARY_SHORT_PATTERN);
-    const fullMatch = content.match(SUMMARY_FULL_PATTERN);
-    const summaryShort = shortMatch ? shortMatch[1] : extractSummary(content);
-    const summaryFull = fullMatch ? fullMatch[1] : extractSummary(content);
+    // Extract summaries from header only
+    const summaryShort = extractSummaryFromHeader(content, SUMMARY_SHORT_PATTERN) || extractSummary(content);
+    const summaryFull = extractSummaryFromHeader(content, SUMMARY_FULL_PATTERN) || extractSummary(content);
 
     // Extract date/time from content
     const sessionDateTime = extractSessionDateTime(content);

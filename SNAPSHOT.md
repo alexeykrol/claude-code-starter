@@ -4,8 +4,8 @@
 
 ## Current State
 
-**Version:** 2.0.1
-**Status:** Dialog export sync bug fixed, all protocols verified
+**Version:** 2.0.2
+**Status:** Summary parsing simplified, marker system implemented
 **Branch:** feat/framework-v2.0
 
 ## What's New in v2.0
@@ -65,6 +65,9 @@ claude-code-starter/
 - [x] CLI testing — list, export, init, watch verified
 - [x] Privacy management — Teacher UI → Student UI sync tested
 - [x] **Dialog export sync bug** — fixed runExport to call syncCurrentSession
+- [x] **Summary parsing** — simplified from 37 to 17 lines (-54% code)
+- [x] **Marker system** — SUMMARY: PENDING/ACTIVE for generation tracking
+- [x] **UI auto-refresh** — 10-second interval for data updates
 
 ## Next Phase
 
