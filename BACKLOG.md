@@ -61,6 +61,12 @@
 - [x] Path encoding variations (findClaudeProjectDir) — underscore/dash support
 - [x] Force Sync, Watcher, CLI Export — автоматически исправлены
 
+### Testing Completed:
+- [x] Manual summaries — 6 dialogs (SUMMARY_SHORT/FULL)
+- [x] CLI commands — list, export, init, watch
+- [x] Privacy management — .gitignore → Student UI sync
+- [x] Recovery — directory deletion incident resolved
+
 ---
 
 ## Phase 3: Installation System ⏳
