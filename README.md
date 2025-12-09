@@ -517,25 +517,63 @@ Framework inspired by:
 
 ## ⭐ Roadmap
 
-### v2.0.2 (Current)
+> **Note:** Current sprint tasks tracked in [.claude/BACKLOG.md](.claude/BACKLOG.md)
+
+### v2.1.1 (Current - December 2025) ✅
 - ✅ TypeScript codebase with npm project structure
 - ✅ Dialog export system (CLI, Web UI, auto-watch)
 - ✅ Crash recovery and completion protocols
-- ✅ Summary parsing with marker system
 - ✅ Privacy management (Teacher/Student UI)
-- ✅ Simplified architecture
+- ✅ Token economy redesign (16.6x smaller installer)
+- 🔄 Legacy project migration support
+- 🔄 Framework distribution system
 
-### v2.1 (In Progress)
-- [ ] Auto-generate summaries for PENDING dialogs
-- [ ] Enhanced Web UI with filtering and search
-- [ ] Export to multiple formats (PDF, HTML)
-- [ ] Migration tools for legacy projects
+### v2.2 (Q1 2025) - User Experience
+**Focus:** Making framework adoption easier
 
-### v3.0 (Future)
-- [ ] VS Code extension
-- [ ] Multi-project workspace support
-- [ ] Team collaboration features
-- [ ] AI-powered insights from dialog history
+**Critical Enhancements:**
+- Post-Compact Hook - auto context restoration after compaction (#12)
+- Enhanced /finalize command with validation (#11)
+- Legacy project migration bug fixes (#3, #4, #7)
+
+**Migration UX Improvements:**
+- Interactive .migrationignore creation (#2)
+- Migration cost forecast (tokens + $) (#5)
+- Post-migration quick start guide (#6)
+- Health check after migration (#9)
+- Interactive post-migration checklist (#10)
+
+**Documentation:**
+- GitHub Issues format standardization (#8)
+- Cold Start Protocol clarifications (#41)
+
+### v2.3 (Q2 2025) - Developer Experience
+**Focus:** Better workflow for large projects
+
+- Sprint Focus Declaration - explicit scope in BACKLOG (#14)
+- Checkpoint Workflow - /rewind for sprint resume (#16)
+- Auto-generate summaries for PENDING dialogs
+- Enhanced Web UI with filtering and search
+- Export to multiple formats (PDF, HTML)
+
+### v3.0 (Future) - Modular Context Management
+**Focus:** Support for projects 100k+ lines of code
+
+**Core Features:**
+- Hierarchical CLAUDE.md - module-level context files (#13)
+- Module Templates - reusable templates for common patterns (#15)
+- Best Practices Guide - documentation for modular projects (#17)
+
+**Advanced Features:**
+- VS Code extension integration
+- Multi-project workspace support
+- Team collaboration features
+- AI-powered insights from dialog history
+
+**Problem it solves:**
+- Large projects overwhelm context window
+- AI wastes tokens on irrelevant code
+- No clear "resume point" after breaks
 
 ---
 
