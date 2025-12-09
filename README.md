@@ -21,18 +21,37 @@ Meta-framework for structured AI-assisted development with Claude Code — now w
 
 ## 🚀 For Users: Want to Use This Framework?
 
-**Installation is simple - one file, 5 minutes:**
+### Before Installation
 
-1. Download [`init-project.sh`](init-project.sh) to your project folder
-2. Run: `./init-project.sh`
-3. Done! Read `FRAMEWORK_GUIDE.md` in your project root
+**Install Node.js** (if not already installed):
+1. Download from https://nodejs.org/ (choose LTS version)
+2. Install (just click "Next"/"Continue")
+3. Restart your terminal
 
-👉 **[Detailed Installation Guide →](migration/INSTALLATION_GUIDE.md)**
+**Check if Node.js is installed:**
+```bash
+node --version
+```
 
-**What you get:**
-- ✅ 85% token savings on every Claude session
-- ✅ Auto-install with project detection
-- ✅ Safe migration with automatic backup
+### Installation Steps
+
+**1. Create your project folder** (if it doesn't exist yet)
+
+**2.** Find `init-project.sh` in the root of this repository, right-click it, choose "Save Link As..." and select your project folder
+
+**3. Open VSCode:**
+   - File → Open Folder
+   - Select your project folder (where `init-project.sh` is)
+
+**4. Open Terminal in VSCode:**
+   - Menu: Terminal → New Terminal
+
+**5. Run:**
+```bash
+./init-project.sh
+```
+
+**Done!** Read `FRAMEWORK_GUIDE.md` in your project root to learn how to use the framework.
 
 ---
 
@@ -46,13 +65,12 @@ Meta-framework for structured AI-assisted development with Claude Code — now w
 
 ## 📑 Table of Contents
 
-- [Want to Use This Framework in YOUR Project?](#-want-to-use-this-framework-in-your-project)
 - [The Problem & Solution](#the-problem--solution)
+- [How It Works](#-how-it-works)
 - [Quick Start (for framework development)](#-quick-start)
 - [Framework Structure](#-framework-structure)
 - [Token Economics & ROI](#-token-economics--roi)
 - [Cold Start Protocol](#-cold-start-protocol-token-optimization)
-- [Philosophy: Modular Architecture](#-philosophy-modular-architecture)
 - [How to Work with the Framework](#-how-to-work-with-the-framework)
 - [Best Practices](#-best-practices)
 - [Framework Architecture](#-framework-architecture)
@@ -67,30 +85,119 @@ Meta-framework for structured AI-assisted development with Claude Code — now w
 
 ### The Problem
 
-When working with Claude Code or other AI agents:
-- 🔥 AI doesn't understand project context → makes wrong architectural decisions
-- 💸 Loads entire project into context → wastes tokens and money
-- 🔄 You explain the same things repeatedly → waste time
-- 🎲 Unpredictable results → no single source of truth
-- 🚫 Security issues → AI doesn't know the rules
+**Root cause:** AI has no memory between sessions.
+
+When you pause development for 2-3 days (or weeks), Claude forgets:
+- What you already implemented
+- Your architectural decisions
+- Current project state and progress
+- Security rules and constraints
+- Module structure and dependencies
+
+Result:
+- You waste time re-explaining everything
+- AI loads entire project to restore context → expensive
+- Inconsistent decisions across sessions
+- No single source of truth
 
 ### The Solution
 
-The framework provides **14 ready-made documentation templates** that:
+The framework provides documentation templates and automation:
 - ✅ **Auto-load** into Claude Code context (via `CLAUDE.md`)
-- ✅ **Save tokens** through modular architecture
-- ✅ **Cold Start Protocol** — 85% token savings (5x cheaper!) on session reloads
-- ✅ **SNAPSHOT.md** - instant project state overview
-- ✅ **Modular focus** - loads only current module
+- ✅ **Cold Start Protocol** — 85% token savings on session reloads
+- ✅ **SNAPSHOT.md** — instant project state overview
+- ✅ **BACKLOG.md** — tasks and implementation phases
+- ✅ **ARCHITECTURE.md** — code structure and decisions
+- ✅ **Dialog export** — save and view all development sessions
+- ✅ **Slash commands** for automation (/commit, /pr, /fix, etc.)
 - ✅ **Single source of truth** for AI and team
-- ✅ **Built-in security** (SECURITY.md)
-- ✅ **Slash commands** for automation (/commit, /pr, /migrate, etc.)
 - ✅ **Standardized processes** — npm scripts for all operations
 
+---
+
+## 🔧 How It Works
+
+The framework is built around two key protocols that structure your AI-assisted development workflow:
+
+### Core Components
+
+**CLAUDE.md** — Main instruction file that auto-loads into Claude Code:
+- Contains Cold Start and Completion protocols
+- Trigger commands: "start" / "начать" and "finish" / "завершить" / "/fi"
+- Ensures consistent AI behavior across sessions
+
+**SNAPSHOT.md** — Current project state file:
+- Version number and current phase
+- Active modules and their status
+- What's completed, what's in progress
+- AI reads this FIRST on every cold start
+
+### Cold Start Protocol
+
+**What happens when you type "start":**
+
+1. **Crash Recovery Check** — reads `.claude/.last_session`
+   - If previous session crashed → exports missed dialogs, checks git status
+   - If clean → continues
+
+2. **Export & Update** — saves previous work
+   - Exports closed dialogs to `dialog/` folder
+   - Generates `html-viewer/index.html` with all sessions
+   - Auto-commits student UI so students see complete dialog history
+
+3. **Mark Session Active** — prevents data loss
+   - Sets session status to "active"
+   - Next cold start will know to check for crashes
+
+4. **Load Context** — reads SNAPSHOT.md
+   - Current version and phase
+   - Active modules only (not entire project!)
+   - Saves 85% tokens by loading only what's needed
+
+5. **Ready to Work** — AI confirms it's ready with current context
+
+### Completion Protocol
+
+**What happens when you type "finish" or "/fi":**
+
+1. **Build** (if code changed) — `npm run build`
+
+2. **Update Documentation**
+   - Mark completed tasks in BACKLOG.md
+   - Update version/status in SNAPSHOT.md
+   - Add CHANGELOG.md entry (if release)
+   - Update ARCHITECTURE.md (if structure changed)
+
+3. **Export Dialogs** — `npm run dialog:export --no-html`
+   - Saves current session to `dialog/` folder
+   - Student UI will be updated on next "start"
+
+4. **Git Commit** — structured commit with Co-Authored-By Claude
+
+5. **Ask About Push & PR** — never pushes without permission
+
+6. **Mark Session Clean** — sets status to "clean"
+   - Next cold start will skip crash recovery
+
+### Why This Matters
+
+Without protocols:
+- AI forgets what it was doing after restart
+- You manually explain context every time
+- Risk of lost work if session crashes
+- Inconsistent workflow
+
+With protocols:
+- Type "start" → AI instantly knows where you left off
+- Type "finish" → All work saved, documented, committed
+- Crash recovery catches lost sessions
+- Consistent, reproducible workflow
+
+---
 
 ## 🚀 Quick Start (for framework development)
 
-**Note:** This section is for developers who want to contribute to the framework itself. If you want to use the framework in your project, see [Installation Guide](migration/MIGRATION_GUIDE.md) above.
+**Note:** This section is for developers who want to contribute to the framework itself. If you want to use the framework in your project, see [Installation Guide](#-for-users-want-to-use-this-framework) above.
 
 ### Clone the repository:
 ```bash
@@ -139,11 +246,12 @@ claude-code-starter/
 ├── src/claude-export/      # TypeScript source code
 ├── dist/claude-export/     # Compiled JavaScript
 ├── .claude/
-│   ├── commands/           # 19 slash commands
+│   ├── commands/           # Slash commands for automation
 │   ├── SNAPSHOT.md         # Current project state
 │   ├── ARCHITECTURE.md     # Code structure documentation
 │   └── BACKLOG.md          # Tasks and roadmap
 ├── dialog/                 # Exported development dialogs
+├── html-viewer/            # HTML file for viewing dialog history
 │
 ├── package.json            # npm scripts
 ├── tsconfig.json           # TypeScript config
@@ -161,22 +269,24 @@ claude-code-starter/
 | **.claude/ARCHITECTURE.md** | Code structure and design decisions |
 | **.claude/BACKLOG.md** | Implementation phases and tasks |
 | **src/claude-export/** | Dialog export system source code |
-| **.claude/commands/** | 19 slash commands for automation |
+| **.claude/commands/** | Slash commands for automation |
+| **dialog/** | Exported development sessions (markdown) |
+| **html-viewer/** | HTML file for viewing dialog history (no framework needed) |
 
 #### ⚡ How Slash Commands Work
 
 **Important to understand:** Slash commands in Claude Code are **prompt expansions**, not executable scripts.
 
-**What happens when you use `/migrate`:**
-1. You type `/migrate`
-2. Claude reads `.claude/commands/migrate.md` (detailed instructions)
+**What happens when you use `/commit`:**
+1. You type `/commit`
+2. Claude reads `.claude/commands/commit.md` (detailed instructions)
 3. Claude follows these instructions step-by-step automatically
 4. You see progress as Claude executes the workflow
 
 **Example:**
-- `/migrate` → Claude reads 612-line migration guide → executes automatically
 - `/commit` → Claude reads commit workflow → creates structured git commit
 - `/pr` → Claude reads PR workflow → analyzes changes → creates pull request
+- `/fix` → Claude reads debugging guide → helps find and fix bugs
 
 **Key insight:** Commands ARE instructions for Claude, not shell scripts. This means:
 - ✅ Claude executes them intelligently based on context
@@ -220,21 +330,6 @@ Annual savings: $43.20 per project!
 
 **After that:** Pure savings on every session restart.
 
-### Why Modular Focus Matters
-
-The framework's modular approach provides continuous benefits:
-
-✅ **Fewer Tokens** - Load only what you need (Auth module, not entire project)
-✅ **Fewer Errors** - AI doesn't get confused in large context
-✅ **Faster Responses** - Less to read and analyze
-✅ **Better Accuracy** - Focused context = focused answers
-
-**Example:**
-- Monolithic: Load entire 5000-line project = ~8k tokens + higher error rate
-- Modular: Load Auth module (200 lines) = ~1k tokens + precise answers
-
-The investment pays for itself almost immediately, then continues saving on every session.
-
 ---
 
 ## ⚡ Cold Start Protocol: Token Optimization
@@ -263,71 +358,47 @@ Every time Claude Code restarts:
 
 **Stage 3: Never Unless Asked**
 - ❌ Other modules (only on request)
-- ❌ MIGRATION_REPORT.md (only if user asks)
-- ❌ WORKFLOW.md (only if user asks)
-- ❌ archive/* (only on request)
-
-### Automatic After Migration
-
-When you run `/migrate-finalize`:
-1. Migration Status automatically set to `✅ COMPLETED (YYYY-MM-DD)`
-2. Next session AI sees this status
-3. Skips reading migration report
-4. **~5k tokens saved on every reload** going forward
+- ❌ Other documentation files (only if user asks)
 
 **See CLAUDE.md → "🔄 Cold Start Protocol" for full details**
 
 ---
 
-## 🧩 Philosophy: Modular Architecture
-
-### Why modules are critical for AI work?
-
-**Monolithic approach problem:**
-```
-Claude loads entire project (5000 lines) →
-Wastes tokens reading everything →
-Expensive and slow →
-May get confused in large context
-```
-
-**Solution through modules:**
-```
-Claude loads only needed module (200 lines) →
-Fewer tokens →
-Faster and cheaper →
-Better understanding of task
-```
-
-### Modularity Principle
-
-**Application = Set of small LEGO blocks**
-
-Each module:
-- Solves **one narrow task**
-- Has **clear input and output**
-- Can be **tested separately**
-- **Doesn't depend** on other modules
-
-Read more in `.claude/ARCHITECTURE.md` (section "Module Architecture")
-
----
-
 ## 🎓 How to Work with the Framework
 
-### Working with Claude Code
+The framework is a meta-layer on top of Claude Code that structures your development workflow.
 
-1. **Launch** `claude` in project root
-2. **CLAUDE.md auto-loads** into context
-3. **Ask AI to read SNAPSHOT.md** for current project state
-4. **Work modularly**: one module → testing → next module
+### Starting a Session
 
-### Maintenance and Evolution
+1. Launch Claude Code in your project root:
+   ```bash
+   claude
+   ```
 
-1. **Update BACKLOG.md** after each sprint
-2. **Enhance ARCHITECTURE.md** with architectural decisions
-3. **Expand AGENTS.md** with new patterns
-4. **Use slash commands** to automate routine tasks
+2. Start working with the framework:
+   ```
+   start
+   ```
+   That's it! The framework handles everything automatically.
+
+### Finishing a Session
+
+When you complete a sprint or work session:
+```
+finish
+```
+
+Or use the slash command:
+```
+/fi
+```
+
+The framework will automatically:
+- Build your code
+- Update documentation
+- Export dialogs
+- Create git commit
+- Ask about push/PR
 
 ---
 
@@ -343,21 +414,18 @@ Read more in `.claude/ARCHITECTURE.md` (section "Module Architecture")
 
 ❌ **DON'T:**
 - Don't load entire project into context at once
-- Don't skip SECURITY.md
 - Don't ignore architectural decisions from ARCHITECTURE.md
 
 ### For security
 
 ✅ **ALWAYS:**
-- Read SECURITY.md before coding
 - Use `.env.example` → `.env.local`
 - Validate all input data
-- Use `/security` slash command for audits
+- Use `/security` slash command for security audits
 
 ❌ **NEVER:**
 - Commit `.env` files
 - Hardcode secrets in code
-- Ignore security warnings
 
 ---
 
@@ -375,7 +443,7 @@ Framework (this repo)
 ├── AI Protocols
 │   ├── CLAUDE.md                   # Cold Start & Completion
 │   └── .claude/
-│       ├── commands/               # 19 slash commands
+│       ├── commands/               # Slash commands for automation
 │       ├── SNAPSHOT.md             # Current state
 │       ├── ARCHITECTURE.md         # Code structure
 │       └── BACKLOG.md              # Tasks and roadmap
