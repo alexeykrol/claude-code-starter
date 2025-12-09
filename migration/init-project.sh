@@ -115,28 +115,34 @@ if [ -d ".claude/templates" ]; then
     DATE=$(date +%Y-%m-%d)
     BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "main")
 
-    # Generate SNAPSHOT.md
-    if [ -f ".claude/templates/SNAPSHOT.template.md" ]; then
+    # Generate SNAPSHOT.md (only if doesn't exist - preserve legacy project data!)
+    if [ ! -f ".claude/SNAPSHOT.md" ] && [ -f ".claude/templates/SNAPSHOT.template.md" ]; then
         sed -e "s/{{PROJECT_NAME}}/$PROJECT_NAME/g" \
             -e "s/{{DATE}}/$DATE/g" \
             -e "s/{{CURRENT_BRANCH}}/$BRANCH/g" \
             .claude/templates/SNAPSHOT.template.md > .claude/SNAPSHOT.md
         log_success "Generated .claude/SNAPSHOT.md"
+    elif [ -f ".claude/SNAPSHOT.md" ]; then
+        log_info "Preserved existing .claude/SNAPSHOT.md (legacy project)"
     fi
 
-    # Generate BACKLOG.md
-    if [ -f ".claude/templates/BACKLOG.template.md" ]; then
+    # Generate BACKLOG.md (only if doesn't exist - preserve legacy project data!)
+    if [ ! -f ".claude/BACKLOG.md" ] && [ -f ".claude/templates/BACKLOG.template.md" ]; then
         sed -e "s/{{PROJECT_NAME}}/$PROJECT_NAME/g" \
             -e "s/{{DATE}}/$DATE/g" \
             .claude/templates/BACKLOG.template.md > .claude/BACKLOG.md
         log_success "Generated .claude/BACKLOG.md"
+    elif [ -f ".claude/BACKLOG.md" ]; then
+        log_info "Preserved existing .claude/BACKLOG.md (legacy project)"
     fi
 
-    # Generate ARCHITECTURE.md
-    if [ -f ".claude/templates/ARCHITECTURE.template.md" ]; then
+    # Generate ARCHITECTURE.md (only if doesn't exist - preserve legacy project data!)
+    if [ ! -f ".claude/ARCHITECTURE.md" ] && [ -f ".claude/templates/ARCHITECTURE.template.md" ]; then
         sed -e "s/{{PROJECT_NAME}}/$PROJECT_NAME/g" \
             .claude/templates/ARCHITECTURE.template.md > .claude/ARCHITECTURE.md
         log_success "Generated .claude/ARCHITECTURE.md"
+    elif [ -f ".claude/ARCHITECTURE.md" ]; then
+        log_info "Preserved existing .claude/ARCHITECTURE.md (legacy project)"
     fi
 fi
 
