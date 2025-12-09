@@ -7,6 +7,41 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.1.1] - 2025-12-08
+
+### Fixed
+- **Critical Bug #2: Parasitic project folders** — Fixed watcher.ts spawning Claude in wrong directory
+  - Changed `cwd: path.dirname(dialogPath)` → `cwd: path.dirname(path.dirname(dialogPath))`
+  - Prevents creation of `project-name-dialog` folders in `~/.claude/projects/`
+  - Source: BUG_REPORT_FRAMEWORK.md from chatRAG production testing
+
+- **sed escaping bug** — Fixed installer crashes with special characters
+  - Added `sed_escape()` function to migration/init-project.sh
+  - Handles special chars (&, /, \) in PROJECT_DESCRIPTION
+  - Uses `|` delimiter instead of `/` for sed commands
+
+- **Token economy disaster** — Complete architecture redesign
+  - **Problem:** init-project.sh was 88KB (546 lines) with embedded base64 archive in git
+  - **Impact:** Risk of wasting 88KB tokens during Cold Start/grep/search operations
+  - **Solution:** Redesigned to loader pattern:
+    - init-project.sh → 5.3KB (161 lines) simple loader script
+    - framework.tar.gz → 56KB separate archive (not in git, GitHub Releases only)
+    - Loader downloads archive from GitHub Releases on demand
+  - **Result:** 16.6x smaller in repository (88KB → 5.3KB)
+
+### Changed
+- Distribution system now creates two separate files:
+  - `init-project.sh` — Small loader (5.3KB, in git)
+  - `framework.tar.gz` — Archive (56KB, GitHub Releases)
+- Updated README.md installation instructions to reflect new architecture
+
+### Technical Details
+- Source files: `src/claude-export/watcher.ts:107`, `migration/init-project.sh`, `migration/build-distribution.sh`
+- All bugs discovered during real-world framework installation test (3 hours, chatRAG project)
+- Full bug report: BUG_REPORT_FRAMEWORK.md
+
+---
+
 ## [2.1.0] - 2025-12-08
 
 ### Fixed

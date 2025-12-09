@@ -83,8 +83,37 @@
 - [x] Создать migration/templates/ для v2.1
 - [x] init-project.sh — self-extracting installer (88KB)
 - [x] build-distribution.sh — создание финального installer
-- [x] MIGRATION_GUIDE.md — упрощен до 3 команд
+- [x] MIGRATION_GUIDE.md → README.md (упрощена установка)
 - [x] Тестирование на реальных проектах (ChatOpenAII_3)
+- [x] README cleanup — удалены устаревшие ссылки на файлы
+- [x] Добавлен раздел "How It Works" — объяснение протоколов
+- [x] dist-release/ удалена из git (artifacts в .gitignore)
+
+---
+
+## Phase 3.5: Bug Fixes v2.1.1 ✅
+
+**Статус:** Завершена 2025-12-08 — Critical bugs from chatRAG testing fixed
+
+### Задачи:
+- [x] Fix Bug #2 (Parasitic folders) — watcher.ts:107 cwd fix
+- [x] Fix sed escaping bug — init-project.sh sed_escape() function
+- [x] Update version to 2.1.1 in init-project.sh
+- [x] Rebuild TypeScript (npm run build)
+- [x] Update SNAPSHOT.md with bug fixes
+- [x] **CRITICAL: Token economy** — Remove init-project.sh (88KB) from git
+
+### Исправленные баги:
+1. **watcher.ts parasitic folders** — Changed `cwd: path.dirname(dialogPath)` to `cwd: path.dirname(path.dirname(dialogPath))` to prevent creation of `project-name-dialog` folders in ~/.claude/projects/
+2. **init-project.sh sed escaping** — Added `sed_escape()` function to handle special characters (&, /, \) in PROJECT_DESCRIPTION, preventing installer crashes
+3. **Token economy disaster → FIXED with architecture redesign** —
+   - **Problem:** init-project.sh was 88KB (546 lines) with embedded base64 archive, stored in git
+   - **Impact:** Risk of wasting 88KB tokens if read during Cold Start/grep/search
+   - **Solution:** Completely redesigned architecture:
+     - init-project.sh → 5.3KB (161 lines) simple loader script
+     - framework.tar.gz → 56KB separate archive file
+     - Loader downloads archive from GitHub Releases on demand
+     - **Result:** 16.6x smaller! (88KB → 5.3KB)
 
 ---
 
