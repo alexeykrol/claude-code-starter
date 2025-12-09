@@ -209,6 +209,8 @@ case $PROJECT_TYPE in
 
         # Mark as legacy migration mode
         MIGRATION_MODE="legacy"
+
+        # Will create migration context after installation
         ;;
 
     framework-upgrade:*)
@@ -246,6 +248,8 @@ case $PROJECT_TYPE in
 
         MIGRATION_MODE="upgrade"
         OLD_FW_VERSION="$OLD_VERSION"
+
+        # Will create migration context after installation
         ;;
 
     "framework-current:v2.1")
@@ -322,6 +326,15 @@ if [ -d ".claude/templates" ]; then
     fi
 fi
 
+# Create migration context for complex scenarios
+if [ "$MIGRATION_MODE" = "legacy" ]; then
+    echo "{\"mode\": \"legacy\", \"timestamp\": \"$(date -Iseconds)\"}" > .claude/migration-context.json
+    log_success "Created migration context"
+elif [ "$MIGRATION_MODE" = "upgrade" ]; then
+    echo "{\"mode\": \"upgrade\", \"old_version\": \"$OLD_FW_VERSION\", \"timestamp\": \"$(date -Iseconds)\"}" > .claude/migration-context.json
+    log_success "Created migration context"
+fi
+
 # Success summary
 echo ""
 echo "════════════════════════════════════════════════════════════"
@@ -334,22 +347,19 @@ if [ "$MIGRATION_MODE" = "legacy" ]; then
     echo "Framework files installed in .claude/"
     echo "Migration context prepared for deep analysis"
     echo ""
-    echo "🔄 Next steps for Legacy Migration:"
+    echo "🔄 Next steps:"
     echo ""
-    echo "  1. Open this project in Claude Code:"
+    echo "  1. Open Claude Code:"
     echo "     claude"
     echo ""
-    echo "  2. Run the migration agent:"
-    echo "     /migrate-legacy"
-    echo ""
-    echo "  3. The agent will:"
+    echo "  2. Claude will automatically:"
+    echo "     • Detect legacy migration context"
     echo "     • Analyze your project (docs, code, git history)"
     echo "     • Ask qualifying questions with recommendations"
     echo "     • Generate detailed project report"
     echo "     • Create Framework files based on analysis"
     echo ""
-    echo "  4. After migration completes:"
-    echo "     Type: start"
+    echo "  Just run 'claude' - migration starts automatically!"
     echo ""
 
 elif [ "$MIGRATION_MODE" = "upgrade" ]; then
@@ -357,23 +367,19 @@ elif [ "$MIGRATION_MODE" = "upgrade" ]; then
     echo "Framework files updated to v$VERSION"
     echo "Ready for migration from $OLD_FW_VERSION → v$VERSION"
     echo ""
-    echo "🔄 Next steps for Framework Upgrade:"
+    echo "🔄 Next steps:"
     echo ""
-    echo "  1. Open this project in Claude Code:"
+    echo "  1. Open Claude Code:"
     echo "     claude"
     echo ""
-    echo "  2. Run the upgrade agent:"
-    echo "     /upgrade-framework"
-    echo ""
-    echo "  3. The agent will:"
-    echo "     • Detect your current Framework version"
+    echo "  2. Claude will automatically:"
+    echo "     • Detect Framework upgrade context"
     echo "     • Show detailed migration plan"
     echo "     • Create backup before changes"
-    echo "     • Migrate to new structure"
+    echo "     • Migrate to new structure ($OLD_FW_VERSION → v$VERSION)"
     echo "     • Preserve ALL your existing data"
     echo ""
-    echo "  4. After upgrade completes:"
-    echo "     Type: start"
+    echo "  Just run 'claude' - upgrade starts automatically!"
     echo ""
 
 else
