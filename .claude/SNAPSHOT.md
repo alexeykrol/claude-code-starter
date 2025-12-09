@@ -5,7 +5,7 @@
 ## Current State
 
 **Version:** 2.1.0
-**Status:** Installation system simplified - one-file self-extracting installer
+**Status:** Documentation cleanup completed - README accurate and concise
 **Branch:** feat/framework-v2.0
 
 ## What's New in v2.0
@@ -78,9 +78,11 @@ claude-code-starter/
 - [x] **CLI generate-html command** — separate HTML generation for students
 - [x] **Migration system** — complete system for installing FW into projects
 - [x] **Meta file templates** — SNAPSHOT, BACKLOG, ARCHITECTURE templates
-- [x] **init-project.sh** — installation script with backup + commit safety
+- [x] **init-project.sh** — self-extracting installer (88KB)
 - [x] **build-distribution.sh** — distribution package builder
-- [x] **Migration guides** — MIGRATION_GUIDE.md + FRAMEWORK_GUIDE.md
+- [x] **README.md restructure** — Installation integrated, "How It Works" added
+- [x] **Documentation cleanup** — removed outdated file references
+- [x] **dist-release/** — removed from git tracking
 
 ## Next Phase
 

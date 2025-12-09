@@ -83,8 +83,11 @@
 - [x] Создать migration/templates/ для v2.1
 - [x] init-project.sh — self-extracting installer (88KB)
 - [x] build-distribution.sh — создание финального installer
-- [x] MIGRATION_GUIDE.md — упрощен до 3 команд
+- [x] MIGRATION_GUIDE.md → README.md (упрощена установка)
 - [x] Тестирование на реальных проектах (ChatOpenAII_3)
+- [x] README cleanup — удалены устаревшие ссылки на файлы
+- [x] Добавлен раздел "How It Works" — объяснение протоколов
+- [x] dist-release/ удалена из git (artifacts в .gitignore)
 
 ---
 
