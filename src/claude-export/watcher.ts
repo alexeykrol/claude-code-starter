@@ -103,7 +103,8 @@ export function requestSummary(dialogPath: string, verbose: boolean = false, isF
   ], {
     stdio: ['pipe', 'pipe', 'pipe'],
     shell: false,
-    cwd: path.dirname(dialogPath)
+    // Fix: use project root, not dialog/ folder to avoid creating parasitic project folders
+    cwd: path.dirname(path.dirname(dialogPath))
   });
 
   // Write prompt to stdin

@@ -213,7 +213,6 @@ storybook-static/
 # ==========================================
 
 # Development/testing directory - excluded from repo
-# Used for testing init-project.sh before releases
 dev/
 
 # Test directories - excluded from repo
@@ -223,22 +222,25 @@ test2/
 #
 # Root meta-files (framework development context):
 #   - CLAUDE.md (AI context for developing THIS framework)
-#   - BACKLOG.md (framework development tasks)
-#   - PROJECT_SNAPSHOT.md (framework state tracking)
+#   - .claude/BACKLOG.md (framework development tasks)
+#   - .claude/SNAPSHOT.md (framework state tracking)
 #
-# Template directories (user-facing templates):
-#   - Init/ (Russian templates - 21 files)
-#   - init_eng/ (English templates - 21 files)
+# Installation system:
+#   - init-project.sh (5.3KB loader in root - users download via "Save Link As")
+#   - migration/init-project.sh (same file, template for build)
+#   - migration/build-distribution.sh (builds release)
+#   - migration/templates/ (meta file templates)
 #
-# Release archives (distributed to users):
-#   - init-starter.zip (Russian templates archive)
-#   - init-starter-en.zip (English templates archive)
-#
-# Installation script:
-#   - init-project.sh (183 lines - deploys templates)
+# Source code:
+#   - src/claude-export/ (TypeScript source)
+#   - dist/claude-export/ (compiled JavaScript)
 #
 # Documentation (public):
 #   - README.md, README_RU.md, CHANGELOG.md, etc.
+#
+# NOTE: Framework archive (framework.tar.gz, 56KB) is NOT in git!
+# It's created by build-distribution.sh and uploaded to GitHub Releases.
+# The loader script downloads it automatically when run.
 
 # Dialog export utility (compiled, needed for /ui and /watch commands)
 !.claude-export/dist/
@@ -257,11 +259,6 @@ node_modules/
 *.tsbuildinfo
 
 # Claude dialogs
-dialog/2025-12-08_session-8578d46d.md
-dialog/2025-12-08_session-f0977e9a.md
-dialog/2025-12-08_session-421cc55b.md
-dialog/2025-12-07_session-333169bf.md
-dialog/2025-12-07_session-3627a6c3.md
 dialog/2025-12-07_session-df57cf3d.md
 dialog/2025-11-09_session-2339b90e.md
 dialog/2025-11-23_session-333311de.md
