@@ -10,6 +10,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [2.1.1] - 2025-12-08
 
 ### Fixed
+
+- **Legacy project data loss during upgrade** — Fixed installer overwriting existing metafiles
+  - Added `[ ! -f ]` checks before generating SNAPSHOT.md, BACKLOG.md, ARCHITECTURE.md
+  - Existing files are now preserved during framework upgrades (v1.x → v2.1.1)
+  - Only new projects get generated templates with placeholders
+  - Logs "Preserved existing ..." for visibility
 - **Critical Bug #2: Parasitic project folders** — Fixed watcher.ts spawning Claude in wrong directory
   - Changed `cwd: path.dirname(dialogPath)` → `cwd: path.dirname(path.dirname(dialogPath))`
   - Prevents creation of `project-name-dialog` folders in `~/.claude/projects/`
