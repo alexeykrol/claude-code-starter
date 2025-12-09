@@ -85,7 +85,183 @@ tar -xzf "$TEMP_DIR/framework.tar.gz" -C "$TEMP_DIR" || {
 }
 log_success "Extracted framework files"
 
-# Install framework files
+# ============================================
+# Project Type Detection & Qualification
+# ============================================
+
+detect_project_type() {
+    # Check for existing Framework
+    if [ -d ".claude" ]; then
+        # Scenario 3: Has Framework - detect version
+        if [ -f ".claude/SNAPSHOT.md" ]; then
+            VERSION_LINE=$(grep -i "framework:" .claude/SNAPSHOT.md 2>/dev/null | head -1)
+            if [ -n "$VERSION_LINE" ]; then
+                FW_VERSION=$(echo "$VERSION_LINE" | awk '{print $NF}' | sed 's/[^0-9.]//g')
+                echo "framework-upgrade:$FW_VERSION"
+            else
+                echo "framework-upgrade:v1.x"
+            fi
+        elif [ -f ".claude/BACKLOG.md" ]; then
+            # v2.0 if BACKLOG exists but no ROADMAP/IDEAS
+            if [ ! -f ".claude/ROADMAP.md" ]; then
+                echo "framework-upgrade:v2.0"
+            else
+                # Already v2.1+
+                echo "framework-current:v2.1"
+            fi
+        else
+            echo "framework-upgrade:v1.x"
+        fi
+    # Check for legacy v1.x structure (Init/ folder)
+    elif [ -d "Init" ] && [ -f "Init/PROJECT_SNAPSHOT.md" ]; then
+        echo "framework-upgrade:v1.x"
+    # Check for project code (legacy without Framework)
+    elif [ -d "src" ] || [ -d "lib" ] || [ -f "package.json" ] || [ -f "pom.xml" ] || [ -f "Cargo.toml" ]; then
+        echo "legacy-migration"
+    else
+        # New empty project
+        echo "new-project"
+    fi
+}
+
+estimate_analysis_cost() {
+    log_info "Estimating analysis cost..."
+
+    # Count lines in code files
+    TOTAL_LINES=0
+    if command -v find &> /dev/null && command -v wc &> /dev/null; then
+        TOTAL_LINES=$(find . -type f \( \
+            -name "*.js" -o -name "*.ts" -o -name "*.tsx" -o -name "*.jsx" \
+            -o -name "*.py" -o -name "*.java" -o -name "*.go" -o -name "*.rs" \
+            -o -name "*.c" -o -name "*.cpp" -o -name "*.h" \
+            -o -name "*.md" -o -name "*.txt" \
+        \) ! -path "*/node_modules/*" ! -path "*/.git/*" ! -path "*/dist/*" ! -path "*/build/*" \
+        2>/dev/null | xargs wc -l 2>/dev/null | tail -1 | awk '{print $1}' || echo "0")
+    fi
+
+    # Rough estimate: ~2 tokens per line
+    ESTIMATED_TOKENS=$((TOTAL_LINES * 2))
+
+    # Add overhead for analysis (~20k)
+    ESTIMATED_TOKENS=$((ESTIMATED_TOKENS + 20000))
+
+    # Calculate cost (Sonnet: $3 per 1M input tokens)
+    ESTIMATED_COST=$(printf "%.2f" $(echo "$ESTIMATED_TOKENS * 0.000003" | bc -l 2>/dev/null || echo "0.15"))
+
+    echo ""
+    echo "════════════════════════════════════════════════════════════"
+    echo "  📊 Deep Analysis Cost Estimate"
+    echo "════════════════════════════════════════════════════════════"
+    echo ""
+    echo "  Project size: ~$TOTAL_LINES lines of code"
+    echo "  Estimated tokens: ~$ESTIMATED_TOKENS"
+    echo "  Estimated cost: ~\$$ESTIMATED_COST USD"
+    echo ""
+    echo "  What will be analyzed:"
+    echo "    • Project structure and modules"
+    echo "    • Existing documentation (README, TODO, etc)"
+    echo "    • Git history (recent commits)"
+    echo "    • Package metadata"
+    echo ""
+    echo "════════════════════════════════════════════════════════════"
+    echo ""
+}
+
+# Detect project type
+PROJECT_TYPE=$(detect_project_type)
+
+# ============================================
+# Route to Appropriate Scenario
+# ============================================
+
+case $PROJECT_TYPE in
+    "new-project")
+        log_info "📦 Scenario: New Project"
+        log_info "Simple installation with template files"
+        echo ""
+        # Continue with simple installation below
+        ;;
+
+    "legacy-migration")
+        log_warning "🔍 Scenario: Legacy Project (No Framework)"
+        echo ""
+        echo "This project has code but no Framework installed."
+        echo "Deep analysis is recommended to generate accurate Framework files."
+        echo ""
+
+        estimate_analysis_cost
+
+        echo "Legacy migration will:"
+        echo "  1. Analyze your project structure"
+        echo "  2. Find existing docs (README, TODO, ARCHITECTURE, etc)"
+        echo "  3. Generate Framework files based on analysis"
+        echo "  4. ❌ NOT modify your existing files"
+        echo ""
+
+        read -p "Proceed with deep analysis? (y/N) " -n 1 -r
+        echo
+
+        if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+            log_info "Installation cancelled"
+            log_info "You can install Framework later with: ./init-project.sh"
+            exit 0
+        fi
+
+        # Mark as legacy migration mode
+        MIGRATION_MODE="legacy"
+        ;;
+
+    framework-upgrade:*)
+        OLD_VERSION=$(echo "$PROJECT_TYPE" | cut -d: -f2)
+        log_warning "🔄 Scenario: Framework Upgrade (from $OLD_VERSION)"
+        echo ""
+        echo "This project has Framework $OLD_VERSION installed."
+        echo "Migration to v$VERSION will preserve all your data."
+        echo ""
+        echo "Migration will:"
+
+        if [[ "$OLD_VERSION" == "v1.x" ]]; then
+            echo "  • Move Init/ → .claude/ structure"
+            echo "  • Add ROADMAP.md and IDEAS.md"
+            echo "  • Archive old Init/ folder"
+        elif [[ "$OLD_VERSION" == "v2.0" ]]; then
+            echo "  • Add ROADMAP.md (extract from BACKLOG)"
+            echo "  • Add IDEAS.md (new template)"
+            echo "  • Restructure BACKLOG.md"
+        else
+            echo "  • Update Framework files"
+        fi
+
+        echo "  • ✅ Preserve ALL existing data"
+        echo "  • 💾 Create backup before changes"
+        echo ""
+
+        read -p "Proceed with migration? (y/N) " -n 1 -r
+        echo
+
+        if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+            log_info "Migration cancelled"
+            exit 0
+        fi
+
+        MIGRATION_MODE="upgrade"
+        OLD_FW_VERSION="$OLD_VERSION"
+        ;;
+
+    "framework-current:v2.1")
+        log_success "✅ Framework v2.1+ already installed"
+        echo ""
+        echo "Your project already has the latest Framework structure."
+        echo "No installation needed."
+        echo ""
+        exit 0
+        ;;
+esac
+
+# ============================================
+# Install Framework Files
+# ============================================
+
 log_info "Installing framework to current directory..."
 
 # Copy .claude directory structure
@@ -152,16 +328,75 @@ echo "════════════════════════�
 log_success "Installation complete!"
 echo "════════════════════════════════════════════════════════════"
 echo ""
-echo "Framework files installed in .claude/"
-echo "Meta files generated (SNAPSHOT, BACKLOG, ARCHITECTURE)"
-echo ""
-echo "Next steps:"
-echo "  1. Open this project in Claude Code"
-echo "  2. Type: start (or начать)"
-echo "  3. Claude will load your project context"
-echo ""
-echo "Documentation:"
+
+if [ "$MIGRATION_MODE" = "legacy" ]; then
+    # Legacy migration scenario
+    echo "Framework files installed in .claude/"
+    echo "Migration context prepared for deep analysis"
+    echo ""
+    echo "🔄 Next steps for Legacy Migration:"
+    echo ""
+    echo "  1. Open this project in Claude Code:"
+    echo "     claude"
+    echo ""
+    echo "  2. Run the migration agent:"
+    echo "     /migrate-legacy"
+    echo ""
+    echo "  3. The agent will:"
+    echo "     • Analyze your project (docs, code, git history)"
+    echo "     • Ask qualifying questions with recommendations"
+    echo "     • Generate detailed project report"
+    echo "     • Create Framework files based on analysis"
+    echo ""
+    echo "  4. After migration completes:"
+    echo "     Type: start"
+    echo ""
+
+elif [ "$MIGRATION_MODE" = "upgrade" ]; then
+    # Framework upgrade scenario
+    echo "Framework files updated to v$VERSION"
+    echo "Ready for migration from $OLD_FW_VERSION → v$VERSION"
+    echo ""
+    echo "🔄 Next steps for Framework Upgrade:"
+    echo ""
+    echo "  1. Open this project in Claude Code:"
+    echo "     claude"
+    echo ""
+    echo "  2. Run the upgrade agent:"
+    echo "     /upgrade-framework"
+    echo ""
+    echo "  3. The agent will:"
+    echo "     • Detect your current Framework version"
+    echo "     • Show detailed migration plan"
+    echo "     • Create backup before changes"
+    echo "     • Migrate to new structure"
+    echo "     • Preserve ALL your existing data"
+    echo ""
+    echo "  4. After upgrade completes:"
+    echo "     Type: start"
+    echo ""
+
+else
+    # New project scenario
+    echo "Framework files installed in .claude/"
+    echo "Meta files generated (SNAPSHOT, BACKLOG, ROADMAP, ARCHITECTURE, IDEAS)"
+    echo ""
+    echo "📦 Next steps for New Project:"
+    echo ""
+    echo "  1. Open this project in Claude Code:"
+    echo "     claude"
+    echo ""
+    echo "  2. Start working with Framework:"
+    echo "     Type: start (or начать)"
+    echo ""
+    echo "  3. Claude will load your project context automatically"
+    echo ""
+fi
+
+echo "📚 Documentation:"
 echo "  - FRAMEWORK_GUIDE.md — How to use the framework"
-echo "  - .claude/SNAPSHOT.md — Edit to update project context"
-echo "  - .claude/BACKLOG.md — Edit to manage tasks"
+echo "  - .claude/SNAPSHOT.md — Current project state"
+echo "  - .claude/BACKLOG.md — Current tasks"
+echo "  - .claude/ROADMAP.md — Strategic planning"
+echo "  - .claude/IDEAS.md — Spontaneous ideas"
 echo ""
