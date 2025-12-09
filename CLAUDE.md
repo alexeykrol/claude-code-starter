@@ -15,7 +15,29 @@
 
 ## Cold Start Protocol
 
-### Step 0: Crash Recovery
+### Step 0: First Launch Detection
+
+**Check for migration context first:**
+```bash
+cat .claude/migration-context.json 2>/dev/null
+```
+
+If file exists, this is first launch after installation.
+
+**Read context and route:**
+- If `"mode": "legacy"` → Execute Legacy Migration workflow (see below)
+- If `"mode": "upgrade"` → Execute Framework Upgrade workflow (see below)
+
+After completing migration, delete marker:
+```bash
+rm .claude/migration-context.json
+```
+
+If no migration context, continue to Step 0.1 (Crash Recovery).
+
+---
+
+### Step 0.1: Crash Recovery
 ```bash
 cat .claude/.last_session
 ```
@@ -151,7 +173,8 @@ npm run dialog:list     # List sessions
 **Core:** `/fi`, `/commit`, `/pr`, `/release`
 **Dev:** `/fix`, `/feature`, `/review`, `/test`, `/security`
 **Quality:** `/explain`, `/refactor`, `/optimize`
-**Migration:** `/migrate`, `/migrate-resolve`, `/migrate-finalize`, `/migrate-rollback`
+**Installation:** `/migrate-legacy`, `/upgrade-framework`
+**Legacy v1.x:** `/migrate`, `/migrate-resolve`, `/migrate-finalize`, `/migrate-rollback`
 
 ## Key Principles
 
@@ -168,4 +191,65 @@ npm run dialog:list     # List sessions
 - ALWAYS mark session clean at completion
 
 ---
-*Framework: Claude Code Starter v2.1.0 | Updated: 2025-12-08*
+
+## Legacy Migration Protocol
+
+**Triggered when:** `.claude/migration-context.json` exists with `"mode": "legacy"`
+
+**Purpose:** Analyze existing project and generate Framework files.
+
+**Workflow:**
+
+1. **Read migration context:**
+   ```bash
+   cat .claude/migration-context.json
+   ```
+
+2. **Execute `/migrate-legacy` command:**
+   - Follow instructions in `.claude/commands/migrate-legacy.md`
+   - Discovery → Deep Analysis → Questions → Report → Generate Files
+
+3. **After completion:**
+   - Verify all Framework files created
+   - Delete migration marker:
+     ```bash
+     rm .claude/migration-context.json
+     ```
+   - Show success summary
+
+4. **Next session:**
+   - Use normal Cold Start Protocol
+
+---
+
+## Framework Upgrade Protocol
+
+**Triggered when:** `.claude/migration-context.json` exists with `"mode": "upgrade"`
+
+**Purpose:** Migrate from old Framework version to v2.1.
+
+**Workflow:**
+
+1. **Read migration context:**
+   ```bash
+   cat .claude/migration-context.json
+   ```
+   Extract `old_version` field.
+
+2. **Execute `/upgrade-framework` command:**
+   - Follow instructions in `.claude/commands/upgrade-framework.md`
+   - Detect Version → Migration Plan → Backup → Execute → Verify
+
+3. **After completion:**
+   - Verify migration successful
+   - Delete migration marker:
+     ```bash
+     rm .claude/migration-context.json
+     ```
+   - Show success summary
+
+4. **Next session:**
+   - Use normal Cold Start Protocol with new structure
+
+---
+*Framework: Claude Code Starter v2.1.1 | Updated: 2025-12-09*
