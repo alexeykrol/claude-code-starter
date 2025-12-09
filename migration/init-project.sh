@@ -1,17 +1,17 @@
 #!/bin/bash
 #
-# Claude Code Starter Framework — Installation Script
+# Claude Code Starter Framework — Self-Extracting Installer
 # Version: 2.1.0
 #
-# This script installs the framework into new or existing projects.
-# It handles both clean installations and migrations from old versions.
+# This is a self-contained installer that includes all framework files.
+# Simply run: ./init-project.sh
 #
 
 set -e  # Exit on error
 
 VERSION="2.1.0"
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_DIR="$(pwd)"
+TEMP_DIR="/tmp/claude-framework-$$"
 
 # Colors for output
 RED='\033[0;31m'
@@ -38,6 +38,48 @@ log_warning() {
 
 log_error() {
     echo -e "${RED}✗${NC} $1"
+}
+
+# ============================================================================
+# Cleanup Function
+# ============================================================================
+
+cleanup() {
+    if [ -d "$TEMP_DIR" ]; then
+        rm -rf "$TEMP_DIR"
+    fi
+}
+
+trap cleanup EXIT
+
+# ============================================================================
+# Self-Extraction
+# ============================================================================
+
+extract_framework() {
+    log_info "Extracting framework files..."
+
+    # Create temp directory
+    mkdir -p "$TEMP_DIR"
+
+    # Find where the archive starts
+    ARCHIVE_LINE=$(awk '/^__ARCHIVE_BELOW__$/ {print NR + 1; exit 0; }' "$0")
+
+    if [ -z "$ARCHIVE_LINE" ]; then
+        log_error "Archive not found in installer!"
+        log_info "This installer might be corrupted. Please re-download."
+        exit 1
+    fi
+
+    # Extract embedded archive
+    tail -n+$ARCHIVE_LINE "$0" | base64 -d | tar -xzf - -C "$TEMP_DIR" 2>/dev/null
+
+    if [ ! -d "$TEMP_DIR/framework" ]; then
+        log_error "Failed to extract framework files!"
+        exit 1
+    fi
+
+    log_success "Framework files extracted"
 }
 
 # ============================================================================
@@ -122,30 +164,18 @@ backup_old_framework() {
 install_framework_files() {
     log_info "Installing framework files..."
 
-    # Extract framework bundle
-    if [ -f "$SCRIPT_DIR/framework-bundle.tar.gz" ]; then
-        tar -xzf "$SCRIPT_DIR/framework-bundle.tar.gz" -C /tmp/
+    # Copy CLAUDE.md to root
+    cp "$TEMP_DIR/framework/CLAUDE.md" ./
+    log_success "Installed CLAUDE.md"
 
-        # Copy CLAUDE.md to root
-        cp /tmp/framework-bundle/CLAUDE.md ./
-        log_success "Installed CLAUDE.md"
+    # Copy FRAMEWORK_GUIDE.md to root
+    cp "$TEMP_DIR/framework/FRAMEWORK_GUIDE.md" ./
+    log_success "Installed FRAMEWORK_GUIDE.md"
 
-        # Copy FRAMEWORK_GUIDE.md to root
-        cp /tmp/framework-bundle/FRAMEWORK_GUIDE.md ./
-        log_success "Installed FRAMEWORK_GUIDE.md"
-
-        # Copy .claude/ directory
-        mkdir -p .claude
-        cp -r /tmp/framework-bundle/.claude/* .claude/
-        log_success "Installed .claude/ directory"
-
-        # Cleanup
-        rm -rf /tmp/framework-bundle
-    else
-        log_error "framework-bundle.tar.gz not found!"
-        log_info "Make sure you extracted the full distribution package."
-        exit 1
-    fi
+    # Copy .claude/ directory
+    mkdir -p .claude
+    cp -r "$TEMP_DIR/framework/.claude/"* .claude/
+    log_success "Installed .claude/ directory"
 }
 
 generate_meta_files_new() {
@@ -228,22 +258,16 @@ generate_meta_files_legacy() {
     [ -f "Cargo.toml" ] && TECH_STACK="$TECH_STACK\n- Rust"
     [ -z "$TECH_STACK" ] && TECH_STACK="\n- Unknown (please update)"
 
-    # Generate file structure
-    local PROJECT_STRUCTURE=$(tree -L 2 -I 'node_modules|.git|dist|build' --charset ascii 2>/dev/null || ls -la | awk '{print $NF}' | grep -v "^total" | sed 's/^/├── /')
-
     # Generate SNAPSHOT.md with project data
     sed -e "s/{{PROJECT_NAME}}/$PROJECT_NAME/g" \
         -e "s/{{DATE}}/$DATE/g" \
         -e "s/{{PROJECT_VERSION}}/$PROJECT_VERSION/g" \
         -e "s/{{CURRENT_BRANCH}}/$BRANCH/g" \
         -e "s/{{PROJECT_DESCRIPTION}}/$PROJECT_DESCRIPTION/g" \
+        -e "s|{{TECH_STACK}}|$TECH_STACK|g" \
+        -e "s|{{PROJECT_STRUCTURE}}|Run 'tree -L 2' or 'ls -la' to see structure|g" \
+        -e "s|{{PROJECT_KEY_CONCEPTS}}|Extracted from existing project. Please review and update.|g" \
         .claude/templates/SNAPSHOT.template.md > .claude/SNAPSHOT.md
-
-    # Insert extracted tech stack
-    sed -i.bak "s|{{TECH_STACK}}|$TECH_STACK|g" .claude/SNAPSHOT.md
-    sed -i.bak "s|{{PROJECT_STRUCTURE}}|$PROJECT_STRUCTURE|g" .claude/SNAPSHOT.md
-    sed -i.bak "s|{{PROJECT_KEY_CONCEPTS}}|Extracted from existing project. Please review and update.|g" .claude/SNAPSHOT.md
-    rm -f .claude/SNAPSHOT.md.bak
 
     # Generate BACKLOG.md
     sed -e "s/{{PROJECT_NAME}}/$PROJECT_NAME/g" \
@@ -261,25 +285,23 @@ generate_meta_files_legacy() {
     # Generate ARCHITECTURE.md with project analysis
     sed -e "s/{{PROJECT_NAME}}/$PROJECT_NAME/g" \
         -e "s/{{PROJECT_DESCRIPTION}}/$PROJECT_DESCRIPTION/g" \
+        -e "s|{{TECH_STACK}}|$TECH_STACK|g" \
+        -e "s|{{PROJECT_STRUCTURE}}|Run 'tree -L 2' or 'ls -la' to see structure|g" \
+        -e "s|{{COMPONENT_1_NAME}}|Main Application|g" \
+        -e "s|{{COMPONENT_1_PATH}}|./src|g" \
+        -e "s|{{COMPONENT_1_PURPOSE}}|Core application code|g" \
+        -e "s|{{COMPONENT_2_NAME}}|Configuration|g" \
+        -e "s|{{COMPONENT_2_PATH}}|./config|g" \
+        -e "s|{{COMPONENT_2_PURPOSE}}|Project configuration|g" \
+        -e "s|{{ARCHITECTURE_PATTERN}}|See existing code|g" \
+        -e "s|{{PATTERN_DESCRIPTION}}|Analyzed from existing project|g" \
+        -e "s|{{DATA_FLOW_DIAGRAM}}|See existing documentation|g" \
+        -e "s|{{DEPENDENCIES_LIST}}|See package.json or requirements.txt|g" \
+        -e "s|{{ENV_CONFIG}}|See existing configuration files|g" \
+        -e "s|{{BUILD_CONFIG}}|See existing build scripts|g" \
+        -e "s|{{TESTING_STRATEGY}}|See existing tests|g" \
+        -e "s|{{DEPLOYMENT_INFO}}|See existing deployment configuration|g" \
         .claude/templates/ARCHITECTURE.template.md > .claude/ARCHITECTURE.md
-
-    sed -i.bak "s|{{TECH_STACK}}|$TECH_STACK|g" .claude/ARCHITECTURE.md
-    sed -i.bak "s|{{PROJECT_STRUCTURE}}|$PROJECT_STRUCTURE|g" .claude/ARCHITECTURE.md
-    sed -i.bak "s|{{COMPONENT_1_NAME}}|Main Application|g" .claude/ARCHITECTURE.md
-    sed -i.bak "s|{{COMPONENT_1_PATH}}|./src|g" .claude/ARCHITECTURE.md
-    sed -i.bak "s|{{COMPONENT_1_PURPOSE}}|Core application code|g" .claude/ARCHITECTURE.md
-    sed -i.bak "s|{{COMPONENT_2_NAME}}|Configuration|g" .claude/ARCHITECTURE.md
-    sed -i.bak "s|{{COMPONENT_2_PATH}}|./config|g" .claude/ARCHITECTURE.md
-    sed -i.bak "s|{{COMPONENT_2_PURPOSE}}|Project configuration|g" .claude/ARCHITECTURE.md
-    sed -i.bak "s|{{ARCHITECTURE_PATTERN}}|See existing code|g" .claude/ARCHITECTURE.md
-    sed -i.bak "s|{{PATTERN_DESCRIPTION}}|Analyzed from existing project|g" .claude/ARCHITECTURE.md
-    sed -i.bak "s|{{DATA_FLOW_DIAGRAM}}|See existing documentation|g" .claude/ARCHITECTURE.md
-    sed -i.bak "s|{{DEPENDENCIES_LIST}}|See package.json or requirements.txt|g" .claude/ARCHITECTURE.md
-    sed -i.bak "s|{{ENV_CONFIG}}|See existing configuration files|g" .claude/ARCHITECTURE.md
-    sed -i.bak "s|{{BUILD_CONFIG}}|See existing build scripts|g" .claude/ARCHITECTURE.md
-    sed -i.bak "s|{{TESTING_STRATEGY}}|See existing tests|g" .claude/ARCHITECTURE.md
-    sed -i.bak "s|{{DEPLOYMENT_INFO}}|See existing deployment configuration|g" .claude/ARCHITECTURE.md
-    rm -f .claude/ARCHITECTURE.md.bak
 
     log_success "Generated meta files from project analysis"
 }
@@ -355,6 +377,9 @@ main() {
     echo "  Version: $VERSION"
     echo "════════════════════════════════════════════════════════════"
     echo ""
+
+    # Extract framework from self
+    extract_framework
 
     # Check git
     if ! check_git; then
@@ -497,3 +522,10 @@ EOF
 
 # Run main function
 main "$@"
+
+exit 0
+
+# ============================================================================
+# EMBEDDED ARCHIVE BELOW - DO NOT EDIT
+# ============================================================================
+__ARCHIVE_BELOW__

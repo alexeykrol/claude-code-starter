@@ -1,11 +1,11 @@
 # SNAPSHOT — Claude Code Starter Framework
 
-*Last updated: 2025-12-07*
+*Last updated: 2025-12-08*
 
 ## Current State
 
 **Version:** 2.1.0
-**Status:** Migration system complete - ready for distribution
+**Status:** Installation system simplified - one-file self-extracting installer
 **Branch:** feat/framework-v2.0
 
 ## What's New in v2.0

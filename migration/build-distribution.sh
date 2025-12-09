@@ -1,21 +1,24 @@
 #!/bin/bash
 #
 # Claude Code Starter Framework — Distribution Builder
-# Version: 2.0.5
+# Version: 2.1.0
 #
-# This script creates the distribution package that users will download.
+# This script creates a self-extracting init-project.sh installer
+# that users can download and run directly.
 #
 
 set -e  # Exit on error
 
-VERSION="2.0.5"
+VERSION="2.1.0"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
-DIST_DIR="$PROJECT_ROOT/dist-package"
+DIST_DIR="$PROJECT_ROOT/dist-release"
+TEMP_DIR="/tmp/claude-framework-build-$$"
 
 # Colors for output
 GREEN='\033[0;32m'
 BLUE='\033[0;34m'
+YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
 echo ""
@@ -25,122 +28,113 @@ echo "  Version: $VERSION"
 echo "════════════════════════════════════════════════════════════"
 echo ""
 
+# Cleanup function
+cleanup() {
+    if [ -d "$TEMP_DIR" ]; then
+        rm -rf "$TEMP_DIR"
+    fi
+}
+
+trap cleanup EXIT
+
 # Clean previous build
 if [ -d "$DIST_DIR" ]; then
     echo -e "${BLUE}ℹ${NC} Cleaning previous build..."
     rm -rf "$DIST_DIR"
 fi
 
-# Create distribution directory
-mkdir -p "$DIST_DIR/framework-bundle"
-echo -e "${GREEN}✓${NC} Created distribution directory"
+# Create directories
+mkdir -p "$DIST_DIR"
+mkdir -p "$TEMP_DIR/framework"
+echo -e "${GREEN}✓${NC} Created build directories"
 
 # ============================================================================
-# Copy Framework Files
+# Copy Framework Files to Temp
 # ============================================================================
 
-echo -e "${BLUE}ℹ${NC} Copying framework files..."
+echo -e "${BLUE}ℹ${NC} Collecting framework files..."
 
 # 1. CLAUDE.md (framework instructions)
-cp "$PROJECT_ROOT/CLAUDE.md" "$DIST_DIR/framework-bundle/"
+cp "$PROJECT_ROOT/CLAUDE.md" "$TEMP_DIR/framework/"
 echo -e "${GREEN}✓${NC} Copied CLAUDE.md"
 
 # 2. FRAMEWORK_GUIDE (usage guide for users)
-cp "$SCRIPT_DIR/FRAMEWORK_GUIDE.template.md" "$DIST_DIR/framework-bundle/FRAMEWORK_GUIDE.md"
+cp "$SCRIPT_DIR/FRAMEWORK_GUIDE.template.md" "$TEMP_DIR/framework/FRAMEWORK_GUIDE.md"
 echo -e "${GREEN}✓${NC} Copied FRAMEWORK_GUIDE.md"
 
 # 3. .claude/commands/ (slash commands)
-mkdir -p "$DIST_DIR/framework-bundle/.claude/commands"
-cp -r "$PROJECT_ROOT/.claude/commands/"* "$DIST_DIR/framework-bundle/.claude/commands/"
+mkdir -p "$TEMP_DIR/framework/.claude/commands"
+cp -r "$PROJECT_ROOT/.claude/commands/"* "$TEMP_DIR/framework/.claude/commands/"
 echo -e "${GREEN}✓${NC} Copied slash commands"
 
 # 4. .claude/dist/ (compiled framework code)
-mkdir -p "$DIST_DIR/framework-bundle/.claude/dist"
-cp -r "$PROJECT_ROOT/dist/claude-export" "$DIST_DIR/framework-bundle/.claude/dist/"
+mkdir -p "$TEMP_DIR/framework/.claude/dist"
+cp -r "$PROJECT_ROOT/dist/claude-export" "$TEMP_DIR/framework/.claude/dist/"
 echo -e "${GREEN}✓${NC} Copied compiled framework code"
 
 # 5. .claude/templates/ (meta file templates)
-mkdir -p "$DIST_DIR/framework-bundle/.claude/templates"
-cp "$SCRIPT_DIR/templates/"*.md "$DIST_DIR/framework-bundle/.claude/templates/"
+mkdir -p "$TEMP_DIR/framework/.claude/templates"
+cp "$SCRIPT_DIR/templates/"*.md "$TEMP_DIR/framework/.claude/templates/"
 echo -e "${GREEN}✓${NC} Copied meta file templates"
 
-# 6. package.json scripts (for dialog management)
-cat > "$DIST_DIR/framework-bundle/package.json.snippet" <<'EOF'
-{
-  "scripts": {
-    "dialog:export": "node .claude/dist/claude-export/cli.js export",
-    "dialog:ui": "node .claude/dist/claude-export/cli.js ui",
-    "dialog:watch": "node .claude/dist/claude-export/cli.js watch",
-    "dialog:list": "node .claude/dist/claude-export/cli.js list"
-  }
-}
-EOF
-echo -e "${GREEN}✓${NC} Created package.json snippet"
-
-# 7. .gitignore template
-cat > "$DIST_DIR/framework-bundle/.gitignore.snippet" <<'EOF'
-# Claude Code Starter Framework
-dialog/
-html-viewer/
-.claude/.last_session
-.claude/.backup-*
-EOF
-echo -e "${GREEN}✓${NC} Created .gitignore snippet"
-
 # ============================================================================
-# Create framework-bundle.tar.gz
+# Create Framework Archive
 # ============================================================================
 
-echo -e "${BLUE}ℹ${NC} Creating framework bundle archive..."
-cd "$DIST_DIR"
-tar -czf framework-bundle.tar.gz framework-bundle/
-rm -rf framework-bundle/
-echo -e "${GREEN}✓${NC} Created framework-bundle.tar.gz"
+echo -e "${BLUE}ℹ${NC} Creating framework archive..."
+cd "$TEMP_DIR"
+tar -czf framework.tar.gz framework/
+echo -e "${GREEN}✓${NC} Created framework.tar.gz"
 
 # ============================================================================
-# Copy Installation Files
+# Build Self-Extracting Installer
 # ============================================================================
 
-echo -e "${BLUE}ℹ${NC} Copying installation files..."
+echo -e "${BLUE}ℹ${NC} Building self-extracting installer..."
 
-# Copy init-project.sh
-cp "$SCRIPT_DIR/init-project.sh" "$DIST_DIR/"
+# Copy installer template
+cp "$SCRIPT_DIR/init-project.sh" "$DIST_DIR/init-project.sh"
+
+# Append base64-encoded archive
+echo "" >> "$DIST_DIR/init-project.sh"
+base64 -i framework.tar.gz >> "$DIST_DIR/init-project.sh"
+
+# Make executable
 chmod +x "$DIST_DIR/init-project.sh"
-echo -e "${GREEN}✓${NC} Copied init-project.sh"
 
-# Copy MIGRATION_GUIDE.md
-cp "$SCRIPT_DIR/MIGRATION_GUIDE.md" "$DIST_DIR/"
-echo -e "${GREEN}✓${NC} Copied MIGRATION_GUIDE.md"
+echo -e "${GREEN}✓${NC} Created self-extracting init-project.sh"
 
 # ============================================================================
-# Create Final Distribution Package
+# Create Distribution Summary
 # ============================================================================
 
-echo -e "${BLUE}ℹ${NC} Creating final distribution package..."
-cd "$DIST_DIR"
-tar -czf "$PROJECT_ROOT/claude-code-starter-v${VERSION}.tar.gz" \
-    init-project.sh \
-    MIGRATION_GUIDE.md \
-    framework-bundle.tar.gz
+INSTALLER_SIZE=$(du -h "$DIST_DIR/init-project.sh" | awk '{print $1}')
 
-echo -e "${GREEN}✓${NC} Created distribution package"
+cat > "$DIST_DIR/README.txt" <<EOF
+Claude Code Starter Framework v${VERSION}
+Distribution Package
 
-# ============================================================================
-# Create Checksum
-# ============================================================================
+Files:
+  - init-project.sh (${INSTALLER_SIZE}) - Self-extracting installer
 
-echo -e "${BLUE}ℹ${NC} Generating checksum..."
-cd "$PROJECT_ROOT"
-shasum -a 256 "claude-code-starter-v${VERSION}.tar.gz" > "claude-code-starter-v${VERSION}.tar.gz.sha256"
-echo -e "${GREEN}✓${NC} Created checksum file"
+Usage:
+  1. Copy init-project.sh to your project directory
+  2. Make executable: chmod +x init-project.sh
+  3. Run: ./init-project.sh
 
-# ============================================================================
-# Cleanup
-# ============================================================================
+Or use curl:
+  curl -O https://github.com/alexeykrol/claude-code-starter/releases/download/v${VERSION}/init-project.sh
+  chmod +x init-project.sh
+  ./init-project.sh
 
-echo -e "${BLUE}ℹ${NC} Cleaning up..."
-rm -rf "$DIST_DIR"
-echo -e "${GREEN}✓${NC} Cleanup complete"
+This installer is self-contained and includes all framework files.
+No additional downloads required.
+
+---
+Generated: $(date)
+EOF
+
+echo -e "${GREEN}✓${NC} Created README.txt"
 
 # ============================================================================
 # Summary
@@ -148,24 +142,22 @@ echo -e "${GREEN}✓${NC} Cleanup complete"
 
 echo ""
 echo "════════════════════════════════════════════════════════════"
-echo -e "${GREEN}✓${NC} Distribution built successfully!"
+echo -e "${GREEN}✓ Build Complete!${NC}"
 echo "════════════════════════════════════════════════════════════"
 echo ""
+echo "Distribution location:"
+echo "  $DIST_DIR/"
+echo ""
 echo "Files created:"
-echo "  - claude-code-starter-v${VERSION}.tar.gz"
-echo "  - claude-code-starter-v${VERSION}.tar.gz.sha256"
+echo "  - init-project.sh (${INSTALLER_SIZE}) - Self-extracting installer"
+echo "  - README.txt - Usage instructions"
 echo ""
-echo "Size: $(du -h claude-code-starter-v${VERSION}.tar.gz | cut -f1)"
+echo "Next steps:"
+echo "  1. Test the installer on a clean project"
+echo "  2. Upload init-project.sh to GitHub Releases"
+echo "  3. Update MIGRATION_GUIDE.md with download URL"
 echo ""
-echo "To test installation:"
-echo "  mkdir test-project && cd test-project"
-echo "  git init"
-echo "  tar -xzf ../claude-code-starter-v${VERSION}.tar.gz"
-echo "  ./init-project.sh"
-echo ""
-echo "To publish:"
-echo "  1. Create GitHub release: v${VERSION}"
-echo "  2. Upload claude-code-starter-v${VERSION}.tar.gz"
-echo "  3. Upload claude-code-starter-v${VERSION}.tar.gz.sha256"
-echo "  4. Update download URLs in documentation"
+echo "Test command:"
+echo "  cp $DIST_DIR/init-project.sh /path/to/test-project/"
+echo "  cd /path/to/test-project && ./init-project.sh"
 echo ""
