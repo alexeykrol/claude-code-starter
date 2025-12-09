@@ -18,4 +18,4 @@ This installer is self-contained and includes all framework files.
 No additional downloads required.
 
 ---
-Generated: Mon Dec  8 15:27:02 PST 2025
+Generated: Mon Dec  8 16:43:49 PST 2025

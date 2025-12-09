@@ -518,6 +518,11 @@ EOF
         echo "  - $BACKUP_DIR — Old files backup"
         echo ""
     fi
+
+    # Clean up installer
+    log_info "Cleaning up installer..."
+    rm -f "$PROJECT_DIR/init-project.sh"
+    log_success "Installer removed"
 }
 
 # Run main function
