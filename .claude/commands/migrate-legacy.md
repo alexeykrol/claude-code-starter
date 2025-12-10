@@ -6,6 +6,40 @@
 
 ---
 
+## Step 0: Initialize Migration Log
+
+Before starting, create migration log for crash recovery:
+
+```bash
+echo '{
+  "status": "in_progress",
+  "mode": "legacy",
+  "started": "'$(date -Iseconds)'",
+  "updated": "'$(date -Iseconds)'",
+  "current_step": 1,
+  "current_step_name": "discovery",
+  "steps_completed": [],
+  "last_error": null
+}' > .claude/migration-log.json
+```
+
+**Update log after each step:**
+```bash
+# Template for updating log (replace STEP_NUM and STEP_NAME)
+echo '{
+  "status": "in_progress",
+  "mode": "legacy",
+  "started": "[keep original]",
+  "updated": "'$(date -Iseconds)'",
+  "current_step": STEP_NUM,
+  "current_step_name": "STEP_NAME",
+  "steps_completed": ["discovery", "analysis", ...],
+  "last_error": null
+}' > .claude/migration-log.json
+```
+
+---
+
 ## Core Principles
 
 1. ❌ **NEVER modify existing project files** - only create `.claude/` files
@@ -555,14 +589,51 @@ Show simple completion message:
   • Your existing files: ✅ NOT modified
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+````
+
+---
+
+## Step 9: Finalize Migration
+
+Complete the migration by swapping CLAUDE.md:
+
+```bash
+# Mark migration as completed in log
+echo '{
+  "status": "completed",
+  "mode": "legacy",
+  "completed": "'$(date -Iseconds)'"
+}' > .claude/migration-log.json
+
+# Swap migration CLAUDE.md with production version
+if [ -f ".claude/CLAUDE.production.md" ]; then
+    cp .claude/CLAUDE.production.md CLAUDE.md
+    rm .claude/CLAUDE.production.md
+    echo "✅ Swapped CLAUDE.md to production mode"
+fi
+
+# Cleanup migration files
+rm .claude/migration-log.json
+rm .claude/migration-context.json 2>/dev/null
+
+echo "✅ Migration cleanup complete"
+```
+
+Show final message:
+
+```
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🎉 Migration Complete!
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Framework is now in production mode.
 
 🚀 Next Step:
 
-  Введите команду "start" или "начать", чтобы фреймворк запустился.
-  (Type "start" or "начать" to launch the framework)
+  Type "start" to begin working with the framework.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-````
+```
 
 ---
 

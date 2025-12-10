@@ -1,14 +1,14 @@
 #!/bin/bash
 #
 # Claude Code Starter Framework — Installer
-# Version: 2.1.1
+# Version: 2.2.0
 #
 # Downloads and installs the framework from GitHub Releases
 #
 
 set -e  # Exit on error
 
-VERSION="2.1.1"
+VERSION="2.2.0"
 REPO="alexeykrol/claude-code-starter"
 ARCHIVE_URL="https://github.com/${REPO}/releases/download/v${VERSION}/framework.tar.gz"
 PROJECT_DIR="$(pwd)"
@@ -281,10 +281,10 @@ if [ "$MIGRATION_MODE" = "new" ]; then
         log_success "Installed .claude/ directory"
     fi
 
-    # Copy CLAUDE.md
-    if [ ! -f "CLAUDE.md" ] && [ -f "$TEMP_DIR/framework/CLAUDE.md" ]; then
-        cp "$TEMP_DIR/framework/CLAUDE.md" .
-        log_success "Installed CLAUDE.md"
+    # Copy CLAUDE.production.md as CLAUDE.md (no migration needed)
+    if [ ! -f "CLAUDE.md" ] && [ -f "$TEMP_DIR/framework/CLAUDE.production.md" ]; then
+        cp "$TEMP_DIR/framework/CLAUDE.production.md" CLAUDE.md
+        log_success "Installed CLAUDE.md (production)"
     fi
 
     # Copy FRAMEWORK_GUIDE.md
@@ -335,13 +335,19 @@ else
     cp "$TEMP_DIR/framework/.claude/commands/upgrade-framework.md" .claude/commands/ 2>/dev/null || true
     log_success "Installed migration commands"
 
-    # Copy CLAUDE.md (needed for Claude to know the protocol)
-    if [ ! -f "CLAUDE.md" ] && [ -f "$TEMP_DIR/framework/CLAUDE.md" ]; then
-        cp "$TEMP_DIR/framework/CLAUDE.md" .
-        log_success "Installed CLAUDE.md"
+    # Copy CLAUDE.migration.md as CLAUDE.md (temporary, will be replaced after migration)
+    if [ -f "$TEMP_DIR/framework/CLAUDE.migration.md" ]; then
+        cp "$TEMP_DIR/framework/CLAUDE.migration.md" CLAUDE.md
+        log_success "Installed CLAUDE.md (migration mode)"
     fi
 
-    # Store framework archive path for Claude to use later
+    # Store CLAUDE.production.md for swap after migration completes
+    if [ -f "$TEMP_DIR/framework/CLAUDE.production.md" ]; then
+        cp "$TEMP_DIR/framework/CLAUDE.production.md" .claude/CLAUDE.production.md
+        log_info "Staged CLAUDE.production.md for post-migration swap"
+    fi
+
+    # Store framework archive for Claude to extract remaining files after analysis
     cp "$TEMP_DIR/framework.tar.gz" .claude/framework-pending.tar.gz 2>/dev/null || true
     log_info "Framework files staged for post-analysis installation"
 fi

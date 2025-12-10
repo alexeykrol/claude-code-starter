@@ -7,6 +7,39 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.2.0] - 2025-12-10
+
+### Added
+
+- **Two-phase CLAUDE.md system** — Separates migration from normal operation
+  - `CLAUDE.migration.md` — Contains migration logic, crash recovery, temporary
+  - `CLAUDE.production.md` — Clean production version, no migration baggage
+  - Migration ends by swapping to production version automatically
+
+- **Migration crash recovery** — New `migration-log.json` for resilient migrations
+  - Tracks migration progress in real-time (status, current_step, steps_completed)
+  - Enables recovery from interrupted migrations (restart or continue)
+  - Analogous to production crash recovery (`.last_session`)
+
+- **Step 0 in migrate-legacy.md** — Initialize migration log before starting
+- **Step 9 in migrate-legacy.md** — Finalize migration with CLAUDE.md swap
+- **Step 0 in upgrade-framework.md** — Initialize migration log with old_version
+- **Step 8 in upgrade-framework.md** — Finalize migration with CLAUDE.md swap
+
+### Changed
+
+- **init-project.sh** — Updated CLAUDE.md copy logic for two-phase system:
+  - New projects: Copy `CLAUDE.production.md` directly as `CLAUDE.md`
+  - Legacy/Upgrade: Copy `CLAUDE.migration.md` as `CLAUDE.md`, stage production for swap
+- **build-distribution.sh** — Now includes both CLAUDE.md versions in archive
+
+### Technical Details
+- `migration/CLAUDE.migration.md` — ~150 lines, migration-only logic
+- `migration/CLAUDE.production.md` — ~120 lines, clean production logic
+- `migration-log.json` structure: status, mode, current_step, steps_completed, last_error
+
+---
+
 ## [2.1.1] - 2025-12-08
 
 ### Fixed
