@@ -97,6 +97,25 @@ npm run build
 - `README.md` + `README_RU.md` — update if major features added
 - `.claude/ARCHITECTURE.md` — update if code structure changed
 
+### 2.1 Version Bumping (if creating release)
+
+**Semantic Versioning (X.Y.Z):**
+- **X** (major) — breaking changes, major architecture rewrites
+- **Y** (minor) — new features, significant improvements (e.g., 2.1.0 → 2.2.0)
+- **Z** (patch) — bug fixes, small tweaks (e.g., 2.2.0 → 2.2.1)
+
+**Files to update with new version:**
+- `init-project.sh` — line 4 (comment) and line 11 (VERSION variable)
+- `migration/build-distribution.sh` — line 4 (comment) and line 12 (VERSION variable)
+- `README.md` — version badge (line ~13)
+- `README_RU.md` — version badge (line ~13)
+- `.claude/SNAPSHOT.md` — Version field
+- `CHANGELOG.md` — new section header
+
+**After version bump:**
+1. Run `bash migration/build-distribution.sh` to rebuild dist-release/
+2. Create GitHub Release with `gh release create vX.Y.Z dist-release/init-project.sh dist-release/framework.tar.gz`
+
 ### 3. Export Dialogs
 ```bash
 npm run dialog:export --no-html
