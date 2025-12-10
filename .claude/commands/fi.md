@@ -15,7 +15,7 @@ Execute the Completion Protocol from `CLAUDE.md`:
    - `.claude/ARCHITECTURE.md` — update if code structure changed
 3. Export dialogs:
    ```bash
-   npm run dialog:export
+   node .claude/dist/claude-export/cli.js export
    ```
 4. Git commit:
    ```bash
