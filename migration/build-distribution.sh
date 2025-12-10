@@ -62,9 +62,16 @@ echo -e "${GREEN}✓${NC} Copied CLAUDE.md"
 cp "$SCRIPT_DIR/FRAMEWORK_GUIDE.template.md" "$TEMP_DIR/framework/FRAMEWORK_GUIDE.md"
 echo -e "${GREEN}✓${NC} Copied FRAMEWORK_GUIDE.md"
 
-# 3. .claude/commands/ (slash commands)
+# 3. .claude/commands/ (slash commands, excluding dev-only commands)
 mkdir -p "$TEMP_DIR/framework/.claude/commands"
-cp -r "$PROJECT_ROOT/.claude/commands/"* "$TEMP_DIR/framework/.claude/commands/"
+for cmd in "$PROJECT_ROOT/.claude/commands/"*.md; do
+    filename=$(basename "$cmd")
+    # Skip dev-only commands not meant for user projects
+    if [ "$filename" = "release.md" ]; then
+        continue
+    fi
+    cp "$cmd" "$TEMP_DIR/framework/.claude/commands/"
+done
 echo -e "${GREEN}✓${NC} Copied slash commands"
 
 # 4. .claude/dist/ (compiled framework code)
