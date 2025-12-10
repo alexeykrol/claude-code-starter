@@ -66,20 +66,25 @@ git add html-viewer/index.html && git commit -m "chore: Update student UI with l
 echo '{"status": "active", "timestamp": "'$(date -Iseconds)'"}' > .claude/.last_session
 ```
 
-### Step 2: Load Context
-Read `.claude/SNAPSHOT.md` — current version, what's in progress
+### Step 2: Load Context (ALWAYS read — keep compact!)
+- `.claude/SNAPSHOT.md` — current version, what's in progress (~30-50 lines)
+- `.claude/BACKLOG.md` — current sprint tasks (~50-100 lines)
+- `.claude/ARCHITECTURE.md` — code structure (~100-200 lines)
 
-### Step 3: Context (on demand)
-- `.claude/BACKLOG.md` — current sprint tasks (always read)
-- `.claude/ROADMAP.md` — strategic direction (v2.2+, always read to understand context)
-- `.claude/ARCHITECTURE.md` — code structure (read if working with code)
+### Step 3: Context (ON DEMAND — read when needed)
+- `.claude/ROADMAP.md` — strategic direction (when planning)
+- `.claude/IDEAS.md` — ideas backlog (when exploring ideas)
+- `CHANGELOG.md` — version history (when need history)
 
 ### Step 4: Confirm
 ```
 Context loaded. Directory: [pwd]
-Framework: Claude Code Starter v2.0
+Framework: Claude Code Starter v2.2
 Ready to work!
 ```
+
+> **Token Economy:** Files in Step 2 are read EVERY session — keep them compact.
+> Historical/strategic content → Step 3 files or CHANGELOG.md.
 
 ---
 
@@ -169,6 +174,7 @@ claude-code-starter/
 │   ├── ARCHITECTURE.md     # Code structure
 │   └── BACKLOG.md          # Tasks
 ├── dialog/                 # Development dialogs
+├── reports/                # Migration logs and bug reports
 │
 ├── package.json            # npm scripts
 ├── tsconfig.json           # TypeScript config

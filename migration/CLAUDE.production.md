@@ -30,13 +30,15 @@ cat .claude/.last_session 2>/dev/null
 echo '{"status": "active", "timestamp": "'$(date -Iseconds)'"}' > .claude/.last_session
 ```
 
-### Step 2: Load Context
-Read `.claude/SNAPSHOT.md` — current version, what's in progress
+### Step 2: Load Context (ALWAYS read — keep compact!)
+- `.claude/SNAPSHOT.md` — current state (~30-50 lines)
+- `.claude/BACKLOG.md` — current sprint tasks (~50-100 lines)
+- `.claude/ARCHITECTURE.md` — code structure (~100-200 lines)
 
-### Step 3: Context (on demand)
-- `.claude/BACKLOG.md` — current sprint tasks (always read)
-- `.claude/ROADMAP.md` — strategic direction (read to understand context)
-- `.claude/ARCHITECTURE.md` — code structure (read if working with code)
+### Step 3: Context (ON DEMAND — read when needed)
+- `.claude/ROADMAP.md` — strategic direction (when planning)
+- `.claude/IDEAS.md` — ideas backlog (when exploring)
+- `CHANGELOG.md` — version history (when need history)
 
 ### Step 4: Confirm
 ```
@@ -50,6 +52,8 @@ Read `.claude/SNAPSHOT.md` — current version, what's in progress
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
+
+> **Token Economy:** Step 2 files are read EVERY session — keep them compact.
 
 ---
 
