@@ -179,6 +179,9 @@ case $PROJECT_TYPE in
         log_info "📦 Scenario: New Project"
         log_info "Simple installation with template files"
         echo ""
+
+        # Mark as new project mode
+        MIGRATION_MODE="new"
         # Continue with simple installation below
         ;;
 
@@ -326,12 +329,15 @@ if [ -d ".claude/templates" ]; then
     fi
 fi
 
-# Create migration context for complex scenarios
+# Create migration context for all scenarios
 if [ "$MIGRATION_MODE" = "legacy" ]; then
     echo "{\"mode\": \"legacy\", \"timestamp\": \"$(date -Iseconds)\"}" > .claude/migration-context.json
     log_success "Created migration context"
 elif [ "$MIGRATION_MODE" = "upgrade" ]; then
     echo "{\"mode\": \"upgrade\", \"old_version\": \"$OLD_FW_VERSION\", \"timestamp\": \"$(date -Iseconds)\"}" > .claude/migration-context.json
+    log_success "Created migration context"
+elif [ "$MIGRATION_MODE" = "new" ]; then
+    echo "{\"mode\": \"new\", \"timestamp\": \"$(date -Iseconds)\"}" > .claude/migration-context.json
     log_success "Created migration context"
 fi
 
@@ -387,15 +393,17 @@ else
     echo "Framework files installed in .claude/"
     echo "Meta files generated (SNAPSHOT, BACKLOG, ROADMAP, ARCHITECTURE, IDEAS)"
     echo ""
-    echo "📦 Next steps for New Project:"
+    echo "🔄 Next steps:"
     echo ""
-    echo "  1. Open this project in Claude Code:"
+    echo "  1. Open Claude Code:"
     echo "     claude"
     echo ""
-    echo "  2. Start working with Framework:"
-    echo "     Type: start (or начать)"
+    echo "  2. Claude will automatically:"
+    echo "     • Verify Framework installation"
+    echo "     • Show welcome message"
+    echo "     • Ask you to type 'start' to begin"
     echo ""
-    echo "  3. Claude will load your project context automatically"
+    echo "  Just run 'claude' - setup completes automatically!"
     echo ""
 fi
 

@@ -472,133 +472,41 @@ head -3 .claude/ROADMAP.md
 
 ## Step 7: Migration Summary
 
-Show comprehensive completion report:
+Show simple completion message:
 
 ````
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-✅ Framework Upgrade Complete!
+✅ Миграция завершена!
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-📊 Migration Summary:
+📊 Framework Upgrade:
 
   From: Framework v[OLD_VERSION]
   To:   Framework v2.1.1
 
-  Duration: [time elapsed]
-  Token Usage: ~[count]k tokens
-
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-📁 Files Migrated:
+📁 Files Updated:
 
-  [For v1.x → v2.1]
-  ✅ Init/PROJECT_SNAPSHOT.md → .claude/SNAPSHOT.md
-  ✅ Init/BACKLOG.md → .claude/BACKLOG.md (restructured)
-  ✅ Init/ARCHITECTURE.md → .claude/ARCHITECTURE.md
-  ✨ Created .claude/ROADMAP.md (extracted from BACKLOG)
-  ✨ Created .claude/IDEAS.md (new template)
-
-  [For v2.0 → v2.1]
+  ✅ .claude/SNAPSHOT.md (updated)
   ✅ .claude/BACKLOG.md (restructured)
-  ✨ Created .claude/ROADMAP.md (extracted Priority 1)
-  ✨ Created .claude/IDEAS.md (new template)
-  ✅ Updated .claude/SNAPSHOT.md (added links)
+  ✅ .claude/ARCHITECTURE.md (preserved)
+  ✨ .claude/ROADMAP.md (created)
+  ✨ .claude/IDEAS.md (created)
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-🎯 New 3-Level Planning Structure:
+💾 Backups:
 
-  Level 1: IDEAS.md
-    • Spontaneous, unstructured ideas
-    • "Good to have" thoughts
-    • ❌ NOT read during Cold Start
-
-  Level 2: ROADMAP.md
-    • Structured features (v2.2, v2.3, v3.0)
-    • Strategic planning
-    • ✅ READ during Cold Start
-
-  Level 3: BACKLOG.md
-    • Concrete tasks (current sprint)
-    • Agreed work items
-    • ✅ READ during Cold Start
-
-  Workflow: IDEAS → ROADMAP → BACKLOG → Done
+  ✅ Backup created: [path]
+  ✅ All your data preserved
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-💾 Backups Created:
+🚀 Next Step:
 
-  [For v1.x]
-  ✅ Init-backup-[timestamp]/
-  ✅ Init/ archived to .archive/
-
-  [For v2.0]
-  ✅ .claude/BACKLOG-backup-[timestamp].md
-
-  Backups can be deleted after verifying migration.
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-✅ Data Integrity:
-
-  ✅ All tasks preserved
-  ✅ All ideas preserved (reorganized)
-  ✅ All architecture notes intact
-  ✅ All project info intact
-  ✅ Git history untouched
-  ✅ Code untouched
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-📝 What Changed:
-
-  BACKLOG.md:
-    • Removed Priority 1 section → moved to ROADMAP.md
-    • Now focuses only on current sprint tasks
-    • Added workflow documentation at top
-
-  SNAPSHOT.md:
-    • Added planning document links
-    • Updated Framework version marker
-
-  README.md:
-    • Roadmap section replaced with link to .claude/ROADMAP.md
-
-  NEW FILES:
-    • ROADMAP.md - strategic planning
-    • IDEAS.md - idea collection
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-🚀 Next Steps:
-
-  1. Review migrated files:
-     cat .claude/ROADMAP.md
-     cat .claude/IDEAS.md
-
-  2. Verify your tasks still there:
-     cat .claude/BACKLOG.md
-
-  3. Start working with new structure:
-     Type: start
-
-  4. Cold Start will now read ROADMAP.md automatically!
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-💡 New Features Available:
-
-  • 3-level idea maturation (IDEAS → ROADMAP → BACKLOG)
-  • Strategic planning in ROADMAP.md
-  • Cleaner BACKLOG (only current work)
-  • Better token economy (IDEAS not loaded)
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-🎉 Framework v2.1 is ready!
-
-Type "start" to begin. 🚀
+  Введите команду "start" или "начать", чтобы фреймворк запустился.
+  (Type "start" or "начать" to launch the framework)
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ````

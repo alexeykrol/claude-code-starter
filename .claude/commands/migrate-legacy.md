@@ -161,7 +161,10 @@ Why I recommend this:
 [Clear 2-3 sentence explanation of reasoning based on analysis]
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Your choice? (1/2 or press Enter for recommendation)
+Your choice?
+  • 1 - Choose Option 1
+  • 2 - Choose Option 2
+  • best (or press Enter) - Сделай, как лучше (Use my recommendation)
 ````
 
 **Example Questions to Ask:**
@@ -493,90 +496,35 @@ head -5 .claude/ROADMAP.md
 
 ## Step 8: Migration Summary
 
-Show comprehensive completion summary:
+Show simple completion message:
 
 ````
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-✅ Legacy Migration Complete!
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-📊 Analysis Summary:
-
-  Discovery:
-    • Files analyzed: 127
-    • Documentation found: 3 files (README, TODO, docs/architecture)
-    • Commits reviewed: 50
-    • Issues reviewed: 8
-
-  Project Understanding:
-    • Tech Stack: React 18, TypeScript, Node.js
-    • Version: 2.3.1 (Production)
-    • Lines of Code: ~15,000
-    • Main Modules: 5 identified
-
+✅ Миграция завершена!
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 📁 Framework Files Created:
 
-  ✅ .claude/SNAPSHOT.md (234 lines)
-     Current state, active modules, recent achievements
-
-  ✅ .claude/BACKLOG.md (156 lines)
-     23 tasks from TODO.md, 8 from GitHub Issues
-
-  ✅ .claude/ROADMAP.md (89 lines)
-     v2.4, v3.0 plans from README roadmap
-
-  ✅ .claude/ARCHITECTURE.md (312 lines)
-     Component hierarchy, service layer, data flow
-
-  ✅ .claude/IDEAS.md (45 lines)
-     Empty template for future ideas
+  ✅ .claude/SNAPSHOT.md
+  ✅ .claude/BACKLOG.md
+  ✅ .claude/ROADMAP.md
+  ✅ .claude/ARCHITECTURE.md
+  ✅ .claude/IDEAS.md
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-💰 Token Usage: 31,247 tokens (~$0.09 USD)
+📊 Analysis Summary:
+
+  • Files analyzed: [count]
+  • Token usage: ~[count]k tokens (~$[cost] USD)
+  • Your existing files: ✅ NOT modified
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-📋 What Was NOT Modified:
+🚀 Next Step:
 
-  ✅ All existing files preserved
-  ✅ README.md - untouched
-  ✅ TODO.md - untouched
-  ✅ docs/ - untouched
-  ✅ Git history - untouched
-
-  Framework just adds a management layer!
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-🚀 Next Steps:
-
-  1. Review generated files:
-     cat .claude/SNAPSHOT.md
-     cat .claude/BACKLOG.md
-
-  2. Make adjustments if needed:
-     [edit files manually]
-
-  3. Start working with Framework:
-     Type: start
-
-  4. Framework will load context automatically!
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-💡 Tips:
-
-  • Update SNAPSHOT.md after major milestones
-  • Move completed tasks from BACKLOG to Archive
-  • Add spontaneous ideas to IDEAS.md
-  • ROADMAP is your strategic vision
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-Ready to start! Type "start" to load context. 🚀
+  Введите команду "start" или "начать", чтобы фреймворк запустился.
+  (Type "start" or "начать" to launch the framework)
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ````
