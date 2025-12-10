@@ -21,35 +21,46 @@ Meta-framework for structured AI-assisted development with Claude Code — now w
 
 ## 🚀 For Users: Want to Use This Framework?
 
-### Before Installation
+### Before installing the framework, Node.js must be installed on your computer
 
-**Install Node.js** (if not already installed):
-1. Download from https://nodejs.org/ (choose LTS version)
-2. Install (just click "Next"/"Continue")
-3. Restart your terminal
-
-**Check if Node.js is installed:**
+1. Check if Node.js is installed by opening Terminal on your computer and entering the command:
 ```bash
 node --version
 ```
+If the terminal shows something like v20.19.4, or v20.4, then everything is fine - proceed directly to Framework Installation. If the terminal shows nothing or a lower version, you need to install the latest version of node.js.
 
-### Installation Steps
+**How to install Node.js** (if not already installed):
+1. Download from https://nodejs.org/ (choose LTS version)
 
-**1. Create your project folder** (if it doesn't exist yet)
+2. Install (just click "Next"/"Continue")
 
-**2.** Find `init-project.sh` in the root of this repository, right-click it, choose "Save Link As..." and select your project folder
+3. Restart your terminal and enter the command again:
+```bash
+node --version
+```
+The terminal should show the correct node.js version number.
 
-**3. Open VSCode:**
-   - File → Open Folder
-   - Select your project folder (where `init-project.sh` is)
+### Installation
 
-**4. Open Terminal in VSCode:**
-   - Menu: Terminal → New Terminal
+1. Create a project folder on your local computer (if not already created).
 
-**5. Run:**
+2. In the root of this GitHub repository, find the `init-project.sh` file, hover over it, and right-click. A menu will appear - select "Save Link As..." and specify your project folder. Make sure the `init-project.sh` file is copied to your folder. In short, your task is to save the `init-project.sh` file to the root of your project on your computer.
+
+3. Open the project in VSCode. To do this:
+   - Launch VSCode, then...
+   - In the menu, click File → Open Folder
+   - In the window that opens, select your project folder (where `init-project.sh` is located)
+   - In the menu, click Terminal → New Terminal
+   - In the terminal line, enter the command:
 ```bash
 ./init-project.sh
 ```
+
+4. After init-project.sh completes, enter the command `claude` in the terminal to launch Claude Code, which will begin the installation. If you already have project code (legacy migration), Claude Code will ask clarifying questions, offering you to choose one option or another. You should select from the suggested options or choose the "Do what's best" option. If you have a new empty project - there will be no questions, the framework will immediately create templates. When the installer finishes, it will display the message "Migration complete, enter the command 'start' to launch the framework."
+
+5. Enter the command "start", and Claude will perform a full cold start of the project. When it finishes, it will give you a brief summary of the current project state and enter waiting mode. After that, you can work on your project.
+
+6. When you decide that your current sprint is complete, enter the `/fi` command, and Claude Code will execute the completion protocol so you can start from where you left off.
 
 **Done!** Read `FRAMEWORK_GUIDE.md` in your project root to learn how to use the framework.
 
@@ -517,25 +528,7 @@ Framework inspired by:
 
 ## ⭐ Roadmap
 
-### v2.0.2 (Current)
-- ✅ TypeScript codebase with npm project structure
-- ✅ Dialog export system (CLI, Web UI, auto-watch)
-- ✅ Crash recovery and completion protocols
-- ✅ Summary parsing with marker system
-- ✅ Privacy management (Teacher/Student UI)
-- ✅ Simplified architecture
-
-### v2.1 (In Progress)
-- [ ] Auto-generate summaries for PENDING dialogs
-- [ ] Enhanced Web UI with filtering and search
-- [ ] Export to multiple formats (PDF, HTML)
-- [ ] Migration tools for legacy projects
-
-### v3.0 (Future)
-- [ ] VS Code extension
-- [ ] Multi-project workspace support
-- [ ] Team collaboration features
-- [ ] AI-powered insights from dialog history
+See detailed roadmap with all planned features and improvements: [.claude/ROADMAP.md](.claude/ROADMAP.md)
 
 ---
 
