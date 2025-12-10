@@ -6,40 +6,16 @@ description: Launch Web UI for dialog management
 
 Launch the web interface for browsing and managing Claude Code dialogs.
 
-## Command
+## Execute
 
+First time setup (install dependencies):
 ```bash
-npm run dialog:ui
+cd .claude/dist/claude-export && npm install && cd ../../..
 ```
 
-Or directly:
+Then run:
 ```bash
-node .claude-export/dist/cli.js ui
+node .claude/dist/claude-export/cli.js ui
 ```
 
-## Features
-
-- Browse all exported dialogs
-- Toggle visibility (public/private)
-- Search across dialogs
-- View dialog details
-- Manage .gitignore entries
-
-## Usage
-
-1. Run the command above
-2. Open http://localhost:3333 in browser
-3. Browse and manage your dialogs
-4. Press Ctrl+C to stop
-
-## Options
-
-```bash
-npm run dialog:ui -- --port 8080  # Custom port
-```
-
-## Notes
-
-- Dialogs are private by default (in .gitignore)
-- Toggle visibility to share specific dialogs
-- All processing is local, no external APIs
+Open http://localhost:3333 in browser. Press Ctrl+C to stop.

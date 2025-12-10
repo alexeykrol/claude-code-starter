@@ -6,6 +6,40 @@
 
 ---
 
+## Step 0: Initialize Migration Log
+
+Before starting, create migration log for crash recovery:
+
+```bash
+echo '{
+  "status": "in_progress",
+  "mode": "legacy",
+  "started": "'$(date -Iseconds)'",
+  "updated": "'$(date -Iseconds)'",
+  "current_step": 1,
+  "current_step_name": "discovery",
+  "steps_completed": [],
+  "last_error": null
+}' > .claude/migration-log.json
+```
+
+**Update log after each step:**
+```bash
+# Template for updating log (replace STEP_NUM and STEP_NAME)
+echo '{
+  "status": "in_progress",
+  "mode": "legacy",
+  "started": "[keep original]",
+  "updated": "'$(date -Iseconds)'",
+  "current_step": STEP_NUM,
+  "current_step_name": "STEP_NAME",
+  "steps_completed": ["discovery", "analysis", ...],
+  "last_error": null
+}' > .claude/migration-log.json
+```
+
+---
+
 ## Core Principles
 
 1. ❌ **NEVER modify existing project files** - only create `.claude/` files
@@ -494,6 +528,41 @@ head -5 .claude/ROADMAP.md
 
 ---
 
+## Step 7.5: Install Remaining Framework Files
+
+After analysis and meta file generation, install remaining Framework files:
+
+```bash
+# Extract staged framework files
+if [ -f ".claude/framework-pending.tar.gz" ]; then
+    tar -xzf .claude/framework-pending.tar.gz -C /tmp/
+
+    # Copy commands (except migrate-legacy which already exists)
+    cp /tmp/framework/.claude/commands/*.md .claude/commands/ 2>/dev/null || true
+
+    # Copy dist (CLI tools)
+    cp -r /tmp/framework/.claude/dist .claude/ 2>/dev/null || true
+
+    # Copy templates
+    cp -r /tmp/framework/.claude/templates .claude/ 2>/dev/null || true
+
+    # Copy FRAMEWORK_GUIDE.md
+    cp /tmp/framework/FRAMEWORK_GUIDE.md . 2>/dev/null || true
+
+    # Cleanup
+    rm .claude/framework-pending.tar.gz
+    rm -rf /tmp/framework
+fi
+```
+
+This installs:
+- All slash commands
+- CLI tools for dialog export
+- Templates for future use
+- Framework guide
+
+---
+
 ## Step 8: Migration Summary
 
 Show simple completion message:
@@ -520,14 +589,51 @@ Show simple completion message:
   • Your existing files: ✅ NOT modified
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+````
+
+---
+
+## Step 9: Finalize Migration
+
+Complete the migration by swapping CLAUDE.md:
+
+```bash
+# Mark migration as completed in log
+echo '{
+  "status": "completed",
+  "mode": "legacy",
+  "completed": "'$(date -Iseconds)'"
+}' > .claude/migration-log.json
+
+# Swap migration CLAUDE.md with production version
+if [ -f ".claude/CLAUDE.production.md" ]; then
+    cp .claude/CLAUDE.production.md CLAUDE.md
+    rm .claude/CLAUDE.production.md
+    echo "✅ Swapped CLAUDE.md to production mode"
+fi
+
+# Cleanup migration files
+rm .claude/migration-log.json
+rm .claude/migration-context.json 2>/dev/null
+
+echo "✅ Migration cleanup complete"
+```
+
+Show final message:
+
+```
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🎉 Migration Complete!
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Framework is now in production mode.
 
 🚀 Next Step:
 
-  Введите команду "start" или "начать", чтобы фреймворк запустился.
-  (Type "start" or "начать" to launch the framework)
+  Type "start" to begin working with the framework.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-````
+```
 
 ---
 
