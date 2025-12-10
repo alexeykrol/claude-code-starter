@@ -92,8 +92,8 @@ echo -e "${GREEN}✓${NC} Created framework.tar.gz"
 
 echo -e "${BLUE}ℹ${NC} Preparing distribution files..."
 
-# Copy installer script (small loader)
-cp "$SCRIPT_DIR/init-project.sh" "$DIST_DIR/init-project.sh"
+# Copy installer script from project root (single source of truth)
+cp "$PROJECT_ROOT/init-project.sh" "$DIST_DIR/init-project.sh"
 chmod +x "$DIST_DIR/init-project.sh"
 echo -e "${GREEN}✓${NC} Copied init-project.sh loader"
 
