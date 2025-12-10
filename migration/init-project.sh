@@ -296,7 +296,8 @@ if [ -d ".claude/templates" ]; then
 
     PROJECT_NAME=$(basename "$PROJECT_DIR")
     DATE=$(date +%Y-%m-%d)
-    BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "main")
+    BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null | tr -d '\n' || echo "main")
+    [ -z "$BRANCH" ] && BRANCH="main"
 
     # Generate SNAPSHOT.md (only if doesn't exist - preserve legacy project data!)
     if [ ! -f ".claude/SNAPSHOT.md" ] && [ -f ".claude/templates/SNAPSHOT.template.md" ]; then
