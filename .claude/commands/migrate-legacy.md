@@ -494,6 +494,41 @@ head -5 .claude/ROADMAP.md
 
 ---
 
+## Step 7.5: Install Remaining Framework Files
+
+After analysis and meta file generation, install remaining Framework files:
+
+```bash
+# Extract staged framework files
+if [ -f ".claude/framework-pending.tar.gz" ]; then
+    tar -xzf .claude/framework-pending.tar.gz -C /tmp/
+
+    # Copy commands (except migrate-legacy which already exists)
+    cp /tmp/framework/.claude/commands/*.md .claude/commands/ 2>/dev/null || true
+
+    # Copy dist (CLI tools)
+    cp -r /tmp/framework/.claude/dist .claude/ 2>/dev/null || true
+
+    # Copy templates
+    cp -r /tmp/framework/.claude/templates .claude/ 2>/dev/null || true
+
+    # Copy FRAMEWORK_GUIDE.md
+    cp /tmp/framework/FRAMEWORK_GUIDE.md . 2>/dev/null || true
+
+    # Cleanup
+    rm .claude/framework-pending.tar.gz
+    rm -rf /tmp/framework
+fi
+```
+
+This installs:
+- All slash commands
+- CLI tools for dialog export
+- Templates for future use
+- Framework guide
+
+---
+
 ## Step 8: Migration Summary
 
 Show simple completion message:
