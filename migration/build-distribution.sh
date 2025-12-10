@@ -54,9 +54,9 @@ echo -e "${GREEN}✓${NC} Created build directories"
 
 echo -e "${BLUE}ℹ${NC} Collecting framework files..."
 
-# 1. CLAUDE.md (framework instructions)
-cp "$PROJECT_ROOT/CLAUDE.md" "$TEMP_DIR/framework/"
-echo -e "${GREEN}✓${NC} Copied CLAUDE.md"
+# 1. CLAUDE.md (framework instructions - use template for host projects)
+cp "$SCRIPT_DIR/CLAUDE.template.md" "$TEMP_DIR/framework/CLAUDE.md"
+echo -e "${GREEN}✓${NC} Copied CLAUDE.md (host project template)"
 
 # 2. FRAMEWORK_GUIDE (usage guide for users)
 cp "$SCRIPT_DIR/FRAMEWORK_GUIDE.template.md" "$TEMP_DIR/framework/FRAMEWORK_GUIDE.md"
