@@ -1,14 +1,14 @@
 #!/bin/bash
 #
 # Claude Code Starter Framework — Installer
-# Version: 2.1.1
+# Version: 2.2.0
 #
 # Downloads and installs the framework from GitHub Releases
 #
 
 set -e  # Exit on error
 
-VERSION="2.1.1"
+VERSION="2.2.0"
 REPO="alexeykrol/claude-code-starter"
 ARCHIVE_URL="https://github.com/${REPO}/releases/download/v${VERSION}/framework.tar.gz"
 PROJECT_DIR="$(pwd)"
@@ -266,67 +266,90 @@ case $PROJECT_TYPE in
 esac
 
 # ============================================
-# Install Framework Files
+# Install Framework Files (mode-dependent)
 # ============================================
 
 log_info "Installing framework to current directory..."
 
-# Copy .claude directory structure
-if [ -d "$TEMP_DIR/framework/.claude" ]; then
-    mkdir -p .claude
-    cp -r "$TEMP_DIR/framework/.claude/"* .claude/ 2>/dev/null || true
-    log_success "Installed .claude/ directory"
-fi
+if [ "$MIGRATION_MODE" = "new" ]; then
+    # NEW PROJECT: Copy everything, generate meta files
 
-# Copy CLAUDE.md if not exists
-if [ ! -f "CLAUDE.md" ] && [ -f "$TEMP_DIR/framework/CLAUDE.md" ]; then
-    cp "$TEMP_DIR/framework/CLAUDE.md" .
-    log_success "Installed CLAUDE.md"
-fi
-
-# Copy FRAMEWORK_GUIDE.md
-if [ -f "$TEMP_DIR/framework/FRAMEWORK_GUIDE.md" ]; then
-    cp "$TEMP_DIR/framework/FRAMEWORK_GUIDE.md" .
-    log_success "Installed FRAMEWORK_GUIDE.md"
-fi
-
-# Generate meta files from templates
-if [ -d ".claude/templates" ]; then
-    log_info "Generating meta files from templates..."
-
-    PROJECT_NAME=$(basename "$PROJECT_DIR")
-    DATE=$(date +%Y-%m-%d)
-    BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "main")
-
-    # Generate SNAPSHOT.md (only if doesn't exist - preserve legacy project data!)
-    if [ ! -f ".claude/SNAPSHOT.md" ] && [ -f ".claude/templates/SNAPSHOT.template.md" ]; then
-        sed -e "s/{{PROJECT_NAME}}/$PROJECT_NAME/g" \
-            -e "s/{{DATE}}/$DATE/g" \
-            -e "s/{{CURRENT_BRANCH}}/$BRANCH/g" \
-            .claude/templates/SNAPSHOT.template.md > .claude/SNAPSHOT.md
-        log_success "Generated .claude/SNAPSHOT.md"
-    elif [ -f ".claude/SNAPSHOT.md" ]; then
-        log_info "Preserved existing .claude/SNAPSHOT.md (legacy project)"
+    # Copy full .claude directory
+    if [ -d "$TEMP_DIR/framework/.claude" ]; then
+        mkdir -p .claude
+        cp -r "$TEMP_DIR/framework/.claude/"* .claude/ 2>/dev/null || true
+        log_success "Installed .claude/ directory"
     fi
 
-    # Generate BACKLOG.md (only if doesn't exist - preserve legacy project data!)
-    if [ ! -f ".claude/BACKLOG.md" ] && [ -f ".claude/templates/BACKLOG.template.md" ]; then
-        sed -e "s/{{PROJECT_NAME}}/$PROJECT_NAME/g" \
-            -e "s/{{DATE}}/$DATE/g" \
-            .claude/templates/BACKLOG.template.md > .claude/BACKLOG.md
-        log_success "Generated .claude/BACKLOG.md"
-    elif [ -f ".claude/BACKLOG.md" ]; then
-        log_info "Preserved existing .claude/BACKLOG.md (legacy project)"
+    # Copy CLAUDE.production.md as CLAUDE.md (no migration needed)
+    if [ ! -f "CLAUDE.md" ] && [ -f "$TEMP_DIR/framework/CLAUDE.production.md" ]; then
+        cp "$TEMP_DIR/framework/CLAUDE.production.md" CLAUDE.md
+        log_success "Installed CLAUDE.md (production)"
     fi
 
-    # Generate ARCHITECTURE.md (only if doesn't exist - preserve legacy project data!)
-    if [ ! -f ".claude/ARCHITECTURE.md" ] && [ -f ".claude/templates/ARCHITECTURE.template.md" ]; then
-        sed -e "s/{{PROJECT_NAME}}/$PROJECT_NAME/g" \
-            .claude/templates/ARCHITECTURE.template.md > .claude/ARCHITECTURE.md
-        log_success "Generated .claude/ARCHITECTURE.md"
-    elif [ -f ".claude/ARCHITECTURE.md" ]; then
-        log_info "Preserved existing .claude/ARCHITECTURE.md (legacy project)"
+    # Copy FRAMEWORK_GUIDE.md
+    if [ -f "$TEMP_DIR/framework/FRAMEWORK_GUIDE.md" ]; then
+        cp "$TEMP_DIR/framework/FRAMEWORK_GUIDE.md" .
+        log_success "Installed FRAMEWORK_GUIDE.md"
     fi
+
+    # Generate meta files from templates
+    if [ -d ".claude/templates" ]; then
+        log_info "Generating meta files from templates..."
+
+        PROJECT_NAME=$(basename "$PROJECT_DIR")
+        DATE=$(date +%Y-%m-%d)
+        BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null | tr -d '\n' || echo "main")
+        [ -z "$BRANCH" ] && BRANCH="main"
+
+        if [ -f ".claude/templates/SNAPSHOT.template.md" ]; then
+            sed -e "s/{{PROJECT_NAME}}/$PROJECT_NAME/g" \
+                -e "s/{{DATE}}/$DATE/g" \
+                -e "s/{{CURRENT_BRANCH}}/$BRANCH/g" \
+                .claude/templates/SNAPSHOT.template.md > .claude/SNAPSHOT.md
+            log_success "Generated .claude/SNAPSHOT.md"
+        fi
+
+        if [ -f ".claude/templates/BACKLOG.template.md" ]; then
+            sed -e "s/{{PROJECT_NAME}}/$PROJECT_NAME/g" \
+                -e "s/{{DATE}}/$DATE/g" \
+                .claude/templates/BACKLOG.template.md > .claude/BACKLOG.md
+            log_success "Generated .claude/BACKLOG.md"
+        fi
+
+        if [ -f ".claude/templates/ARCHITECTURE.template.md" ]; then
+            sed -e "s/{{PROJECT_NAME}}/$PROJECT_NAME/g" \
+                .claude/templates/ARCHITECTURE.template.md > .claude/ARCHITECTURE.md
+            log_success "Generated .claude/ARCHITECTURE.md"
+        fi
+    fi
+
+else
+    # LEGACY or UPGRADE: Copy only minimum for Claude to run analysis
+    # Meta files will be created/updated by Claude after analysis
+
+    mkdir -p .claude/commands
+
+    # Copy only essential commands for migration
+    cp "$TEMP_DIR/framework/.claude/commands/migrate-legacy.md" .claude/commands/ 2>/dev/null || true
+    cp "$TEMP_DIR/framework/.claude/commands/upgrade-framework.md" .claude/commands/ 2>/dev/null || true
+    log_success "Installed migration commands"
+
+    # Copy CLAUDE.migration.md as CLAUDE.md (temporary, will be replaced after migration)
+    if [ -f "$TEMP_DIR/framework/CLAUDE.migration.md" ]; then
+        cp "$TEMP_DIR/framework/CLAUDE.migration.md" CLAUDE.md
+        log_success "Installed CLAUDE.md (migration mode)"
+    fi
+
+    # Store CLAUDE.production.md for swap after migration completes
+    if [ -f "$TEMP_DIR/framework/CLAUDE.production.md" ]; then
+        cp "$TEMP_DIR/framework/CLAUDE.production.md" .claude/CLAUDE.production.md
+        log_info "Staged CLAUDE.production.md for post-migration swap"
+    fi
+
+    # Store framework archive for Claude to extract remaining files after analysis
+    cp "$TEMP_DIR/framework.tar.gz" .claude/framework-pending.tar.gz 2>/dev/null || true
+    log_info "Framework files staged for post-analysis installation"
 fi
 
 # Create migration context for all scenarios
@@ -348,69 +371,9 @@ log_success "Installation complete!"
 echo "════════════════════════════════════════════════════════════"
 echo ""
 
-if [ "$MIGRATION_MODE" = "legacy" ]; then
-    # Legacy migration scenario
-    echo "Framework files installed in .claude/"
-    echo "Migration context prepared for deep analysis"
-    echo ""
-    echo "🔄 Next steps:"
-    echo ""
-    echo "  1. Open Claude Code:"
-    echo "     claude"
-    echo ""
-    echo "  2. Claude will automatically:"
-    echo "     • Detect legacy migration context"
-    echo "     • Analyze your project (docs, code, git history)"
-    echo "     • Ask qualifying questions with recommendations"
-    echo "     • Generate detailed project report"
-    echo "     • Create Framework files based on analysis"
-    echo ""
-    echo "  Just run 'claude' - migration starts automatically!"
-    echo ""
-
-elif [ "$MIGRATION_MODE" = "upgrade" ]; then
-    # Framework upgrade scenario
-    echo "Framework files updated to v$VERSION"
-    echo "Ready for migration from $OLD_FW_VERSION → v$VERSION"
-    echo ""
-    echo "🔄 Next steps:"
-    echo ""
-    echo "  1. Open Claude Code:"
-    echo "     claude"
-    echo ""
-    echo "  2. Claude will automatically:"
-    echo "     • Detect Framework upgrade context"
-    echo "     • Show detailed migration plan"
-    echo "     • Create backup before changes"
-    echo "     • Migrate to new structure ($OLD_FW_VERSION → v$VERSION)"
-    echo "     • Preserve ALL your existing data"
-    echo ""
-    echo "  Just run 'claude' - upgrade starts automatically!"
-    echo ""
-
-else
-    # New project scenario
-    echo "Framework files installed in .claude/"
-    echo "Meta files generated (SNAPSHOT, BACKLOG, ROADMAP, ARCHITECTURE, IDEAS)"
-    echo ""
-    echo "🔄 Next steps:"
-    echo ""
-    echo "  1. Open Claude Code:"
-    echo "     claude"
-    echo ""
-    echo "  2. Claude will automatically:"
-    echo "     • Verify Framework installation"
-    echo "     • Show welcome message"
-    echo "     • Ask you to type 'start' to begin"
-    echo ""
-    echo "  Just run 'claude' - setup completes automatically!"
-    echo ""
-fi
-
-echo "📚 Documentation:"
-echo "  - FRAMEWORK_GUIDE.md — How to use the framework"
-echo "  - .claude/SNAPSHOT.md — Current project state"
-echo "  - .claude/BACKLOG.md — Current tasks"
-echo "  - .claude/ROADMAP.md — Strategic planning"
-echo "  - .claude/IDEAS.md — Spontaneous ideas"
+echo "🚀 Next steps:"
 echo ""
+echo "  1. Run: claude"
+echo "  2. Type: start"
+echo ""
+

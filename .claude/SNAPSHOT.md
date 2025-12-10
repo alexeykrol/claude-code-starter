@@ -1,11 +1,11 @@
 # SNAPSHOT — Claude Code Starter Framework
 
-*Last updated: 2025-12-09*
+*Last updated: 2025-12-10*
 
 ## Current State
 
-**Version:** 2.1.1
-**Status:** Installation UX improvements - unified workflow for all scenarios
+**Version:** 2.2.0
+**Status:** Two-phase CLAUDE.md system with migration crash recovery
 **Branch:** feat/framework-v2.0
 
 ## What's New in v2.0
@@ -92,11 +92,14 @@ claude-code-starter/
 - [x] **Qualifying questions** — added explicit "Сделай, как лучше" option
 - [x] **Migration summary** — simplified to concise message instead of large tables
 - [x] **README updates** — simplified installation instructions for beginners
+- [x] **Two-phase CLAUDE.md** — CLAUDE.migration.md + CLAUDE.production.md
+- [x] **Migration crash recovery** — migration-log.json for interrupted migrations
+- [x] **Step 0/9 migrate-legacy** — log init and CLAUDE.md swap on completion
+- [x] **Step 0/8 upgrade-framework** — log init and CLAUDE.md swap on completion
 
 ## Next Phase
 
-- [ ] Test migration system on real legacy projects
-- [ ] Create additional templates as needed
+- [ ] Test v2.2.0 on real legacy projects
 - [ ] Gather user feedback on installation process
 
 ## npm Commands

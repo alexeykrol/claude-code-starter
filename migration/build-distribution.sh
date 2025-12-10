@@ -1,7 +1,7 @@
 #!/bin/bash
 #
 # Claude Code Starter Framework — Distribution Builder
-# Version: 2.1.1
+# Version: 2.2.0
 #
 # This script creates a self-extracting init-project.sh installer
 # that users can download and run directly.
@@ -9,7 +9,7 @@
 
 set -e  # Exit on error
 
-VERSION="2.1.1"
+VERSION="2.2.0"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 DIST_DIR="$PROJECT_ROOT/dist-release"
@@ -54,17 +54,25 @@ echo -e "${GREEN}✓${NC} Created build directories"
 
 echo -e "${BLUE}ℹ${NC} Collecting framework files..."
 
-# 1. CLAUDE.md (framework instructions)
-cp "$PROJECT_ROOT/CLAUDE.md" "$TEMP_DIR/framework/"
-echo -e "${GREEN}✓${NC} Copied CLAUDE.md"
+# 1. CLAUDE.md versions (migration and production)
+cp "$SCRIPT_DIR/CLAUDE.migration.md" "$TEMP_DIR/framework/CLAUDE.migration.md"
+cp "$SCRIPT_DIR/CLAUDE.production.md" "$TEMP_DIR/framework/CLAUDE.production.md"
+echo -e "${GREEN}✓${NC} Copied CLAUDE.md versions (migration + production)"
 
 # 2. FRAMEWORK_GUIDE (usage guide for users)
 cp "$SCRIPT_DIR/FRAMEWORK_GUIDE.template.md" "$TEMP_DIR/framework/FRAMEWORK_GUIDE.md"
 echo -e "${GREEN}✓${NC} Copied FRAMEWORK_GUIDE.md"
 
-# 3. .claude/commands/ (slash commands)
+# 3. .claude/commands/ (slash commands, excluding dev-only commands)
 mkdir -p "$TEMP_DIR/framework/.claude/commands"
-cp -r "$PROJECT_ROOT/.claude/commands/"* "$TEMP_DIR/framework/.claude/commands/"
+for cmd in "$PROJECT_ROOT/.claude/commands/"*.md; do
+    filename=$(basename "$cmd")
+    # Skip dev-only commands not meant for user projects
+    if [ "$filename" = "release.md" ]; then
+        continue
+    fi
+    cp "$cmd" "$TEMP_DIR/framework/.claude/commands/"
+done
 echo -e "${GREEN}✓${NC} Copied slash commands"
 
 # 4. .claude/dist/ (compiled framework code)
@@ -92,8 +100,8 @@ echo -e "${GREEN}✓${NC} Created framework.tar.gz"
 
 echo -e "${BLUE}ℹ${NC} Preparing distribution files..."
 
-# Copy installer script (small loader)
-cp "$SCRIPT_DIR/init-project.sh" "$DIST_DIR/init-project.sh"
+# Copy installer script from project root (single source of truth)
+cp "$PROJECT_ROOT/init-project.sh" "$DIST_DIR/init-project.sh"
 chmod +x "$DIST_DIR/init-project.sh"
 echo -e "${GREEN}✓${NC} Copied init-project.sh loader"
 

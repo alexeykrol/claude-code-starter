@@ -25,10 +25,10 @@
 - [ ] Тестирование init-project.sh на legacy проектах
   - [ ] chatRAG (уже протестировано, найдены баги)
   - [ ] Другие проекты с Framework v1.x
-- [ ] Создать GitHub Release v2.1.1
-  - [ ] Загрузить init-project.sh (5.3KB)
-  - [ ] Загрузить framework.tar.gz (56KB)
-  - [ ] Написать Release Notes
+- [x] Создать GitHub Release v2.1.1
+  - [x] Загрузить init-project.sh (16KB)
+  - [x] Загрузить framework.tar.gz (64KB)
+  - [x] Написать Release Notes
 - [x] Обновить README.md с инструкциями по установке
   - [x] Упрощенная секция установки (6 шагов)
   - [x] Уточнение про qualifying questions (legacy vs новый)
