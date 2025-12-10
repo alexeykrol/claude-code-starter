@@ -1,8 +1,33 @@
 # Framework Upgrade Protocol
 
-**Purpose:** Migrate project from old Framework version (v1.x or v2.0) to current version (v2.1+).
+**Purpose:** Migrate project from old Framework version (v1.x or v2.0) to current version (v2.2).
 
 **When to use:** Project already has `.claude/` directory with older Framework structure.
+
+---
+
+## Step 0: Initialize Migration Log
+
+Before starting, create migration log for crash recovery:
+
+```bash
+# Get old version from migration context
+OLD_VERSION=$(cat .claude/migration-context.json 2>/dev/null | grep -o '"old_version"[^,]*' | cut -d'"' -f4)
+
+echo '{
+  "status": "in_progress",
+  "mode": "upgrade",
+  "old_version": "'$OLD_VERSION'",
+  "started": "'$(date -Iseconds)'",
+  "updated": "'$(date -Iseconds)'",
+  "current_step": 1,
+  "current_step_name": "detect",
+  "steps_completed": [],
+  "last_error": null
+}' > .claude/migration-log.json
+```
+
+**Update log after each step** (same as migrate-legacy).
 
 ---
 
@@ -533,14 +558,51 @@ Show simple completion message:
   ✅ All your data preserved
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+````
+
+---
+
+## Step 8: Finalize Migration
+
+Complete the migration by swapping CLAUDE.md:
+
+```bash
+# Mark migration as completed in log
+echo '{
+  "status": "completed",
+  "mode": "upgrade",
+  "completed": "'$(date -Iseconds)'"
+}' > .claude/migration-log.json
+
+# Swap migration CLAUDE.md with production version
+if [ -f ".claude/CLAUDE.production.md" ]; then
+    cp .claude/CLAUDE.production.md CLAUDE.md
+    rm .claude/CLAUDE.production.md
+    echo "✅ Swapped CLAUDE.md to production mode"
+fi
+
+# Cleanup migration files
+rm .claude/migration-log.json
+rm .claude/migration-context.json 2>/dev/null
+
+echo "✅ Migration cleanup complete"
+```
+
+Show final message:
+
+```
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🎉 Upgrade Complete!
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Framework is now in production mode (v2.2).
 
 🚀 Next Step:
 
-  Введите команду "start" или "начать", чтобы фреймворк запустился.
-  (Type "start" or "начать" to launch the framework)
+  Type "start" to begin working with the framework.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-````
+```
 
 ---
 
