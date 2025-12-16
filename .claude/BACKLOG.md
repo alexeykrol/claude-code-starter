@@ -46,10 +46,10 @@
 - [x] Упростить qualifying questions
   - [x] Добавить явную опцию "Сделай, как лучше"
   - [x] Упростить migration summary (краткая сводка вместо больших таблиц)
-- [ ] Создать GitHub Release v2.2.0
-  - [ ] Загрузить init-project.sh
-  - [ ] Загрузить framework.tar.gz
-  - [ ] Написать Release Notes (включая fix для migration reports)
+- [x] Создать GitHub Release v2.2.1
+  - [x] Загрузить init-project.sh
+  - [x] Загрузить framework.tar.gz
+  - [x] Написать Release Notes (включая fix для migration reports)
 - [ ] Объявить релиз пользователям
 
 ---
