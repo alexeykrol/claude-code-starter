@@ -663,7 +663,7 @@ Show simple completion message:
 
 ### 9.1 Save Migration Artifacts
 
-Get project name and save log/report with unique names:
+Get project name and save migration artifacts with unique names:
 
 ```bash
 PROJECT_NAME=$(basename "$(pwd)")
@@ -673,16 +673,32 @@ mkdir -p reports
 
 # Save migration log with project name
 cp .claude/migration-log.json "reports/${PROJECT_NAME}-migration-log.json"
-
-# Generate migration report (Claude creates this based on migration results)
-# Save as: reports/${PROJECT_NAME}-MIGRATION_REPORT.md
+echo "✅ Migration log saved: reports/${PROJECT_NAME}-migration-log.json"
 ```
 
-**IMPORTANT:** Before proceeding, generate `reports/${PROJECT_NAME}-MIGRATION_REPORT.md` with:
-- Summary of migration
-- Files migrated/created
-- Any errors or warnings
-- Verification results
+**CRITICAL: Generate Migration Report NOW**
+
+Before proceeding to cleanup, you MUST create the migration report:
+
+1. Read `.claude/migration-log.json` to get migration details
+2. Create `reports/${PROJECT_NAME}-MIGRATION_REPORT.md` with:
+   - **Summary:** Migration type, versions, status, duration
+   - **Files Migrated/Created:** List all files with sizes
+   - **Changes Made:** Key restructuring, optimizations
+   - **Verification Results:** All checks passed
+   - **Errors/Warnings:** Any issues encountered (or "None")
+   - **Post-Migration Actions:** What user needs to do next
+   - **Rollback Procedure:** If needed
+   - **Success Criteria:** Checklist of what was accomplished
+
+3. **Verify report created:**
+   ```bash
+   ls -lh "reports/${PROJECT_NAME}-MIGRATION_REPORT.md"
+   ```
+
+4. **ONLY AFTER** confirming report exists, proceed to Step 9.2
+
+**DO NOT proceed to cleanup until migration report is created and verified!**
 
 ### 9.2 Swap CLAUDE.md to Production
 
