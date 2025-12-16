@@ -1,11 +1,11 @@
 # SNAPSHOT — Claude Code Starter Framework
 
-*Last updated: 2025-12-15*
+*Last updated: 2025-12-16*
 
 ## Current State
 
 **Version:** 2.2.3
-**Status:** Production release - Bug fixes (migration cleanup, session recovery, port conflicts)
+**Status:** Production - All critical bugs fixed, source files synchronized
 **Branch:** main
 
 ## What's New in v2.0
@@ -99,10 +99,28 @@ claude-code-starter/
 - [x] **Production testing** — santacruz project successfully migrated v1.x → v2.2
 - [x] **Migration reports bug fix** — Made MIGRATION_REPORT.md generation mandatory before cleanup
 
+## v2.2.3 Critical Fixes
+
+**Source File Synchronization Issue (RESOLVED):**
+- Fixed migration/CLAUDE.production.md being out of sync with bug fixes
+- All 4 production bugs now fixed in source templates
+- Framework → Host project update cycle now working correctly
+
+**Bug Fixes:**
+- BUG-001: Migration cleanup recovery (Step 0.05)
+- BUG-002: Missing chokidar dependency
+- BUG-003: Port conflict detection (EADDRINUSE handler)
+- BUG-004: Session cleanup false positives
+
+**Distribution:**
+- framework.tar.gz rebuilt with corrected source files
+- GitHub Release v2.2.3 updated (CORRECTED)
+- santacruz host project updated and verified
+
 ## Next Phase
 
-- [ ] Create GitHub Release v2.2.0
-- [ ] Announce release to users
+- [ ] Monitor for additional production issues
+- [ ] Announce v2.2.3 release to users
 
 ## npm Commands
 
