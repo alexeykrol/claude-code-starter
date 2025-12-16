@@ -7,6 +7,39 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.2.3] - 2025-12-16
+
+### Fixed
+
+- **BUG-001 (Critical): Incomplete migration cleanup**
+  - Added Step 0.05 "Migration Cleanup Recovery" to Cold Start Protocol
+  - Automatically detects leftover migration files (.claude/CLAUDE.production.md, migration-context.json, etc.)
+  - Swaps CLAUDE.md to production version if still in Migration Mode
+  - Removes all migration artifacts (~108 KB) automatically
+  - Prevents manual cleanup after migration completion
+
+- **BUG-003 (Medium): Port conflict detection**
+  - Added graceful error handling for EADDRINUSE errors in server.ts
+  - Shows clear, actionable error message when port 3333 is in use
+  - Provides two solutions: kill existing process or use different port
+  - Replaces cryptic Node.js stack trace with user-friendly guidance
+
+- **BUG-004 (Medium): Session cleanup false positives**
+  - Enhanced Step 0.1 "Crash Recovery" with auto-recovery logic
+  - Checks git status before triggering crash recovery warning
+  - Auto-recovers clean sessions (no uncommitted changes) without user intervention
+  - Reduces false positive "crashed session" warnings when user forgets `/fi`
+  - Only shows recovery prompt for true crashes (with uncommitted changes)
+
+### Changed
+
+- **Cold Start Protocol improvements**
+  - More intelligent crash detection (checks working tree state)
+  - Automatic cleanup of migration artifacts
+  - Better error messages and user guidance
+
+---
+
 ## [2.2.2] - 2025-12-16
 
 ### Fixed
