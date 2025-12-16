@@ -8,15 +8,11 @@ Start automatic export of Claude Code dialogs as they happen.
 
 ## Execute
 
-First time setup (install dependencies):
-```bash
-cd .claude/dist/claude-export && npm install && cd ../../..
-```
-
-Then run:
 ```bash
 node .claude/dist/claude-export/cli.js watch
 ```
+
+**Note:** Dependencies are installed automatically on first run.
 
 ## Features
 

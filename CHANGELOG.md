@@ -7,6 +7,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.2.2] - 2025-12-16
+
+### Fixed
+
+- **Missing dependency error on /ui command** — Automatic dependency installation
+  - **Solution:** `init-project.sh` automatically runs `npm install` during framework installation
+  - **Also:** Simplified `/ui` and `/watch` commands — removed manual setup instructions
+  - Eliminates "missing dependency" errors for express and chokidar
+  - Users never need to manually run `npm install` anymore
+  - ⚠️ Note: Runtime auto-install (Level 2) removed due to Node.js static import limitations
+
+### Changed
+
+- **Slash commands simplified** — `/ui` and `/watch` now single-step
+  - Before: Two steps (manual npm install + run command)
+  - After: One step (just run command, dependencies pre-installed by installer)
+  - Better UX for beginners and more reliable for AI execution
+
+- **Fixed package.json** — Added missing `chokidar` dependency to `dist/claude-export/package.json`
+  - Previously only contained `express`, causing MODULE_NOT_FOUND errors
+  - Now includes both `chokidar` and `express` for complete CLI functionality
+
+---
+
 ## [2.2.1] - 2025-12-15
 
 ### Fixed

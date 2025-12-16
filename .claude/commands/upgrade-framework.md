@@ -573,6 +573,18 @@ if [ -f ".claude/framework-pending.tar.gz" ]; then
     # Copy FRAMEWORK_GUIDE.md
     cp /tmp/framework/FRAMEWORK_GUIDE.md . 2>/dev/null || true
 
+    # Install npm dependencies for CLI tools
+    if [ -f ".claude/dist/claude-export/package.json" ]; then
+        echo "📦 Installing framework dependencies..."
+        if command -v npm &> /dev/null; then
+            (cd .claude/dist/claude-export && npm install --silent 2>&1 | grep -v "^npm WARN" || true) && \
+                echo "✅ Framework dependencies installed" || \
+                echo "⚠️  Failed to install dependencies (run manually: cd .claude/dist/claude-export && npm install)"
+        else
+            echo "⚠️  npm not found - install it, then run: cd .claude/dist/claude-export && npm install"
+        fi
+    fi
+
     # Cleanup temp
     rm .claude/framework-pending.tar.gz
     rm -rf /tmp/framework
