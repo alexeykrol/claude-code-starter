@@ -7,7 +7,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [2.2.0] - 2025-12-10
+## [2.2.0] - 2025-12-15
+
+### Fixed
+
+- **Migration reports missing after cleanup** — Critical bug fix for migration artifacts
+  - Made `MIGRATION_REPORT.md` generation **mandatory** before cleanup step
+  - Added explicit verification that report exists before proceeding to cleanup
+  - Updated both `upgrade-framework.md` and `migrate-legacy.md` with CRITICAL warnings
+  - Prevents loss of migration reports when `.claude/migration-log.json` is deleted
+  - Guarantees both artifacts saved: `reports/PROJECT-migration-log.json` + `reports/PROJECT-MIGRATION_REPORT.md`
+
+### Changed
+
+- **Production testing completed** — Framework successfully tested on real legacy project
+  - Project `santacruz` (literary project) migrated from v1.x → v2.2
+  - 22-minute migration completed without errors
+  - Token economy improved by 40% (2000 → 1200 tokens)
+  - All data integrity checks passed
+
+---
+
+## [2.2.0-beta] - 2025-12-10
 
 ### Added
 
