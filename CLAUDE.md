@@ -34,19 +34,63 @@ After completing workflow, delete marker:
 rm .claude/migration-context.json
 ```
 
-If no migration context, continue to Step 0.1 (Crash Recovery).
+If no migration context, continue to Step 0.05 (Migration Cleanup).
 
 ---
 
-### Step 0.1: Crash Recovery
+### Step 0.05: Migration Cleanup Recovery
+
+Check for leftover migration files and clean them up:
+
+```bash
+# Check for production CLAUDE.md waiting to be swapped
+if [ -f ".claude/CLAUDE.production.md" ]; then
+  echo "⚠️  Found leftover migration files. Cleaning up..."
+
+  # Swap CLAUDE.md if needed
+  if grep -q "Migration Mode" CLAUDE.md 2>/dev/null; then
+    cp .claude/CLAUDE.production.md CLAUDE.md
+    echo "✓ Swapped CLAUDE.md to production version"
+  fi
+
+  # Remove all migration artifacts
+  rm -f .claude/CLAUDE.production.md
+  rm -f .claude/migration-context.json
+  rm -f .claude/migration-log.json
+  rm -f .claude/commands/migrate-legacy.md
+  rm -f .claude/commands/upgrade-framework.md
+  rm -f .claude/framework-pending.tar.gz
+
+  echo "✓ Migration cleanup complete"
+fi
+```
+
+If cleanup performed, continue to Step 0.1 (Crash Recovery).
+
+---
+
+### Step 0.1: Crash Recovery & Auto-Recovery
 ```bash
 cat .claude/.last_session
 ```
-- If `"status": "active"` → Previous session crashed:
-  1. `git status` — check uncommitted changes
-  2. `npm run dialog:export --no-html` — export missed dialogs
-  3. Read `.claude/SNAPSHOT.md` for context
-  4. Ask: "Continue or commit first?"
+- If `"status": "active"` → Check if real crash or just missing `/fi`:
+  ```bash
+  # Check for uncommitted changes
+  if git diff --quiet && git diff --staged --quiet; then
+    # Working tree clean - probably forgot /fi
+    echo "ℹ️  Previous session didn't run /fi but working tree is clean."
+    echo "Auto-recovering to clean state..."
+    echo '{"status": "clean", "timestamp": "'$(date -Iseconds)'"}' > .claude/.last_session
+    # Continue to Step 0.5
+  else
+    # True crash - has uncommitted changes
+    echo "⚠️  Previous session crashed with uncommitted changes"
+    git status
+    npm run dialog:export --no-html
+    # Read .claude/SNAPSHOT.md for context
+    # Ask: "Continue or commit first?"
+  fi
+  ```
 - If `"status": "clean"` → OK, continue to Step 0.5
 
 ### Step 0.5: Export Closed Sessions & Update Student UI
