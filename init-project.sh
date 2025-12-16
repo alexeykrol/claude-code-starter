@@ -1,14 +1,14 @@
 #!/bin/bash
 #
 # Claude Code Starter Framework — Installer
-# Version: 2.2.1
+# Version: 2.2.2
 #
 # Downloads and installs the framework from GitHub Releases
 #
 
 set -e  # Exit on error
 
-VERSION="2.2.1"
+VERSION="2.2.2"
 REPO="alexeykrol/claude-code-starter"
 ARCHIVE_URL="https://github.com/${REPO}/releases/download/v${VERSION}/framework.tar.gz"
 PROJECT_DIR="$(pwd)"
@@ -279,6 +279,21 @@ if [ "$MIGRATION_MODE" = "new" ]; then
         mkdir -p .claude
         cp -r "$TEMP_DIR/framework/.claude/"* .claude/ 2>/dev/null || true
         log_success "Installed .claude/ directory"
+    fi
+
+    # Install npm dependencies for framework CLI
+    if [ -f ".claude/dist/claude-export/package.json" ]; then
+        log_info "Installing framework dependencies..."
+        if command -v npm &> /dev/null; then
+            (cd .claude/dist/claude-export && npm install --silent 2>&1 | grep -v "^npm WARN" || true) && \
+                log_success "Framework dependencies installed" || {
+                log_warning "Failed to install dependencies automatically"
+                log_info "You can install them later with: cd .claude/dist/claude-export && npm install"
+            }
+        else
+            log_warning "npm not found - skipping dependency installation"
+            log_info "Install npm, then run: cd .claude/dist/claude-export && npm install"
+        fi
     fi
 
     # Copy CLAUDE.production.md as CLAUDE.md (no migration needed)

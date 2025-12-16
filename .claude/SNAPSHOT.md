@@ -4,8 +4,8 @@
 
 ## Current State
 
-**Version:** 2.2.1
-**Status:** Production release - Migration reports bug fixed
+**Version:** 2.2.2
+**Status:** Production release - Automatic dependency installation
 **Branch:** main
 
 ## What's New in v2.0
