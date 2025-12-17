@@ -263,6 +263,11 @@ node_modules/
 *.tsbuildinfo
 
 # Claude dialogs
+dialog/2025-12-16_session-0c9b18ef.md
+dialog/2025-12-16_session-b3b48edc.md
+dialog/2025-12-16_session-ba5650bc.md
+dialog/2025-12-16_session-2fcbe8dc.md
+dialog/2025-12-16_session-1cffbae3.md
 dialog/2025-12-16_session-f6eb30ee.md
 dialog/2025-12-16_session-f68d9256.md
 dialog/2025-12-16_session-87991211.md
