@@ -322,9 +322,17 @@ git push origin "v${NEW_VERSION}"
 gh release create "v${NEW_VERSION}" \
   --title "v${NEW_VERSION}" \
   --notes "[Извлечь из CHANGELOG.md секцию для этой версии]" \
-  init-starter.zip \
-  init-starter-en.zip
+  dist-release/init-project.sh \
+  dist-release/framework.tar.gz \
+  dist-release/framework-commands.tar.gz \
+  CLAUDE.md
 ```
+
+**Файлы в релизе:**
+- `init-project.sh` - Installer script для установки фреймворка
+- `framework.tar.gz` - Полный архив фреймворка (для установки)
+- `framework-commands.tar.gz` - Только команды (для автообновления)
+- `CLAUDE.md` - Основной протокол (для автообновления)
 
 ### Шаг 14: Финальный вывод
 

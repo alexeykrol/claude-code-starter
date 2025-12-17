@@ -110,11 +110,46 @@ cp framework.tar.gz "$DIST_DIR/framework.tar.gz"
 echo -e "${GREEN}✓${NC} Copied framework.tar.gz"
 
 # ============================================================================
+# Create Framework Commands Archive (for auto-update)
+# ============================================================================
+
+echo -e "${BLUE}ℹ${NC} Creating framework-commands archive (for auto-update)..."
+
+# Create temp directory for commands-only archive
+mkdir -p "$TEMP_DIR/framework-commands"
+
+# Copy only the 5 framework commands (for auto-update)
+FRAMEWORK_COMMANDS=(
+    "fi.md"
+    "ui.md"
+    "watch.md"
+    "migrate-legacy.md"
+    "upgrade-framework.md"
+)
+
+for cmd in "${FRAMEWORK_COMMANDS[@]}"; do
+    if [ -f "$PROJECT_ROOT/.claude/commands/$cmd" ]; then
+        cp "$PROJECT_ROOT/.claude/commands/$cmd" "$TEMP_DIR/framework-commands/"
+    else
+        echo -e "${YELLOW}⚠${NC} Warning: $cmd not found, skipping"
+    fi
+done
+
+# Create commands archive
+cd "$TEMP_DIR"
+tar -czf framework-commands.tar.gz framework-commands/
+cp framework-commands.tar.gz "$DIST_DIR/framework-commands.tar.gz"
+
+COMMANDS_SIZE=$(du -h "$DIST_DIR/framework-commands.tar.gz" | awk '{print $1}')
+echo -e "${GREEN}✓${NC} Created framework-commands.tar.gz (${COMMANDS_SIZE})"
+
+# ============================================================================
 # Create Distribution Summary
 # ============================================================================
 
 INSTALLER_SIZE=$(du -h "$DIST_DIR/init-project.sh" | awk '{print $1}')
 ARCHIVE_SIZE=$(du -h "$DIST_DIR/framework.tar.gz" | awk '{print $1}')
+COMMANDS_SIZE=$(du -h "$DIST_DIR/framework-commands.tar.gz" | awk '{print $1}')
 
 cat > "$DIST_DIR/README.txt" <<EOF
 Claude Code Starter Framework v${VERSION}
@@ -123,6 +158,7 @@ Distribution Package
 Files:
   - init-project.sh (${INSTALLER_SIZE}) - Installer script
   - framework.tar.gz (${ARCHIVE_SIZE}) - Framework files archive
+  - framework-commands.tar.gz (${COMMANDS_SIZE}) - Commands only (for auto-update)
 
 Installation:
 
@@ -165,13 +201,16 @@ echo ""
 echo "Files created:"
 echo "  - init-project.sh (${INSTALLER_SIZE}) - Installer script (small loader)"
 echo "  - framework.tar.gz (${ARCHIVE_SIZE}) - Framework files archive"
+echo "  - framework-commands.tar.gz (${COMMANDS_SIZE}) - Commands only (for auto-update)"
 echo "  - README.txt - Usage instructions"
 echo ""
 echo "Next steps:"
 echo "  1. Test the installer on a clean project"
-echo "  2. Upload BOTH files to GitHub Releases:"
-echo "     - init-project.sh"
-echo "     - framework.tar.gz"
+echo "  2. Upload files to GitHub Releases:"
+echo "     - init-project.sh (for installation)"
+echo "     - framework.tar.gz (for installation)"
+echo "     - framework-commands.tar.gz (for auto-update)"
+echo "     - CLAUDE.md (for auto-update)"
 echo "  3. Update documentation with download URLs"
 echo ""
 echo "Test command (requires uploading to GitHub first):"
