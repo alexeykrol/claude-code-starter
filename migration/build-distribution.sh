@@ -1,7 +1,7 @@
 #!/bin/bash
 #
 # Claude Code Starter Framework — Distribution Builder
-# Version: 2.3.0
+# Version: 2.3.1
 #
 # This script creates a self-extracting init-project.sh installer
 # that users can download and run directly.
@@ -9,7 +9,7 @@
 
 set -e  # Exit on error
 
-VERSION="2.3.0"
+VERSION="2.3.1"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 DIST_DIR="$PROJECT_ROOT/dist-release"
@@ -86,11 +86,20 @@ cp "$SCRIPT_DIR/templates/"*.md "$TEMP_DIR/framework/.claude/templates/"
 cp "$SCRIPT_DIR/templates/.framework-config.template.json" "$TEMP_DIR/framework/.claude/templates/"
 echo -e "${GREEN}✓${NC} Copied meta file templates and config template"
 
-# 6. .claude/scripts/ (anonymization script)
+# 6. .claude/scripts/ (bug reporting scripts)
 mkdir -p "$TEMP_DIR/framework/.claude/scripts"
 cp "$PROJECT_ROOT/.claude/scripts/anonymize-report.sh" "$TEMP_DIR/framework/.claude/scripts/"
+cp "$PROJECT_ROOT/.claude/scripts/submit-bug-report.sh" "$TEMP_DIR/framework/.claude/scripts/"
+cp "$PROJECT_ROOT/.claude/scripts/analyze-bug-patterns.sh" "$TEMP_DIR/framework/.claude/scripts/"
 chmod +x "$TEMP_DIR/framework/.claude/scripts/anonymize-report.sh"
-echo -e "${GREEN}✓${NC} Copied anonymization script"
+chmod +x "$TEMP_DIR/framework/.claude/scripts/submit-bug-report.sh"
+chmod +x "$TEMP_DIR/framework/.claude/scripts/analyze-bug-patterns.sh"
+echo -e "${GREEN}✓${NC} Copied bug reporting scripts (anonymize + submit + analyze)"
+
+# 7. .github/ISSUE_TEMPLATE/ (GitHub issue templates)
+mkdir -p "$TEMP_DIR/framework/.github/ISSUE_TEMPLATE"
+cp "$PROJECT_ROOT/.github/ISSUE_TEMPLATE/bug_report.yml" "$TEMP_DIR/framework/.github/ISSUE_TEMPLATE/"
+echo -e "${GREEN}✓${NC} Copied GitHub issue template"
 
 # ============================================================================
 # Create Framework Archive

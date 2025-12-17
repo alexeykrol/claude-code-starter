@@ -7,6 +7,87 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.3.1] - 2025-12-16
+
+### Added
+
+- **Bug Reporting System Complete (Phase 2 & 3)** — Centralized collection and analytics
+
+**Phase 2: Centralized Collection**
+
+- **submit-bug-report.sh** — Automatic submission to GitHub Issues
+  - File: `.claude/scripts/submit-bug-report.sh` (new, 2.2KB, executable)
+  - Uses GitHub CLI (`gh`) to submit anonymized reports
+  - Submits to `alexeykrol/claude-code-starter` repository
+  - Adds `bug-report` label automatically
+  - Checks for `gh` installation and authentication
+  - Records submission URL in report metadata
+  - Graceful fallback if `gh` not available
+
+- **GitHub Issue Template** — Structured bug report format
+  - File: `.github/ISSUE_TEMPLATE/bug_report.yml` (new, 1.9KB)
+  - Fields: Error Details, Framework Version, Protocol Type, Protocol Step, Additional Context
+  - Privacy verification checkboxes required
+  - Clear notice about anonymization
+  - Automated submission compatible
+
+**Phase 3: Analytics & Pattern Detection**
+
+- **analyze-bug-patterns.sh** — Local bug report pattern analyzer
+  - File: `.claude/scripts/analyze-bug-patterns.sh` (new, ~6KB, executable)
+  - **bash 3.2+ compatible** (works on macOS default bash)
+  - Analyzes `.claude/logs/bug-reports/` for patterns
+  - Reports:
+    - Framework version distribution
+    - Protocol type distribution (Cold Start vs Completion)
+    - Top 5 most common errors
+    - Step failure analysis
+    - Actionable recommendations
+  - Exports summary to `.claude/logs/bug-analysis-TIMESTAMP.md`
+  - Color-coded console output
+
+- **/analyze-local-bugs Command** — Wrapper for pattern analyzer
+  - File: `.claude/commands/analyze-local-bugs.md` (new, ~1KB)
+  - Works in both framework and host projects
+  - Analyzes local bug reports (complements `/analyze-bugs` for GitHub Issues)
+  - Privacy-first: all data stays local
+  - No network requests
+
+### Changed
+
+- **CLAUDE.md Step 6.5** — Enhanced with two-step confirmation workflow
+  - First confirmation: "Create anonymized bug report? (y/N)"
+  - Second confirmation: "Submit bug report to GitHub? (y/N)"
+  - Users have full control over submission
+  - Option to save locally without submitting
+  - Calls `submit-bug-report.sh` if both confirmations given
+  - Shows submission URL on success
+  - File: `CLAUDE.md` (+25 lines)
+
+- **build-distribution.sh** — Updated to include new scripts and template
+  - Now copies `.claude/scripts/submit-bug-report.sh` (executable)
+  - Now copies `.claude/scripts/analyze-bug-patterns.sh` (executable)
+  - Now copies `.github/ISSUE_TEMPLATE/bug_report.yml`
+  - Updated file count and summary messages
+  - File: `migration/build-distribution.sh` (+15 lines)
+
+### Technical Notes
+
+- **bash 3.2 Compatibility**: All scripts use portable syntax (no associative arrays)
+- **Privacy Design**: Double confirmation ensures user control
+- **Auto-Learning System**: Pattern detection enables data-driven improvements
+- **Complete Architecture**: Phase 1 (Local) → Phase 2 (Centralized) → Phase 3 (Analytics)
+
+### Testing
+
+- ✅ Script syntax validation (`bash -n`)
+- ✅ YAML template structure validation
+- ✅ GitHub CLI availability check
+- ✅ Pattern analyzer with empty and populated logs
+- ✅ bash 3.2 compatibility verified on macOS
+
+---
+
 ## [2.3.0] - 2025-12-16
 
 ### Added

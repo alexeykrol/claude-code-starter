@@ -1,0 +1,72 @@
+name: Bug Report (Automated)
+description: Automated bug report from host project
+title: "[Bug Report] "
+labels: ["bug-report"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Automated Bug Report
+
+        This bug report was automatically generated and anonymized by the Claude Code Starter Framework.
+
+        **Privacy Notice:**
+        - All sensitive data has been removed (paths, keys, emails, IPs)
+        - Project names are anonymized
+        - Only error messages and stack traces are included
+
+  - type: textarea
+    id: error-details
+    attributes:
+      label: Error Details
+      description: Anonymized error message and stack trace
+      placeholder: |
+        Error: Something went wrong
+          at function (file.ts:42)
+    validations:
+      required: true
+
+  - type: input
+    id: framework-version
+    attributes:
+      label: Framework Version
+      description: Version of Claude Code Starter Framework
+      placeholder: "v2.3.0"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: protocol-type
+    attributes:
+      label: Protocol Type
+      description: Which protocol encountered the error?
+      options:
+        - Cold Start Protocol
+        - Completion Protocol
+        - Unknown
+    validations:
+      required: true
+
+  - type: input
+    id: protocol-step
+    attributes:
+      label: Protocol Step
+      description: Which step failed?
+      placeholder: "Step 0.15, Step 6.5, etc."
+
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: Additional Context
+      description: Any additional context about the error (anonymized)
+
+  - type: checkboxes
+    id: verification
+    attributes:
+      label: Verification
+      description: Please verify before submitting
+      options:
+        - label: I confirm this report has been anonymized and contains no sensitive data
+          required: true
+        - label: I have reviewed the report and it's safe to share publicly
+          required: true
