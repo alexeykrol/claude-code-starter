@@ -125,6 +125,11 @@ echo -e "${GREEN}✓${NC} Copied init-project.sh loader"
 cp framework.tar.gz "$DIST_DIR/framework.tar.gz"
 echo -e "${GREEN}✓${NC} Copied framework.tar.gz"
 
+# Copy quick-update.sh utility
+cp "$PROJECT_ROOT/quick-update.sh" "$DIST_DIR/quick-update.sh"
+chmod +x "$DIST_DIR/quick-update.sh"
+echo -e "${GREEN}✓${NC} Copied quick-update.sh utility"
+
 # ============================================================================
 # Create Framework Commands Archive (for auto-update)
 # ============================================================================
@@ -166,6 +171,7 @@ echo -e "${GREEN}✓${NC} Created framework-commands.tar.gz (${COMMANDS_SIZE})"
 INSTALLER_SIZE=$(du -h "$DIST_DIR/init-project.sh" | awk '{print $1}')
 ARCHIVE_SIZE=$(du -h "$DIST_DIR/framework.tar.gz" | awk '{print $1}')
 COMMANDS_SIZE=$(du -h "$DIST_DIR/framework-commands.tar.gz" | awk '{print $1}')
+UPDATER_SIZE=$(du -h "$DIST_DIR/quick-update.sh" | awk '{print $1}')
 
 cat > "$DIST_DIR/README.txt" <<EOF
 Claude Code Starter Framework v${VERSION}
@@ -175,6 +181,7 @@ Files:
   - init-project.sh (${INSTALLER_SIZE}) - Installer script
   - framework.tar.gz (${ARCHIVE_SIZE}) - Framework files archive
   - framework-commands.tar.gz (${COMMANDS_SIZE}) - Commands only (for auto-update)
+  - quick-update.sh (${UPDATER_SIZE}) - Quick updater utility
 
 Installation:
 
@@ -218,6 +225,7 @@ echo "Files created:"
 echo "  - init-project.sh (${INSTALLER_SIZE}) - Installer script (small loader)"
 echo "  - framework.tar.gz (${ARCHIVE_SIZE}) - Framework files archive"
 echo "  - framework-commands.tar.gz (${COMMANDS_SIZE}) - Commands only (for auto-update)"
+echo "  - quick-update.sh (${UPDATER_SIZE}) - Quick updater utility"
 echo "  - README.txt - Usage instructions"
 echo ""
 echo "Next steps:"
@@ -226,6 +234,7 @@ echo "  2. Upload files to GitHub Releases:"
 echo "     - init-project.sh (for installation)"
 echo "     - framework.tar.gz (for installation)"
 echo "     - framework-commands.tar.gz (for auto-update)"
+echo "     - quick-update.sh (for quick updates)"
 echo "     - CLAUDE.md (for auto-update)"
 echo "  3. Update documentation with download URLs"
 echo ""
