@@ -7,6 +7,70 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.2.4] - 2025-12-16
+
+### Added
+
+- **Framework Auto-Update on Cold Start** — Automatic version checking and updating
+  - Added Step 0.2 "Framework Version Check" to Cold Start Protocol
+  - Automatically checks for newer framework versions on every `start`
+  - Parses local version from CLAUDE.md footer
+  - Fetches latest version from GitHub Releases API
+  - Downloads and replaces framework files automatically (aggressive strategy)
+  - Only updates framework files (CLAUDE.md + 5 commands), preserves all project data
+  - Requires session restart to use new version
+  - File: `CLAUDE.md` (+55 lines)
+
+- **Framework Commands Archive** — Lightweight update package
+  - Created `framework-commands.tar.gz` (~2-3KB) for auto-update
+  - Contains only 5 core framework commands:
+    - `fi.md` (Completion Protocol)
+    - `ui.md` (Web UI)
+    - `watch.md` (Auto-export watcher)
+    - `migrate-legacy.md` (Legacy migration agent)
+    - `upgrade-framework.md` (Framework upgrade agent)
+  - Excludes user commands (commit, pr, fix, feature, review, test, security, optimize, refactor, explain, db-migrate)
+  - File: `migration/build-distribution.sh` (+45 lines)
+
+### Changed
+
+- **GitHub Release Structure** — New files for auto-update support
+  - Added to releases:
+    - `framework-commands.tar.gz` (for auto-update)
+    - `CLAUDE.md` (for auto-update)
+  - Existing files (unchanged):
+    - `init-project.sh` (for installation)
+    - `framework.tar.gz` (for installation)
+  - File: `.claude/commands/release.md` (+12 lines)
+
+- **SNAPSHOT.md** — Updated to v2.2.4 with feature description
+  - Added "Current Work (v2.2.4)" section with auto-update details
+  - Status changed from "Development" to "Production"
+  - File: `.claude/SNAPSHOT.md` (+26 lines)
+
+- **BACKLOG.md** — Added Phase 5 for v2.2.4
+  - Detailed task breakdown for auto-update implementation
+  - All implementation tasks completed
+  - File: `.claude/BACKLOG.md` (+41 lines)
+
+### Benefits
+
+- **Seamless Updates** — Host projects always use latest framework version without manual intervention
+- **Fast Updates** — Downloads only changed files (CLAUDE.md + commands ~5-10KB total)
+- **Safe** — Only framework files updated, project data completely untouched
+- **Consistent Experience** — Same framework version across all user projects
+- **Zero Configuration** — Works automatically on every Cold Start
+
+### Technical Details
+
+- Version parsing: Uses `grep` + `sed` on CLAUDE.md footer
+- GitHub API: Fetches latest release tag from `/repos/:owner/:repo/releases/latest`
+- Download verification: Checks file existence before replacing
+- Error handling: Falls back gracefully if update fails
+- Requires session restart after update (CLAUDE.md is already loaded)
+
+---
+
 ## [2.2.3] - 2025-12-16
 
 ### Fixed
