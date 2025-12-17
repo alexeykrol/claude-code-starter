@@ -425,7 +425,32 @@ Ready to work!
 
 ## Completion Protocol
 
-### 0. Initialize Completion Logging
+### 0. Re-read Completion Protocol (Self-Check)
+
+**Purpose:** Ensure protocol is followed correctly by re-reading instructions.
+
+**Why needed:**
+- During long sessions, context may be compacted/summarized
+- Re-reading ensures sharp focus on protocol steps
+- Prevents forgetting metafile updates (CLAUDE.md, SNAPSHOT.md, BACKLOG.md)
+- "Practice what we preach" — we require this from host projects
+- Catches systemic errors where changes are made but not documented
+
+**Action:**
+```
+Read the Completion Protocol section from CLAUDE.md to refresh protocol steps.
+Mentally review what was done in this session and what needs to be updated.
+```
+
+**Self-check questions:**
+- Did I add new features? → Update SNAPSHOT.md, BACKLOG.md, CHANGELOG.md
+- Did I modify CLAUDE.md? → Ensure changes are in migration/CLAUDE.production.md too
+- Did I add new commands? → Are they in distribution?
+- Did I fix bugs? → Document in CHANGELOG.md
+
+---
+
+### 0.1. Initialize Completion Logging
 
 **Purpose:** Set up logging for Completion protocol execution (if enabled).
 
@@ -480,7 +505,7 @@ EOF
 
     export -f log_completion_step log_completion_error
 
-    log_completion_step "Step 0: Logging initialized"
+    log_completion_step "Step 0.1: Logging initialized"
   fi
 fi
 ```
