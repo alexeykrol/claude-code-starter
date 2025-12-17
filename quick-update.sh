@@ -53,12 +53,55 @@ fi
 if [ -z "$CURRENT_VERSION" ]; then
     echo -e "${YELLOW}⚠${NC} Framework not found in this project"
     echo ""
-    echo "To install the framework, run:"
-    echo "  curl -O https://github.com/${REPO}/releases/latest/download/init-project.sh"
-    echo "  chmod +x init-project.sh"
-    echo "  ./init-project.sh"
+    echo "This script updates an existing framework installation."
+    echo "To install the framework for the first time, you need to run init-project.sh"
     echo ""
-    exit 1
+    echo -e "${BOLD}Would you like to automatically download and run the installer?${NC}"
+    echo ""
+    read -p "Download and install framework? (y/N): " -n 1 -r
+    echo ""
+
+    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+        echo ""
+        echo "To install manually, run:"
+        echo "  curl -O https://github.com/${REPO}/releases/latest/download/init-project.sh"
+        echo "  chmod +x init-project.sh"
+        echo "  ./init-project.sh"
+        echo ""
+        exit 0
+    fi
+
+    # Download and run init-project.sh
+    echo ""
+    echo -e "${BLUE}ℹ${NC} Downloading init-project.sh..."
+
+    INSTALLER_URL="https://github.com/${REPO}/releases/latest/download/init-project.sh"
+    INSTALLER_PATH="./init-project.sh"
+
+    if ! curl -L -f "$INSTALLER_URL" -o "$INSTALLER_PATH" 2>/dev/null; then
+        echo -e "${RED}✗${NC} Failed to download init-project.sh"
+        echo ""
+        echo "Please download manually from:"
+        echo "  $INSTALLER_URL"
+        exit 1
+    fi
+
+    chmod +x "$INSTALLER_PATH"
+    echo -e "${GREEN}✓${NC} Downloaded init-project.sh"
+    echo ""
+    echo -e "${BLUE}ℹ${NC} Running installer..."
+    echo ""
+
+    # Run installer
+    bash "$INSTALLER_PATH"
+
+    # Cleanup
+    rm -f "$INSTALLER_PATH"
+
+    echo ""
+    echo -e "${GREEN}✓${NC} Framework installed successfully!"
+    echo ""
+    exit 0
 fi
 
 echo -e "${BLUE}ℹ${NC} Current version: ${BOLD}${CURRENT_VERSION}${NC}"
