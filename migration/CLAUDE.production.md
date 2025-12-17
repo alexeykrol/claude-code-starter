@@ -290,6 +290,100 @@ fi
 
 ---
 
+### Step 0.4: Framework Developer Mode — Check Bug Reports
+
+**Purpose:** Automatically check for new bug reports from host projects (framework project only).
+
+**Trigger:** Only runs in claude-code-starter framework repository.
+
+```bash
+# Check if this is the framework project
+if [ -d "migration" ] && [ -f "migration/build-distribution.sh" ]; then
+  echo ""
+  echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+  echo "🔧 Framework Developer Mode"
+  echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+  echo ""
+
+  # Check if gh CLI is available
+  if ! command -v gh &> /dev/null; then
+    echo "ℹ️  GitHub CLI not installed - skipping bug report check"
+    echo "   Install: brew install gh (macOS) or sudo apt install gh (Linux)"
+    echo ""
+  else
+    # Check if authenticated
+    if ! gh auth status &> /dev/null; then
+      echo "ℹ️  GitHub CLI not authenticated - skipping bug report check"
+      echo "   Run: gh auth login"
+      echo ""
+    else
+      # Fetch bug reports from GitHub Issues
+      echo "📊 Checking for bug reports from host projects..."
+
+      BUG_REPORTS=$(gh issue list \
+        --repo "alexeykrol/claude-code-starter" \
+        --label "bug-report" \
+        --state "open" \
+        --json number,title,createdAt \
+        --limit 100 2>/dev/null)
+
+      if [ $? -eq 0 ]; then
+        REPORT_COUNT=$(echo "$BUG_REPORTS" | jq length 2>/dev/null || echo "0")
+
+        if [ "$REPORT_COUNT" -gt 0 ]; then
+          echo ""
+          echo "⚠️  Found $REPORT_COUNT open bug report(s)"
+          echo ""
+
+          # Show recent reports (last 5)
+          echo "Recent reports:"
+          echo "$BUG_REPORTS" | jq -r '.[:5] | .[] | "  • #\(.number): \(.title)"' 2>/dev/null
+          echo ""
+
+          # Count by recency (last 7 days)
+          WEEK_AGO=$(date -u -v-7d +%Y-%m-%dT%H:%M:%SZ 2>/dev/null || date -u -d '7 days ago' +%Y-%m-%dT%H:%M:%SZ)
+          RECENT_COUNT=$(echo "$BUG_REPORTS" | jq --arg week "$WEEK_AGO" '[.[] | select(.createdAt > $week)] | length' 2>/dev/null || echo "0")
+
+          if [ "$RECENT_COUNT" -gt 0 ]; then
+            echo "📌 $RECENT_COUNT new report(s) in the last 7 days"
+            echo ""
+          fi
+
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo ""
+          echo "💡 Recommended actions:"
+          echo "   1. Run /analyze-bugs for detailed analysis"
+          echo "   2. Review and prioritize bug reports"
+          echo "   3. Create fixes for critical issues"
+          echo ""
+
+          # Save bug report summary for later reference
+          export BUG_REPORT_COUNT="$REPORT_COUNT"
+          export BUG_RECENT_COUNT="$RECENT_COUNT"
+        else
+          echo "✅ No open bug reports"
+          echo ""
+        fi
+      else
+        echo "⚠️  Failed to fetch bug reports"
+        echo ""
+      fi
+    fi
+  fi
+fi
+```
+
+**Notes:**
+- Only runs in framework repository (claude-code-starter)
+- Requires GitHub CLI (`gh`) installed and authenticated
+- Shows count of open bug reports with "bug-report" label
+- Highlights reports from last 7 days
+- Suggests running `/analyze-bugs` for detailed analysis
+- Non-blocking: continues even if gh CLI unavailable
+- First priority task: fix user-reported issues
+
+---
+
 ### Step 0.5: Export Closed Sessions & Update Student UI
 ```bash
 npm run dialog:export --no-html
