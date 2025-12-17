@@ -61,6 +61,15 @@ echo ""
 echo "📤 Submitting bug report to GitHub..."
 echo ""
 
+# Ensure "bug-report" label exists (auto-create if missing)
+if ! gh label list --repo "alexeykrol/claude-code-starter" 2>/dev/null | grep -q "^bug-report"; then
+  echo "Creating 'bug-report' label..."
+  gh label create "bug-report" \
+    --repo "alexeykrol/claude-code-starter" \
+    --description "Automated bug report from host project (telemetry & analytics)" \
+    --color "d73a4a" 2>/dev/null || true
+fi
+
 ISSUE_URL=$(gh issue create \
   --repo "alexeykrol/claude-code-starter" \
   --title "$TITLE" \

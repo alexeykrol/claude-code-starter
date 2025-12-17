@@ -88,11 +88,46 @@ sed -i.bak -E 's/eyJ[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+/JWT_***REDACT
 rm -f "$REPORT_FILE.bak"
 
 # ============================================
-# Add Anonymization Notice
+# Generate Smart Title
 # ============================================
 
-# Prepend notice to report
+# Detect protocol type
+PROTOCOL_TYPE="Unknown"
+if grep -q "# Cold Start Protocol Log" "$REPORT_FILE" 2>/dev/null; then
+  PROTOCOL_TYPE="Cold Start"
+elif grep -q "# Completion Protocol Log" "$REPORT_FILE" 2>/dev/null; then
+  PROTOCOL_TYPE="Completion"
+fi
+
+# Extract framework version
+FW_VERSION=$(grep "^\*\*Framework:\*\*" "$REPORT_FILE" 2>/dev/null | head -1 | sed 's/.*v\([0-9.]*\).*/\1/' | tr -d '\n')
+if [ -z "$FW_VERSION" ]; then
+  FW_VERSION="unknown"
+fi
+
+# Check for errors
+STATUS="Success"
+if grep -q "## ⚠️ ERROR\|ERROR at" "$REPORT_FILE" 2>/dev/null; then
+  # Extract error description (first error line)
+  ERROR_DESC=$(grep -E "## ⚠️ ERROR|ERROR at" "$REPORT_FILE" | head -1 | sed 's/.*ERROR[: ]*//' | cut -c1-50)
+  if [ -n "$ERROR_DESC" ]; then
+    STATUS="$ERROR_DESC"
+  else
+    STATUS="Error Detected"
+  fi
+fi
+
+# Generate title
+TITLE="[Bug Report][${PROTOCOL_TYPE}] v${FW_VERSION} - ${STATUS}"
+
+# ============================================
+# Add Title and Anonymization Notice
+# ============================================
+
+# Prepend title and notice to report
 cat > "$REPORT_FILE.tmp" <<EOF
+# $TITLE
+
 ---
 **ANONYMIZED BUG REPORT**
 
