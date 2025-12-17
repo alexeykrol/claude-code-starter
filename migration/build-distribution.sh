@@ -1,7 +1,7 @@
 #!/bin/bash
 #
 # Claude Code Starter Framework — Distribution Builder
-# Version: 2.2.4
+# Version: 2.3.0
 #
 # This script creates a self-extracting init-project.sh installer
 # that users can download and run directly.
@@ -9,7 +9,7 @@
 
 set -e  # Exit on error
 
-VERSION="2.2.4"
+VERSION="2.3.0"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 DIST_DIR="$PROJECT_ROOT/dist-release"
@@ -80,10 +80,17 @@ mkdir -p "$TEMP_DIR/framework/.claude/dist"
 cp -r "$PROJECT_ROOT/dist/claude-export" "$TEMP_DIR/framework/.claude/dist/"
 echo -e "${GREEN}✓${NC} Copied compiled framework code"
 
-# 5. .claude/templates/ (meta file templates)
+# 5. .claude/templates/ (meta file templates + framework config)
 mkdir -p "$TEMP_DIR/framework/.claude/templates"
 cp "$SCRIPT_DIR/templates/"*.md "$TEMP_DIR/framework/.claude/templates/"
-echo -e "${GREEN}✓${NC} Copied meta file templates"
+cp "$SCRIPT_DIR/templates/.framework-config.template.json" "$TEMP_DIR/framework/.claude/templates/"
+echo -e "${GREEN}✓${NC} Copied meta file templates and config template"
+
+# 6. .claude/scripts/ (anonymization script)
+mkdir -p "$TEMP_DIR/framework/.claude/scripts"
+cp "$PROJECT_ROOT/.claude/scripts/anonymize-report.sh" "$TEMP_DIR/framework/.claude/scripts/"
+chmod +x "$TEMP_DIR/framework/.claude/scripts/anonymize-report.sh"
+echo -e "${GREEN}✓${NC} Copied anonymization script"
 
 # ============================================================================
 # Create Framework Archive

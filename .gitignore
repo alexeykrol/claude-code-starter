@@ -212,6 +212,10 @@ storybook-static/
 # Claude Code Starter Framework Specific
 # ==========================================
 
+# Framework logs and bug reports (privacy-sensitive, gitignored)
+.claude/logs/
+.claude/.framework-config
+
 # Development/testing directory - excluded from repo
 dev/
 
@@ -259,6 +263,11 @@ node_modules/
 *.tsbuildinfo
 
 # Claude dialogs
+dialog/2025-12-16_session-a6e90166.md
+dialog/2025-12-16_session-959c2974.md
+dialog/2025-12-16_session-ae481872.md
+dialog/2025-12-16_session-5bb2deeb.md
+dialog/2025-12-16_session-3562a949.md
 dialog/2025-12-16_session-8ace1b13.md
 dialog/2025-12-16_session-a29ed328.md
 dialog/2025-12-16_session-69ae156d.md

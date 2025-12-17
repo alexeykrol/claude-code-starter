@@ -1,14 +1,14 @@
 #!/bin/bash
 #
 # Claude Code Starter Framework — Installer
-# Version: 2.2.4
+# Version: 2.3.0
 #
 # Downloads and installs the framework from GitHub Releases
 #
 
 set -e  # Exit on error
 
-VERSION="2.2.4"
+VERSION="2.3.0"
 REPO="alexeykrol/claude-code-starter"
 ARCHIVE_URL="https://github.com/${REPO}/releases/download/v${VERSION}/framework.tar.gz"
 PROJECT_DIR="$(pwd)"
@@ -336,6 +336,13 @@ if [ "$MIGRATION_MODE" = "new" ]; then
             sed -e "s/{{PROJECT_NAME}}/$PROJECT_NAME/g" \
                 .claude/templates/ARCHITECTURE.template.md > .claude/ARCHITECTURE.md
             log_success "Generated .claude/ARCHITECTURE.md"
+        fi
+
+        # Generate .framework-config from template
+        if [ -f ".claude/templates/.framework-config.template.json" ]; then
+            sed -e "s/{{PROJECT_NAME}}/$PROJECT_NAME/g" \
+                .claude/templates/.framework-config.template.json > .claude/.framework-config
+            log_success "Generated .claude/.framework-config"
         fi
     fi
 

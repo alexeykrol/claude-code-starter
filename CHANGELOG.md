@@ -7,6 +7,139 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.3.0] - 2025-12-16
+
+### Added
+
+- **Bug Reporting & Logging System** — Privacy-first error tracking and protocol logging
+  - Added Step 0.15 "Bug Reporting Consent" to Cold Start Protocol
+  - First-run opt-in dialog explaining what gets collected and what doesn't
+  - Default is disabled (opt-in required)
+  - User can change preference anytime with `/bug-reporting` command
+  - File: `CLAUDE.md` (+60 lines)
+
+- **Protocol Logging** — Track execution of Cold Start and Completion protocols
+  - Added Step 0.3 "Initialize Protocol Logging" for Cold Start
+  - Added Step 0 "Initialize Completion Logging" for Completion Protocol
+  - Logs stored in `.claude/logs/cold-start/` and `.claude/logs/completion/`
+  - Each log includes: project name (anonymized), timestamp, framework version, protocol steps
+  - Provides `log_step()` and `log_error()` functions for tracking execution
+  - File: `CLAUDE.md` (+110 lines)
+
+- **Bug Report Creation** — Automatic anonymized bug reports when errors detected
+  - Added Step 6.5 "Finalize Completion Log & Create Bug Report" to Completion Protocol
+  - Checks for errors in logs automatically
+  - Offers to create anonymized report if errors found
+  - Uses anonymization script to remove sensitive data
+  - File: `CLAUDE.md` (+45 lines)
+
+- **Anonymization Script** — Removes sensitive data from bug reports
+  - File: `.claude/scripts/anonymize-report.sh` (new, 3.5KB, executable)
+  - Removes:
+    - File paths → `/PROJECT_ROOT/...`
+    - API keys, tokens, secrets → `***REDACTED***`
+    - GitHub tokens → `gh_***REDACTED***`
+    - Email addresses → `***@***`
+    - IP addresses → `*.*.*.*`
+    - Project names → `{project}_anon`
+  - Adds anonymization notice header to reports
+  - Safe to share after anonymization
+
+- **/bug-reporting Command** — Manage bug reporting settings
+  - File: `.claude/commands/bug-reporting.md` (new, 4.7KB)
+  - Subcommands:
+    - `enable` — Enable bug reporting with privacy explanation
+    - `disable` — Disable bug reporting (preserves existing logs)
+    - `status` — Show current settings and log counts
+    - `test` — Create test bug report to verify system
+  - Shows what gets collected and what doesn't
+  - User-friendly privacy controls
+
+- **Framework Developer Mode** — Bug report collection for framework project
+  - Added Step 0.4 "Read Bug Reports from Host Projects" to Cold Start Protocol
+  - Only activates on framework project (checks for `migration/build-distribution.sh`)
+  - Shows count of open GitHub Issues with `bug-report` label
+  - Directs to `/analyze-bugs` command for detailed analysis
+  - File: `CLAUDE.md` (+40 lines)
+
+- **/analyze-bugs Command** — Analyze bug reports from GitHub Issues (framework project only)
+  - File: `.claude/commands/analyze-bugs.md` (new, 4.9KB)
+  - Fetches all open issues with `bug-report` label from GitHub
+  - Groups reports by error type (Cold Start vs Completion)
+  - Creates analysis file in `.claude/logs/bug-analysis/`
+  - Shows summary with count by protocol type
+  - Requires `gh` CLI (GitHub CLI)
+
+- **Framework Config** — Storage for bug reporting preferences
+  - File: `migration/templates/.framework-config.template.json` (new, 135B)
+  - JSON structure with:
+    - `bug_reporting_enabled` — User preference (default: false)
+    - `project_name` — Anonymized in reports
+    - `first_run_completed` — Tracks if consent dialog shown
+    - `consent_version` — Tracks privacy policy version
+  - Created automatically on first run by Step 0.15
+  - Updated by `/bug-reporting` command
+
+### Changed
+
+- **build-distribution.sh** — Updated to copy new files
+  - Now copies `.claude/scripts/anonymize-report.sh` (executable)
+  - Now copies `migration/templates/.framework-config.template.json`
+  - Updated summary to show scripts in file list
+  - File: `migration/build-distribution.sh` (+12 lines)
+
+- **init-project.sh** — Generates .framework-config during installation
+  - New projects get `.framework-config` from template
+  - Replaces `{{PROJECT_NAME}}` placeholder with actual project name
+  - Generated during meta file creation step
+  - File: `init-project.sh` (+7 lines)
+
+- **.gitignore** — Added entries for privacy-sensitive files
+  - Added `.claude/logs/` (all log files ignored)
+  - Added `.claude/.framework-config` (user preferences ignored)
+  - Ensures bug reports and logs never committed to git
+  - File: `.gitignore` (+3 lines)
+
+- **migration/CLAUDE.production.md** — Updated with all new features
+  - Synced with root CLAUDE.md (full feature parity)
+  - Includes all new bug reporting steps
+  - Ready for distribution in next release
+  - File: `migration/CLAUDE.production.md` (replaced, now matches root)
+
+### Benefits
+
+- **Privacy-First** — Opt-in by default, complete anonymization, user control
+- **Better Support** — Framework developers can see anonymized error patterns
+- **Improved Quality** — Bug reports help identify and fix issues faster
+- **Transparent** — Users know exactly what gets sent and what doesn't
+- **Local Control** — All logs stored locally, user decides what to share
+- **Zero Configuration** — Works automatically once enabled
+
+### Technical Details
+
+- Logging only activates if `bug_reporting_enabled: true` in `.framework-config`
+- Log files named: `{project}-{timestamp}.md` for easy organization
+- Anonymization uses `sed` with multiple regex patterns
+- GitHub Issues API used for centralized bug collection
+- Framework Developer Mode detects framework project by checking for `migration/build-distribution.sh`
+- All bash scripts tested on macOS (Darwin 25.1.0)
+
+### Testing
+
+- ✅ Config creation tested on santacruz
+- ✅ Cold Start logging tested (creates files with correct format)
+- ✅ `/bug-reporting status` shows correct info
+- ✅ Anonymization script removes all sensitive data:
+  - Paths: `/Users/.../santacruz/...` → `/PROJECT_ROOT/santacruz_anon/...`
+  - API keys: `api_key=sk_test_123` → `api_key=***REDACTED***`
+  - Tokens: `ghp_AbCdEf123` → `gh_***REDACTED***`
+  - Emails: `user@example.com` → `***@***`
+  - IPs: `192.168.1.100` → `*.*.*.*`
+- ✅ All files created in correct locations
+- ✅ Scripts executable and functional
+
+---
+
 ## [2.2.4] - 2025-12-16
 
 ### Added
