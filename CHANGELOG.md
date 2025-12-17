@@ -19,7 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - File: `.claude/scripts/submit-bug-report.sh` (new, 2.2KB, executable)
   - Uses GitHub CLI (`gh`) to submit anonymized reports
   - Submits to `alexeykrol/claude-code-starter` repository
-  - Adds `bug-report` label automatically
+  - Auto-creates `bug-report` label if missing
   - Checks for `gh` installation and authentication
   - Records submission URL in report metadata
   - Graceful fallback if `gh` not available
@@ -30,6 +30,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Privacy verification checkboxes required
   - Clear notice about anonymization
   - Automated submission compatible
+
+- **anonymize-report.sh** — Smart title generation
+  - Generates descriptive titles: `[Bug Report][Protocol Type] vX.Y.Z - Status`
+  - Detects protocol type (Cold Start vs Completion)
+  - Extracts framework version
+  - Determines status (Success vs Error with description)
 
 **Phase 3: Analytics & Pattern Detection**
 
@@ -48,6 +54,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **/analyze-local-bugs Command** — Wrapper for pattern analyzer
   - File: `.claude/commands/analyze-local-bugs.md` (new, ~1KB)
+
+- **quick-update.sh** — Standalone framework updater
+  - File: `quick-update.sh` (new, 8.7KB, executable)
+  - Smart detection — auto-downloads init-project.sh if framework not found
+  - Downloads lightweight framework-commands.tar.gz for updates
+  - Creates backups before updating
+  - Updates SNAPSHOT.md version automatically
+  - Prevents user confusion between update vs installation
+
+### Changed
+
+- **CLAUDE.md Step 6.5** — Bug reports now created ALWAYS (not just on errors)
+  - Changed from error-only to analytics/telemetry model
+  - Bug reports serve as usage statistics and framework health monitoring
+  - Even "success" executions provide valuable data
+  - Double confirmation still required (create → submit)
   - Works in both framework and host projects
   - Analyzes local bug reports (complements `/analyze-bugs` for GitHub Issues)
   - Privacy-first: all data stays local
