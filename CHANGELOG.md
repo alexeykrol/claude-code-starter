@@ -63,6 +63,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Updates SNAPSHOT.md version automatically
   - Prevents user confusion between update vs installation
 
+- **Step 0.4: Framework Developer Mode** — Automatic bug report checking
+  - Added to Cold Start Protocol (CLAUDE.md lines 293-384)
+  - Automatically checks GitHub Issues for bug-report label on framework startup
+  - Shows count of open reports and highlights recent ones (last 7 days)
+  - Lists 5 most recent bug reports with issue numbers and titles
+  - Suggests running `/analyze-bugs` for detailed analysis
+  - Only runs in framework project (claude-code-starter)
+  - Non-blocking: gracefully handles missing gh CLI or authentication
+  - Framework developer's first priority: fix user-reported issues
+
+- **Step 0: Re-read Completion Protocol (Self-Check)** — Protocol accuracy enforcement
+  - Added to Completion Protocol in CLAUDE.md and migration/CLAUDE.production.md
+  - Forces re-reading Completion Protocol section at /fi start
+  - Prevents "сапожник без сапог" problem (forgetting to document changes)
+  - Includes self-check questions for metafile updates
+  - Counters context compaction during long sessions
+  - Works for both framework and host projects
+  - Updated .claude/commands/fi.md to include Step 0
+
 ### Changed
 
 - **CLAUDE.md Step 6.5** — Bug reports now created ALWAYS (not just on errors)
