@@ -221,6 +221,7 @@ dev/
 
 # Test directories - excluded from repo
 test2/
+test/
 
 # ✅ IMPORTANT: DO NOT IGNORE (these are part of the framework):
 #
