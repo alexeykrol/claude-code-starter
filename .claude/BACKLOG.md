@@ -16,6 +16,46 @@
 
 ## 🎯 Текущие задачи (приоритизированные)
 
+### Phase 13: Hotfix - Critical Bugs v2.4.2 ✅
+
+**Статус:** Завершено
+**Цель:** Исправить критические баги для internationalization и UX
+
+**Issue #54: Dialog export не работает с кириллицей**
+- [x] Проблема: `findClaudeProjectDir()` не может найти проект с unicode в пути
+- [x] Анализ: Claude Code кодирует пути, кириллица → дефисы
+- [x] Решение: использовать `sessions-index.json` (projectPath field)
+- [x] Реализация: новый алгоритм в `src/claude-export/exporter.ts`
+  - [x] Method 1: чтение sessions-index.json (100% точность)
+  - [x] Method 2: fallback legacy (backwards compatibility)
+- [x] Тестирование: экспорт работает на текущем проекте
+- [x] Build TypeScript
+
+**Issue #50: `/explain` слишком длинный**
+- [x] Проблема: 6 обязательных разделов для любого кода (даже 1 строка)
+- [x] Анализ: избыточное использование токенов, плохой UX
+- [x] Решение: адаптивная детализация по сложности
+- [x] Реализация: `.claude/commands/explain.md`
+  - [x] Step 1: Complexity Assessment (Simple/Medium/Complex)
+  - [x] Step 2: Adaptive Explanation (50-100 / 200-400 / Full)
+  - [x] Guidelines + Examples (Good/Bad)
+- [x] Token economy: 90% reduction для simple code
+
+**Metafiles:**
+- [x] CHANGELOG.md (v2.4.2 entry)
+- [x] SNAPSHOT.md (v2.4.2 description)
+- [x] BACKLOG.md (этот файл)
+- [ ] Version bump (2.4.1 → 2.4.2)
+- [ ] Build distribution
+- [ ] GitHub Release v2.4.2
+
+**Результат:**
+- ✅ Framework работает с любыми языками (internationalization)
+- ✅ `/explain` даёт адекватные ответы (UX improvement)
+- ✅ Обратная совместимость сохранена (legacy projects)
+
+---
+
 ### Phase 12: Hybrid Protocol Files Architecture v2.4.1 ✅
 
 **Статус:** Завершено

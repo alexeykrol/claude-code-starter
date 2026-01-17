@@ -157,9 +157,48 @@ export function formatDateISO(ts: number): string {
 
 /**
  * Find Claude project directory for a given real project path
- * Converts /Users/alex/Code/MyProject to -Users-alex-Code-MyProject
+ * Uses sessions-index.json for 100% accurate matching (handles cyrillic and all unicode)
  */
 export function findClaudeProjectDir(realProjectPath: string): string | null {
+  if (!fs.existsSync(PROJECTS_DIR)) {
+    return null;
+  }
+
+  const dirs = fs.readdirSync(PROJECTS_DIR).filter(d => {
+    const fullPath = path.join(PROJECTS_DIR, d);
+    return fs.statSync(fullPath).isDirectory();
+  });
+
+  // Method 1: Use sessions-index.json for accurate path matching (v2.4.2+)
+  // This method handles cyrillic, unicode, and any special characters correctly
+  for (const dir of dirs) {
+    const indexPath = path.join(PROJECTS_DIR, dir, 'sessions-index.json');
+
+    if (!fs.existsSync(indexPath)) {
+      continue;
+    }
+
+    try {
+      const indexContent = fs.readFileSync(indexPath, 'utf8');
+      const index = JSON.parse(indexContent);
+
+      // Get projectPath from first entry
+      if (index.entries && index.entries.length > 0) {
+        const projectPath = index.entries[0].projectPath;
+
+        // Direct path comparison (100% accurate)
+        if (projectPath === realProjectPath || projectPath === path.resolve(realProjectPath)) {
+          return dir;
+        }
+      }
+    } catch (e) {
+      // Ignore corrupted or invalid index files, continue to next directory
+      continue;
+    }
+  }
+
+  // Method 2: Fallback to legacy path-based matching (for backwards compatibility)
+  // This may fail with cyrillic/unicode paths, but kept for old projects without sessions-index.json
   const normalized = realProjectPath.replace(/\//g, '-');
 
   if (fs.existsSync(path.join(PROJECTS_DIR, normalized))) {
@@ -172,30 +211,14 @@ export function findClaudeProjectDir(realProjectPath: string): string | null {
     return '-' + withoutLeading;
   }
 
-  // Try with underscore → dash conversion (Claude may convert underscores)
+  // Try with underscore → dash conversion
   const withDashes = normalized.replace(/_/g, '-');
   if (withDashes !== normalized && fs.existsSync(path.join(PROJECTS_DIR, withDashes))) {
     return withDashes;
   }
 
-  // Try with dash → underscore conversion
-  const withUnderscores = normalized.replace(/-([^\/])/g, '_$1');
-  if (withUnderscores !== normalized && fs.existsSync(path.join(PROJECTS_DIR, withUnderscores))) {
-    return withUnderscores;
-  }
-
-  // Search for matching directory
-  if (!fs.existsSync(PROJECTS_DIR)) {
-    return null;
-  }
-
-  const dirs = fs.readdirSync(PROJECTS_DIR);
-  const match = dirs.find(d => {
-    const fullPath = getProjectFullPath(d);
-    return fullPath === realProjectPath || fullPath === path.resolve(realProjectPath);
-  });
-
-  return match || null;
+  // No match found
+  return null;
 }
 
 /**

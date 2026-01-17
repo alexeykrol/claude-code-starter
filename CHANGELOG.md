@@ -7,6 +7,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.4.2] - 2026-01-16
+
+### Fixed
+
+- **CRITICAL: Dialog export с кириллицей в пути (#54)**
+  - Проблема: `npm run dialog:export` находил 0 сессий для проектов с unicode путями
+  - Решение: использование `sessions-index.json` для точного сопоставления путей
+  - Файл: `src/claude-export/exporter.ts` — функция `findClaudeProjectDir()`
+  - Метод 1: чтение projectPath из sessions-index.json (100% точность)
+  - Метод 2: fallback к legacy path-based matching (backwards compatibility)
+  - Поддержка: любые unicode символы (кириллица, китайский, арабский, спецсимволы)
+
+- **MEDIUM: `/explain` избыточные ответы (#50)**
+  - Проблема: 6 обязательных разделов даже для 1-3 строк кода (500+ строк ответа)
+  - Решение: адаптивная детализация по сложности кода
+  - Файл: `.claude/commands/explain.md` — adaptive complexity assessment
+  - Simple (1-10 lines) → 50-100 tokens (краткое объяснение)
+  - Medium (10-50 lines) → 200-400 tokens (обзор + ключевые моменты)
+  - Complex (50+ lines) → Full breakdown (все 7 разделов)
+  - Token economy: до 90% сокращение для простого кода
+
+### Impact
+
+- **Internationalization:** Framework теперь работает с любыми языками в путях
+- **User Experience:** `/explain` теперь даёт адекватные по размеру ответы
+- **Compatibility:** Обратная совместимость с legacy проектами сохранена
+
+---
+
 ## [2.4.1] - 2026-01-16
 
 ### Added

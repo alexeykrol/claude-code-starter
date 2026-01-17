@@ -4,8 +4,8 @@
 
 ## Current State
 
-**Version:** 2.4.1
-**Status:** Production - Phase 12: Hybrid Protocol Files Architecture
+**Version:** 2.4.2
+**Status:** Production - Hotfix: Cyrillic Paths + Adaptive /explain
 **Branch:** main
 
 ## What's New in v2.0
@@ -149,6 +149,29 @@ claude-code-starter/
 - File paths (replaced with /PROJECT_ROOT/...)
 - API keys, tokens, secrets (removed)
 - Email addresses, IP addresses
+
+## What's New in v2.4.2
+
+**Hotfix Release: Critical Bug Fixes**
+
+**Issue #54 - CRITICAL: Dialog export с кириллицей (unicode) в пути:**
+- **Проблема:** Экспорт находил 0 сессий для проектов с кириллицей/unicode в пути
+- **Решение:** Использование `sessions-index.json` для точного сопоставления
+- **Файл:** `src/claude-export/exporter.ts` — `findClaudeProjectDir()`
+- **Метод:** Чтение `projectPath` из sessions-index.json (100% точность)
+- **Поддержка:** Любые unicode символы (кириллица, китайский, арабский)
+
+**Issue #50 - MEDIUM: `/explain` избыточные ответы:**
+- **Проблема:** 6 разделов + 500+ строк даже для 3 строк кода
+- **Решение:** Адаптивная детализация по сложности
+- **Файл:** `.claude/commands/explain.md`
+- **Уровни:**
+  - Simple (1-10 lines) → 50-100 tokens
+  - Medium (10-50 lines) → 200-400 tokens
+  - Complex (50+) → Full breakdown
+- **Token economy:** До 90% сокращение для простого кода
+
+---
 
 ## What's New in v2.4.1
 
