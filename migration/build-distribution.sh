@@ -1,7 +1,7 @@
 #!/bin/bash
 #
 # Claude Code Starter Framework — Distribution Builder
-# Version: 2.4.0
+# Version: 2.4.1
 #
 # This script creates a self-extracting init-project.sh installer
 # that users can download and run directly.
@@ -9,7 +9,7 @@
 
 set -e  # Exit on error
 
-VERSION="2.4.0"
+VERSION="2.4.1"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 DIST_DIR="$PROJECT_ROOT/dist-release"
@@ -95,6 +95,12 @@ chmod +x "$TEMP_DIR/framework/.claude/scripts/anonymize-report.sh"
 chmod +x "$TEMP_DIR/framework/.claude/scripts/submit-bug-report.sh"
 chmod +x "$TEMP_DIR/framework/.claude/scripts/analyze-bug-patterns.sh"
 echo -e "${GREEN}✓${NC} Copied bug reporting scripts (anonymize + submit + analyze)"
+
+# 6.5. .claude/protocols/ (protocol files - NEW in v2.4.1)
+mkdir -p "$TEMP_DIR/framework/.claude/protocols"
+cp "$PROJECT_ROOT/.claude/protocols/cold-start.md" "$TEMP_DIR/framework/.claude/protocols/"
+cp "$PROJECT_ROOT/.claude/protocols/completion.md" "$TEMP_DIR/framework/.claude/protocols/"
+echo -e "${GREEN}✓${NC} Copied protocol files (cold-start + completion)"
 
 # 7. .github/ISSUE_TEMPLATE/ (GitHub issue templates)
 mkdir -p "$TEMP_DIR/framework/.github/ISSUE_TEMPLATE"

@@ -123,6 +123,385 @@ Show user what you found:
 
 ---
 
+## Step 2.5: MANDATORY Security Scan 🔒
+
+**CRITICAL:** Before proceeding with migration, scan existing project for credentials.
+
+**Why mandatory:**
+- Legacy projects often have hardcoded secrets
+- .env files may be committed
+- Credentials in old commits/documentation
+- **First integration = last chance to catch issues**
+
+### 2.5.1: Run Initial Security Scan
+
+```bash
+# Run comprehensive security scan
+bash security/initial-scan.sh
+SCAN_EXIT=$?
+```
+
+**Exit codes:**
+- `0` = Clean (no issues)
+- `1` = HIGH severity issues
+- `2` = CRITICAL severity issues
+- `3` = MEDIUM severity issues
+
+### 2.5.2: Handle Scan Results
+
+**If exit code = 0 (CLEAN):**
+```
+✅ Security scan passed! No credentials detected.
+
+Proceeding with migration...
+```
+
+**If exit code = 1, 2, or 3 (ISSUES FOUND):**
+
+```
+🚨 SECURITY ISSUES DETECTED
+
+Migration STOPPED for safety.
+
+Report: security/reports/initial-scan-[timestamp].txt
+```
+
+**STOP migration and present user with 3 options:**
+
+````
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🔒 Security Issues Detected
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+The security scan found potential credentials in your project.
+For your safety, migration has been STOPPED.
+
+Please choose how to proceed:
+
+┌─ 📌 Option A: Create Security Report + Reminder
+│
+│  What it does:
+│  • Saves detailed security report
+│  • Creates GitHub issue as reminder
+│  • You fix issues manually later
+│  • Migration continues without cleanup
+│
+│  Pros:
+│  • Quick (no changes to your project)
+│  • You maintain full control
+│
+│  Cons:
+│  • Issues remain in project until you fix them
+│  • Risk of forgetting to fix
+│
+│  Recommended for: Experienced developers who want manual control
+└─
+
+┌─ 📌 Option B: Automatic Cleanup (Framework Handles It) ⭐ RECOMMENDED
+│
+│  What it does:
+│  • Runs full credential cleanup (regex + AI agent)
+│  • Creates .env.example template
+│  • Moves secrets to .env (you fill real values later)
+│  • Adds security patterns to .gitignore
+│  • Creates backup before changes
+│
+│  Pros:
+│  • Thorough and automatic
+│  • Uses all security layers (regex + AI)
+│  • Creates proper .env setup
+│  • Safe (creates backup first)
+│
+│  Cons:
+│  • Takes 2-3 minutes (AI scan)
+│  • Makes changes to your project (with backup)
+│
+│  Recommended for: Most users, especially if unfamiliar with security
+└─
+
+┌─ 📌 Option C: Manual Fix + .env Setup
+│
+│  What it does:
+│  • Shows you security report
+│  • Guides you to create .env file
+│  • Helps move secrets manually
+│  • Updates .gitignore
+│  • You control every step
+│
+│  Pros:
+│  • Full transparency
+│  • Learn security best practices
+│  • No automated changes
+│
+│  Cons:
+│  • Takes longer (manual work)
+│  • Requires security knowledge
+│
+│  Recommended for: Developers who want to learn and control everything
+└─
+
+⭐ My Recommendation: Option B (Automatic Cleanup)
+
+Why: Framework has battle-tested security tools (from production use).
+Automatic cleanup is safe, thorough, and saves your time.
+
+What would you like to do? (A/B/C)
+````
+
+### 2.5.3: Execute User Choice
+
+**Option A: Security Report + Reminder**
+
+```bash
+# 1. Report already created by initial-scan.sh
+REPORT=$(ls -t security/reports/initial-scan-*.txt | head -1)
+
+echo "✅ Security report saved: $REPORT"
+
+# 2. Create GitHub issue (if gh CLI available)
+if command -v gh &> /dev/null && gh auth status &> /dev/null 2>&1; then
+  gh issue create \
+    --title "🔒 Security: Credentials detected during migration" \
+    --body "$(cat <<EOF
+## Security Scan Results
+
+Initial security scan detected potential credentials in the project.
+
+**Report:** $REPORT
+
+## Action Required
+
+Review the security report and fix the following:
+- [ ] Move hardcoded credentials to .env
+- [ ] Remove .env files from git history if committed
+- [ ] Add security patterns to .gitignore
+- [ ] Verify no secrets in documentation
+
+## Next Steps
+
+1. Read full report: \`$REPORT\`
+2. Fix each issue listed
+3. Run \`/security-dialogs\` for verification
+4. Close this issue when complete
+
+**Priority:** HIGH
+**Created by:** Claude Code Starter Framework
+EOF
+)" \
+    --label "security" \
+    --label "high-priority"
+
+  echo "✅ GitHub issue created as reminder"
+else
+  echo "ℹ️  Install gh CLI to auto-create reminder issues"
+fi
+
+# 3. Continue migration (issues remain)
+echo ""
+echo "⚠️  Continuing migration with security issues present."
+echo "   Remember to fix them before committing to git!"
+echo ""
+```
+
+**Option B: Automatic Cleanup** ⭐
+
+```bash
+echo ""
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "🔧 Automatic Security Cleanup"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo ""
+
+# 1. Create backup
+BACKUP_DIR="security/backups/migration-$(date +%Y%m%d-%H%M%S)"
+mkdir -p "$BACKUP_DIR"
+
+echo "Creating backup..."
+git ls-files | cpio -pdm "$BACKUP_DIR" 2>/dev/null
+echo "✅ Backup created: $BACKUP_DIR"
+echo ""
+
+# 2. Run comprehensive cleanup (Layer 2: regex)
+echo "Step 1/3: Running regex-based cleanup..."
+bash security/cleanup-dialogs.sh  # All files, not --last
+echo ""
+
+# 3. Run AI-based deep scan (Layer 4)
+echo "Step 2/3: Running AI agent deep scan (1-2 minutes)..."
+echo "This ensures we catch obfuscated/context-dependent credentials..."
+echo ""
+
+# Invoke /security-dialogs for deep scan
+# Agent will analyze all files (not just dialogs in this case)
+# Will create detailed security report
+
+# 4. Create .env setup
+echo "Step 3/3: Setting up .env file..."
+
+# Check if .env.example exists
+if [ ! -f ".env.example" ]; then
+  cat > .env.example <<'ENVEOF'
+# Environment Variables Template
+# Copy this file to .env and fill in your actual values
+# NEVER commit .env to git!
+
+# Database
+# DATABASE_URL=postgresql://user:password@localhost:5432/dbname
+
+# API Keys
+# API_KEY=your_api_key_here
+# SECRET_KEY=your_secret_key_here
+
+# Authentication
+# JWT_SECRET=your_jwt_secret_here
+
+# External Services
+# STRIPE_KEY=your_stripe_key_here
+# SENDGRID_API_KEY=your_sendgrid_key_here
+
+ENVEOF
+  echo "✅ Created .env.example template"
+fi
+
+# Create .env from example if doesn't exist
+if [ ! -f ".env" ]; then
+  cp .env.example .env
+  echo "✅ Created .env file (fill in your actual values)"
+else
+  echo "ℹ️  .env already exists (not overwriting)"
+fi
+
+# Update .gitignore
+if [ -f ".gitignore" ]; then
+  # Add security patterns if missing
+  if ! grep -q "^\.env$" .gitignore; then
+    cat >> .gitignore <<'GITEOF'
+
+# Security: Environment variables and credentials
+.env
+.env.*
+!.env.example
+*credentials*
+*secret*
+*.pem
+*.key
+security/reports/
+GITEOF
+    echo "✅ Updated .gitignore with security patterns"
+  else
+    echo "✓ .gitignore already has security patterns"
+  fi
+else
+  # Create new .gitignore
+  cat > .gitignore <<'GITEOF'
+# Security: Environment variables and credentials
+.env
+.env.*
+!.env.example
+*credentials*
+*secret*
+*.pem
+*.key
+security/reports/
+
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+build/
+GITEOF
+  echo "✅ Created .gitignore with security patterns"
+fi
+
+echo ""
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "✅ Automatic Cleanup Complete!"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo ""
+echo "What was done:"
+echo "  ✅ Created backup: $BACKUP_DIR"
+echo "  ✅ Ran regex cleanup (10 credential patterns)"
+echo "  ✅ Ran AI deep scan (context-aware detection)"
+echo "  ✅ Created .env.example template"
+echo "  ✅ Created .env file (fill in real values)"
+echo "  ✅ Updated .gitignore (security patterns)"
+echo ""
+echo "⚠️  IMPORTANT: Edit .env and fill in your actual credentials!"
+echo ""
+echo "If anything went wrong, restore from backup:"
+echo "  cp -r $BACKUP_DIR/* ."
+echo ""
+```
+
+**Option C: Manual Fix + Guidance**
+
+```bash
+echo ""
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "📖 Manual Security Fix Guide"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo ""
+
+# Show report
+REPORT=$(ls -t security/reports/initial-scan-*.txt | head -1)
+cat "$REPORT"
+
+echo ""
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "Step-by-Step Fix Instructions:"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo ""
+echo "1. Create .env file:"
+echo "   touch .env"
+echo ""
+echo "2. Move each credential from code to .env:"
+echo "   Example:"
+echo "   Before: const API_KEY = \"abc123\""
+echo "   After in code: const API_KEY = process.env.API_KEY"
+echo "   In .env: API_KEY=abc123"
+echo ""
+echo "3. Update .gitignore:"
+echo "   echo '.env' >> .gitignore"
+echo "   echo '*credentials*' >> .gitignore"
+echo "   echo '*.pem' >> .gitignore"
+echo ""
+echo "4. Remove .env from git history (if already committed):"
+echo "   git filter-branch --force --index-filter \\"
+echo "     'git rm --cached --ignore-unmatch .env' \\"
+echo "     --prune-empty --tag-name-filter cat -- --all"
+echo ""
+echo "5. Verify cleanup:"
+echo "   Run: /security-dialogs"
+echo ""
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo ""
+
+read -p "Press Enter when you've fixed all issues to continue migration..."
+```
+
+### 2.5.4: Update Migration Log
+
+After user choice is executed:
+
+```bash
+# Update migration log
+echo '{
+  "status": "in_progress",
+  "mode": "legacy",
+  "started": "[keep original]",
+  "updated": "'$(date -Iseconds)'",
+  "current_step": 3,
+  "current_step_name": "deep_analysis",
+  "steps_completed": ["discovery", "security_scan"],
+  "security_issues_found": true,
+  "security_action": "[A/B/C]",
+  "last_error": null
+}' > .claude/migration-log.json
+```
+
+---
+
 ## Step 3: Deep Analysis Phase
 
 **IMPORTANT:** Use Task tool with Explore agent for thorough analysis.

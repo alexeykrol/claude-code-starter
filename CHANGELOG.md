@@ -11,82 +11,91 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- **Layer 4: AI Agent Deep Scan with Advisory Mode**
-  - Smart trigger system for detecting high-risk situations
-  - Advisory mode: Claude AI asks user before invoking agent (user control)
+- **Hybrid Protocol Files Architecture**
+  - New `.claude/protocols/cold-start.md` (600+ lines) — complete Cold Start Protocol
+  - New `.claude/protocols/completion.md` (490+ lines) — complete Completion Protocol
+  - Protocols now read fresh from disk, immune to context compaction
+  - Token economy: protocols loaded only when needed (~3-4k tokens vs constant 8.7k)
+
+- **Mandatory Security Scan on Legacy Migration**
+  - New `security/initial-scan.sh` — comprehensive security scanner for legacy projects
+  - Scans for .env files, credentials, hardcoded secrets, API keys
+  - Integrated into `/migrate-legacy` Step 2.5 (mandatory before Deep Analysis)
+  - 3 user options: Report + Issue, Auto-cleanup (recommended), Manual fix
+  - Auto-cleanup includes .env setup and .gitignore patterns
+  - Exit codes: 0=clean, 1=HIGH, 2=CRITICAL, 3=MEDIUM
+
+- **Security Layer 4: AI Agent Deep Scan with Advisory Mode**
+  - Smart trigger system for detecting high-risk situations (10 triggers)
+  - Advisory mode: Claude AI asks user before invoking agent
   - Auto-invoke only on release mode (git tag v2.x.x)
-  - Scope optimization: analyzes git diff + last dialog (NOT entire codebase)
-  - Massive token savings: 5-10 files instead of 300+
-
-- **Smart Trigger Detection System**
-  - New `security/check-triggers.sh` — 10 triggers with priority levels
-  - **CRITICAL triggers:** Production credentials file, git release tag, release workflow
-  - **HIGH triggers:** Regex found credentials, security keywords (>5), production discussion
-  - **MEDIUM triggers:** Large diff (>500 lines), many dialogs (>5), config modified
-  - **LOW triggers:** Long session (>2 hours)
-  - JSON output with recommendations and risk scores
-  - Exit codes for Claude AI decision-making
-
-- **Advisory System (Not Auto-Invoke)**
-  - New `security/auto-invoke-agent.sh` — advisory recommendations
-  - Claude AI reads triggers and session context
-  - **Normal commits:** Claude asks user "Run deep scan? (y/N)"
-  - **Release mode:** Auto-invoke without asking (mandatory paranoia mode)
-  - User always in control (except releases)
-
-- **Scope Optimization for AI Agent**
-  - Agent analyzes ONLY sprint changes:
-    - Git diff (last 5 commits)
-    - Last dialog (current session)
-    - New/modified reports
-  - Does NOT analyze entire codebase or old dialogs
-  - Token economy: 5-10 files vs 300+ (massive savings)
-
-- **Enhanced /security-dialogs Command**
-  - Step 0: Shows why agent was invoked (auto vs manual)
-  - Step 2: Identifies sprint changes (not all files)
-  - Agent prompt optimized for git diff analysis
-  - Context-aware credential detection for DevOps projects
-
-- **Complete Documentation**
-  - New `security/README.md` — comprehensive 4-layer architecture guide
-  - Updated `.claude/SNAPSHOT.md` — Layer 4 description with triggers
-  - Updated `.claude/BACKLOG.md` — Phase 11 tasks
-  - Updated `CLAUDE.md` Step 3.5 — advisory mode logic
-  - Updated `migration/CLAUDE.production.md` — same changes
+  - Scope optimization: analyzes git diff + last dialog only
+  - Files: `security/check-triggers.sh`, `security/auto-invoke-agent.sh`
 
 ### Changed
 
-- **Security approach:** Auto-invoke → Advisory mode
-  - Prevents token waste on every commit
-  - User decides when thorough check needed
-  - Only release mode auto-invokes (safety)
+- **CLAUDE.md → Router Architecture**
+  - Reduced from ~1000 lines to ~330 lines
+  - Now routes to protocol files instead of containing full protocols
+  - Repository Structure updated (added `.claude/protocols/` section)
+  - Triggers section updated with explicit routing logic
 
-- **Agent scope:** Entire codebase → Sprint changes only
-  - Git diff + last dialog analysis
-  - Focus on what changed, not what's unchanged
-  - Optimized for DevOps projects (production management)
+- **Completion Protocol**
+  - Extracted to `.claude/protocols/completion.md`
+  - `/fi` command updated to read protocol file explicitly
+  - All 11 steps preserved with full instructions and bash code
 
-### Philosophy
+- **Cold Start Protocol**
+  - Extracted to `.claude/protocols/cold-start.md`
+  - All 11 steps preserved with full instructions
+  - Version and last updated date included
 
-- "Лучше пусть медленно, но надёжно" — но НЕ на каждый commit
-- Advisory mode: пользователь решает, когда нужна тщательность
-- Release mode: единственный auto-invoke (public safety)
-- Token economy: анализ изменений спринта, не всей базы
-- User control: всегда в курсе и контролирует процесс
+- **Distribution Build**
+  - `migration/build-distribution.sh` updated to v2.4.1
+  - Added Step 6.5: copy `.claude/protocols/` to distribution
+  - `framework.tar.gz` now includes protocol files
+  - Verified: protocol files present in archive
+
+- **Installer**
+  - `init-project.sh` updated to v2.4.1
+  - `migration/CLAUDE.production.md` synchronized with new router architecture
+
+### Removed
+
+- **Agent-based Completion Protocol approach** (v2.4.0)
+  - Replaced with protocol file approach
+  - Reason: CLAUDE.md in "Memory files" section (not compacted)
+  - Protocol files provide modularit y without agent overhead
+  - Direct file read faster and more transparent than agent spawn
+
+### Benefits
+
+- **Modularit y:** Protocols in separate versioned files
+- **Maintainability:** Router (330 lines) vs Monolith (1000 lines)
+- **Token Economy:** CLAUDE.md reduced from 8.7k to ~3.5k tokens
+- **Reliability:** Protocol files always read fresh from disk
+- **Scalability:** Easy to add new protocols without growing CLAUDE.md
+
+### Fixed
+
+- Closed #55: Cold Start Protocol consuming 17-22% tokens
+- Closed #52: Completion Protocol not executing completely
+- Closed #53: `/fi` not exporting dialogs (wrong path)
 
 ### Technical Details
 
 - Files created:
-  - `security/check-triggers.sh` (trigger detection, 10 triggers)
-  - `security/auto-invoke-agent.sh` (advisory system)
-  - `security/README.md` (architecture guide)
+  - `.claude/protocols/cold-start.md`
+  - `.claude/protocols/completion.md`
+  - `security/initial-scan.sh`
+  - `security/check-triggers.sh`
+  - `security/auto-invoke-agent.sh`
 - Files modified:
-  - `CLAUDE.md` Step 3.5 (advisory mode)
-  - `migration/CLAUDE.production.md` Step 3.5 (advisory mode)
-  - `.claude/commands/security-dialogs.md` (scope optimization)
-  - `.claude/SNAPSHOT.md` (Layer 4 description)
-  - `.claude/BACKLOG.md` (Phase 11 tasks)
+  - `CLAUDE.md` (router architecture)
+  - `.claude/commands/fi.md` (reads protocol file)
+  - `migration/CLAUDE.production.md` (synchronized)
+  - `migration/build-distribution.sh` (includes protocols)
+  - `init-project.sh` (version bump)
 
 ---
 
