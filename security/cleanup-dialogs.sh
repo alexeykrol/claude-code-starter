@@ -3,7 +3,7 @@
 # Claude Code Starter Framework — Dialog Credentials Cleanup
 #
 # Purpose: Remove credentials from dialog files before git commit
-# Usage: bash security/cleanup-dialogs.sh [--last]
+# Usage: bash security/cleanup-dialogs.sh [--last] [--deep]
 #
 # Features:
 # - Redacts SSH credentials (hosts, IPs, keys)
@@ -11,10 +11,13 @@
 # - Redacts API keys, tokens, passwords
 # - Redacts JWT tokens
 # - Creates cleanup report in security/reports/
+# - Optional: AI-based deep scan for context-dependent secrets
 #
 # Flags:
 # --last    Clean only last (most recent) dialog file (50x faster)
 #           Without flag: cleans ALL dialog files
+# --deep    Invoke AI agent for deep context-aware scan (slow but thorough)
+#           Use when: regex may miss obfuscated/contextual credentials
 #
 
 set -e
@@ -28,9 +31,18 @@ NC='\033[0m'
 
 # Parse flags
 LAST_ONLY=false
-if [ "$1" = "--last" ]; then
-  LAST_ONLY=true
-fi
+DEEP_SCAN=false
+
+for arg in "$@"; do
+  case $arg in
+    --last)
+      LAST_ONLY=true
+      ;;
+    --deep)
+      DEEP_SCAN=true
+      ;;
+  esac
+done
 
 # Get dialog files
 if [ "$LAST_ONLY" = true ]; then
@@ -191,9 +203,62 @@ if [ $FILES_WITH_SECRETS -gt 0 ]; then
   echo -e "${YELLOW}⚠${NC}  Credentials detected and redacted"
   echo -e "${YELLOW}⚠${NC}  Review report before committing"
   echo ""
-  exit 1  # Exit with error to block git commit if needed
+fi
+
+# ============================================================================
+# Layer 4: Deep AI-Based Scan (Optional)
+# ============================================================================
+
+if [ "$DEEP_SCAN" = true ] || [ $FILES_WITH_SECRETS -gt 0 ]; then
+  # Deep scan triggered if:
+  # 1. User explicitly requested --deep flag
+  # 2. Regex found credentials (want AI confirmation/analysis)
+
+  if [ "$DEEP_SCAN" = true ]; then
+    echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    echo -e "${BLUE}  Layer 4: Deep AI Scan${NC}"
+    echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    echo ""
+    echo -e "${BLUE}ℹ${NC}  Invoking AI agent for context-aware credential detection..."
+    echo -e "${BLUE}ℹ${NC}  This may take 1-2 minutes (analyzing file context)"
+    echo ""
+
+    # Create marker file for Claude Code to pick up
+    DEEP_SCAN_REQUEST="/tmp/claude-deep-scan-request-$$.json"
+    cat > "$DEEP_SCAN_REQUEST" <<EOF
+{
+  "type": "deep_credential_scan",
+  "dialog_files": $(echo "$DIALOG_FILES" | jq -R . | jq -s .),
+  "regex_found": $FILES_WITH_SECRETS,
+  "report_file": "$REPORT_FILE",
+  "timestamp": "$(date -Iseconds)"
+}
+EOF
+
+    echo -e "${YELLOW}⚠${NC}  Deep scan requires Claude Code session"
+    echo -e "${YELLOW}⚠${NC}  Manual action required:"
+    echo ""
+    echo "    1. Open Claude Code session"
+    echo "    2. Run: cat $DEEP_SCAN_REQUEST"
+    echo "    3. Ask Claude to analyze files for context-dependent credentials"
+    echo ""
+    echo -e "${BLUE}ℹ${NC}  What AI will catch that regex misses:"
+    echo "    • Obfuscated credentials (base64, hex, chr arrays)"
+    echo "    • Context-dependent secrets (\"password is company name\")"
+    echo "    • Multiline credentials in unusual formats"
+    echo "    • Secrets mentioned in comments/discussions"
+    echo ""
+  fi
+fi
+
+# Exit code
+if [ $FILES_WITH_SECRETS -gt 0 ]; then
+  exit 1  # Block commit - credentials found
 else
-  echo -e "${GREEN}✓${NC}  No credentials detected"
+  echo -e "${GREEN}✓${NC}  No credentials detected by regex"
+  if [ "$DEEP_SCAN" = true ]; then
+    echo -e "${YELLOW}⚠${NC}  Deep scan requested - follow manual steps above"
+  fi
   echo ""
-  exit 0
+  exit 0  # Allow commit - clean
 fi

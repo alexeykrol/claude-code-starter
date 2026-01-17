@@ -16,6 +16,95 @@
 
 ## 🎯 Текущие задачи (приоритизированные)
 
+### Phase 11: Security Layer 4 — Advisory Mode + Smart Triggers v2.4.1 ✅
+
+**Статус:** Завершено
+**Цель:** Advisory система для умного вызова AI-агента sec24 (не автоматика)
+
+**Проблема:**
+- Regex (Layer 2) покрывает 95% кейсов, но пропускает edge cases
+- Layer 4 (AI agent) нужен для thorough check, но медленный (1-2 min)
+- **Автоматический вызов агента на каждый commit = маразм** (траты токенов)
+- Нужна **advisory система**: триггеры → Claude спрашивает → user решает
+
+**Специфика проектов с DevOps (supabase-bridge):**
+- Не только код, но и управление production
+- SSH к серверам, database credentials, API keys — рабочая реальность
+- Credentials не только в dialogs, но и в коде/config
+- **Sprint changes** могут содержать production secrets
+
+**Решение: Advisory Mode + Smart Triggers**
+
+**Принципы:**
+1. **Advisory, не автоматика** — триггеры дают рекомендации Claude (AI)
+2. **Claude спрашивает user** — пользователь решает запускать deep scan или нет
+3. **Scope оптимизация** — анализ git diff + last dialog, НЕ весь codebase
+4. **Release mode = исключение** — единственный случай auto-invoke (git tag v2.x.x)
+5. **Token economy** — анализ 5-10 файлов вместо 300+
+
+**Задачи: Trigger Detection System**
+- [x] Создать `security/check-triggers.sh` (trigger detection logic)
+- [x] Реализовать 10 триггеров с приоритетами:
+  - [x] CRITICAL: Production credentials file exists
+  - [x] CRITICAL: Git release tag detected
+  - [x] CRITICAL: Release workflow in recent dialogs
+  - [x] HIGH: Regex found credentials
+  - [x] HIGH: Security keywords (>5 mentions)
+  - [x] HIGH: Production/deployment discussion
+  - [x] MEDIUM: Large diff (>500 lines)
+  - [x] MEDIUM: Many new dialogs (>5 uncommitted)
+  - [x] MEDIUM: Security config files modified
+  - [x] LOW: Long session (>2 hours)
+- [x] JSON output с trigger level и reasons
+- [x] Exit codes (0=none, 1=critical, 2=high, 3=medium, 4=low)
+
+**Задачи: Advisory System (не auto-invoke)**
+- [x] Переделать `security/auto-invoke-agent.sh` в advisory mode
+- [x] Release mode (git tag) → auto-invoke (единственный случай)
+- [x] CRITICAL/HIGH triggers → Claude спрашивает user
+- [x] MEDIUM triggers → optional mention
+- [x] LOW triggers → informational only
+- [x] Exit codes для Claude: 0, 1 (auto), 10 (ask), 11 (ask), 12 (optional)
+
+**Задачи: Protocol Integration**
+- [x] Обновить CLAUDE.md Step 3.5 (advisory mode, Claude asks user)
+- [x] Обновить migration/CLAUDE.production.md Step 3.5 (same changes)
+- [x] Обновить `/security-dialogs` команду (scope: git diff + last dialog)
+- [x] Step 2 в /security-dialogs (identify sprint changes, not all files)
+- [x] Agent prompt: analyze git diff + last dialog only
+
+**Задачи: Scope Optimization**
+- [x] Агент анализирует git diff (last 5 commits), не весь codebase
+- [x] Агент анализирует last dialog, не все 300+ dialogs
+- [x] Token economy: 5-10 файлов вместо 300+
+
+**Задачи: Documentation**
+- [x] Обновить SNAPSHOT.md (advisory mode, release exception)
+- [x] Обновить BACKLOG.md (этот файл)
+- [x] Таблица "When to Use Each Layer" в SNAPSHOT.md
+- [x] Обновить security/README.md (advisory mode, не auto-invoke)
+- [x] Создать security/README.md с полным описанием архитектуры
+- [ ] Обновить CHANGELOG.md (v2.4.1 entry)
+- [ ] Тестирование на примерах (сейчас тестируем!)
+
+**Задачи: Testing & Validation**
+- [ ] Тестировать CRITICAL trigger (.production-credentials file)
+- [ ] Тестировать HIGH trigger (regex found secrets)
+- [ ] Тестировать MEDIUM trigger (large diff)
+- [ ] Verify agent invokes correctly через Task tool
+- [ ] Test на santacruz host project
+
+**Результат:**
+- **95% coverage (regex)** для normal sessions (fast, automatic)
+- **99% coverage (AI agent)** для high-risk situations (advisory mode)
+- **Advisory mode:** триггеры → Claude спрашивает → user решает
+- **Token economy:** анализ git diff + last dialog (5-10 files vs 300+)
+- **User control:** пользователь всегда решает (кроме release mode)
+- **Release mode exception:** git tag v2.x.x → auto-invoke (mandatory)
+- "Лучше пусть медленно, но надёжно" — но не на каждый commit (умно)
+
+---
+
 ### Phase 10: Security Hardening — Dialog Credential Cleanup v2.4.0 ✅
 
 **Статус:** Завершено

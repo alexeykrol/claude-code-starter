@@ -7,6 +7,89 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.4.1] - 2026-01-16
+
+### Added
+
+- **Layer 4: AI Agent Deep Scan with Advisory Mode**
+  - Smart trigger system for detecting high-risk situations
+  - Advisory mode: Claude AI asks user before invoking agent (user control)
+  - Auto-invoke only on release mode (git tag v2.x.x)
+  - Scope optimization: analyzes git diff + last dialog (NOT entire codebase)
+  - Massive token savings: 5-10 files instead of 300+
+
+- **Smart Trigger Detection System**
+  - New `security/check-triggers.sh` — 10 triggers with priority levels
+  - **CRITICAL triggers:** Production credentials file, git release tag, release workflow
+  - **HIGH triggers:** Regex found credentials, security keywords (>5), production discussion
+  - **MEDIUM triggers:** Large diff (>500 lines), many dialogs (>5), config modified
+  - **LOW triggers:** Long session (>2 hours)
+  - JSON output with recommendations and risk scores
+  - Exit codes for Claude AI decision-making
+
+- **Advisory System (Not Auto-Invoke)**
+  - New `security/auto-invoke-agent.sh` — advisory recommendations
+  - Claude AI reads triggers and session context
+  - **Normal commits:** Claude asks user "Run deep scan? (y/N)"
+  - **Release mode:** Auto-invoke without asking (mandatory paranoia mode)
+  - User always in control (except releases)
+
+- **Scope Optimization for AI Agent**
+  - Agent analyzes ONLY sprint changes:
+    - Git diff (last 5 commits)
+    - Last dialog (current session)
+    - New/modified reports
+  - Does NOT analyze entire codebase or old dialogs
+  - Token economy: 5-10 files vs 300+ (massive savings)
+
+- **Enhanced /security-dialogs Command**
+  - Step 0: Shows why agent was invoked (auto vs manual)
+  - Step 2: Identifies sprint changes (not all files)
+  - Agent prompt optimized for git diff analysis
+  - Context-aware credential detection for DevOps projects
+
+- **Complete Documentation**
+  - New `security/README.md` — comprehensive 4-layer architecture guide
+  - Updated `.claude/SNAPSHOT.md` — Layer 4 description with triggers
+  - Updated `.claude/BACKLOG.md` — Phase 11 tasks
+  - Updated `CLAUDE.md` Step 3.5 — advisory mode logic
+  - Updated `migration/CLAUDE.production.md` — same changes
+
+### Changed
+
+- **Security approach:** Auto-invoke → Advisory mode
+  - Prevents token waste on every commit
+  - User decides when thorough check needed
+  - Only release mode auto-invokes (safety)
+
+- **Agent scope:** Entire codebase → Sprint changes only
+  - Git diff + last dialog analysis
+  - Focus on what changed, not what's unchanged
+  - Optimized for DevOps projects (production management)
+
+### Philosophy
+
+- "Лучше пусть медленно, но надёжно" — но НЕ на каждый commit
+- Advisory mode: пользователь решает, когда нужна тщательность
+- Release mode: единственный auto-invoke (public safety)
+- Token economy: анализ изменений спринта, не всей базы
+- User control: всегда в курсе и контролирует процесс
+
+### Technical Details
+
+- Files created:
+  - `security/check-triggers.sh` (trigger detection, 10 triggers)
+  - `security/auto-invoke-agent.sh` (advisory system)
+  - `security/README.md` (architecture guide)
+- Files modified:
+  - `CLAUDE.md` Step 3.5 (advisory mode)
+  - `migration/CLAUDE.production.md` Step 3.5 (advisory mode)
+  - `.claude/commands/security-dialogs.md` (scope optimization)
+  - `.claude/SNAPSHOT.md` (Layer 4 description)
+  - `.claude/BACKLOG.md` (Phase 11 tasks)
+
+---
+
 ## [2.4.0] - 2026-01-16
 
 ### Added

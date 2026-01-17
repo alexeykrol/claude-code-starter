@@ -581,39 +581,112 @@ npm run dialog:export --no-html
 - Student UI (html-viewer) is NOT updated here (current session still active)
 - Student UI will be updated on next Cold Start (Step 0.5)
 
-### 3.5. Security: Clean Current Dialog
+### 3.5. Security: Clean Current Dialog + Auto AI Agent
 
 **MANDATORY SECURITY CHECK** — Prevents credentials from leaking into git
+
+**Part 1: Regex-Based Cleanup (Layer 2)**
 
 ```bash
 # Clean CURRENT dialog (this session) before commit
 if [ -f "security/cleanup-dialogs.sh" ]; then
   bash security/cleanup-dialogs.sh --last
+  CLEANUP_EXIT=$?
 fi
 ```
 
 **What this does:**
 - Cleans CURRENT (active) dialog session before git commit
-- Redacts credentials that may have been mentioned during this session
+- Redacts credentials using regex patterns (fast, ~1-2 seconds)
 - Blocks commit if credentials detected (script exits with error)
 - **CRITICAL:** This is the LAST line of defense before credentials enter git
+
+**Part 2: Smart Trigger Detection (Advisory for Claude AI)**
+
+```bash
+# Check security triggers (advisory mode)
+if [ -f "security/auto-invoke-agent.sh" ]; then
+  bash security/auto-invoke-agent.sh
+  TRIGGER_EXIT=$?
+fi
+```
+
+**Claude AI Decision Logic:**
+
+**Exit code interpretation:**
+- `0` = No triggers → skip deep scan
+- `1` = CRITICAL + release mode → **auto-invoke agent (no confirmation)**
+- `10` = CRITICAL triggers → **ask user**
+- `11` = HIGH triggers → **ask user**
+- `12` = MEDIUM triggers → **optional mention**
+
+**If exit code = 1 (Release Mode):**
+```
+Claude automatically invokes /security-dialogs without asking.
+User sees: "🚨 RELEASE MODE: Running mandatory deep scan..."
+```
+
+**If exit code = 10 or 11 (CRITICAL/HIGH):**
+```
+Claude asks user:
+
+⚠️  Обнаружены потенциальные риски безопасности:
+  • [reasons from trigger detection]
+
+Рекомендую запустить deep scan изменений спринта (1-2 минуты).
+Запустить AI-агент для проверки? (y/N)
+
+If user answers "y" → Claude invokes /security-dialogs
+If user answers "N" → Claude skips, proceeds with commit
+```
+
+**If exit code = 12 (MEDIUM):**
+```
+Claude optionally mentions:
+"💡 Если хотите дополнительную проверку, можете запустить /security-dialogs"
+```
+
+**Important:**
+- Claude (AI) reads trigger info and sprint context
+- Claude decides whether to ask based on what was discussed in session
+- Only release mode (git tag v2.x.x) auto-invokes without asking
+- Normal commits → user always decides
 
 **Why this is mandatory:**
 - Cold Start Step 0.5 cleans PREVIOUS session
 - This step cleans CURRENT session (the one being committed now)
 - Double protection: previous session (0.5) + current session (3.5)
+- **NEW:** Auto-invokes AI agent when high-risk conditions detected
 
-**What gets redacted:**
+**What gets redacted by regex:**
 - SSH credentials (user@host, IPs, SSH keys, ports)
 - Database URLs (postgres, mysql, mongodb)
 - API keys, tokens, passwords
 - JWT tokens, bearer tokens
 - Private keys (PEM format)
 
+**When AI agent is invoked automatically:**
+
+**CRITICAL triggers (always invoke, no confirmation):**
+- Production credentials file exists (`.production-credentials`)
+- Git release tag detected (creating release)
+- Release workflow in recent dialogs
+
+**HIGH triggers (invoke with explanation):**
+- Regex cleanup found credentials
+- Security-sensitive keywords in dialogs (ssh, api key, password, etc.)
+- Production/deployment discussion detected
+
+**MEDIUM triggers (suggest, allow skip):**
+- Large diff (>500 lines changed)
+- Many new dialog files (>5 uncommitted)
+- Security config files modified
+
 **If credentials detected:**
 - Script exits with error (non-zero exit code)
 - Commit is blocked
 - Review `security/reports/cleanup-*.txt` for details
+- AI agent may be invoked for deep context analysis
 - Manually verify redactions before proceeding
 
 ### 4. Git Commit

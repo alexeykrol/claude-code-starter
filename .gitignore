@@ -287,3 +287,14 @@ FRAMEWORK_IMPROVEMENTS.md
 # Security scan reports (contain detected credentials)
 security/reports/
 security/reports/**/*
+
+# Claude dialogs
+dialog/2026-01-16_session-a03207be.md
+dialog/2026-01-16_session-194f8527.md
+dialog/2026-01-16_session-aa13f73d.md
+dialog/2026-01-16_session-34f8ac2c.md
+dialog/2026-01-16_session-f477841f.md
+dialog/2026-01-16_session-9a20d420.md
+dialog/2026-01-16_session-5684b454.md
+dialog/2026-01-16_session-cfc0f95d.md
+dialog/2026-01-16_session-c37b1080.md
