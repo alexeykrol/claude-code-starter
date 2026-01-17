@@ -7,6 +7,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.4.4] - 2026-01-17
+
+### Fixed
+
+- **CRITICAL: `/migrate` пропускает docs/ с мета-документацией (#7)**
+  - Проблема: `/migrate-legacy` находил только файлы в корне проекта
+  - Последствия: Пропускал docs/BACKLOG.md (491 строка roadmap!), docs/STATUS.md
+  - Результат: .claude/BACKLOG.md оставался пустым template после "успешной" миграции
+  - **Нарушал обещание:** "single source of truth" - два источника истины
+  - Решение: Сканирование subdirectories (docs/, documentation/, notes/, wiki/, .github/)
+  - Файл: `.claude/commands/migrate-legacy.md` — Step 2.1, 2.3, 3, 5, 6, 9
+  - Новые возможности:
+    - Классификация по содержимому (мета-документация vs code documentation)
+    - Интерактивное подтверждение для ambiguous файлов
+    - Правильный mapping: docs/BACKLOG.md → .claude/BACKLOG.md
+    - Архивирование docs/ после миграции (single source of truth)
+    - Приоритизация источников: docs/BACKLOG.md > TODO.md > GitHub Issues
+
+### Impact
+
+- **Migration Quality:** Теперь находит ВСЮ мета-документацию, не только в корне
+- **Single Source of Truth:** .claude/ действительно становится единственным источником
+- **User Experience:** После миграции .claude/BACKLOG.md заполнен реальным контентом
+- **Token Economy:** AI не тратит токены на поиск docs/BACKLOG.md после миграции
+- **Prevents Confusion:** Archived docs/ предотвращает "два источника истины"
+
+---
+
 ## [2.4.3] - 2026-01-17
 
 ### Fixed
