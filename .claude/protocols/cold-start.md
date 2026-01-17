@@ -122,7 +122,9 @@ cat .claude/.last_session
 
 ## Step 0.2: Framework Version Check
 
-**Purpose:** Automatically update framework to latest version if available.
+**CRITICAL: Execute this bash script using the Bash tool to check for framework updates.**
+
+**Action:** Run the following bash script:
 
 ```bash
 # 1. Parse local version from CLAUDE.md
@@ -163,11 +165,12 @@ if [ "$LOCAL_VERSION" != "$LATEST_VERSION" ] && [ "$LATEST_VERSION" != "" ]; the
 fi
 ```
 
-**Notes:**
-- Updates only framework files (CLAUDE.md + 5 commands)
+**What happens:**
+- If update available → Downloads and replaces CLAUDE.md + commands
+- Updates only framework files (CLAUDE.md + commands)
 - Does NOT touch user files (SNAPSHOT.md, BACKLOG.md, etc.)
 - Safe to run - preserves all project data
-- Requires session restart to use new version
+- **Requires session restart** to use new version
 
 ---
 
