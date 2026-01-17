@@ -16,43 +16,26 @@
 
 ## 🎯 Текущие задачи (приоритизированные)
 
-### Phase 13: Hotfix - Critical Bugs v2.4.2 ✅
+*В данный момент нет активных задач. См. архив ниже для завершенных фаз.*
 
-**Статус:** Завершено
-**Цель:** Исправить критические баги для internationalization и UX
+---
 
-**Issue #54: Dialog export не работает с кириллицей**
-- [x] Проблема: `findClaudeProjectDir()` не может найти проект с unicode в пути
-- [x] Анализ: Claude Code кодирует пути, кириллица → дефисы
-- [x] Решение: использовать `sessions-index.json` (projectPath field)
-- [x] Реализация: новый алгоритм в `src/claude-export/exporter.ts`
-  - [x] Method 1: чтение sessions-index.json (100% точность)
-  - [x] Method 2: fallback legacy (backwards compatibility)
-- [x] Тестирование: экспорт работает на текущем проекте
-- [x] Build TypeScript
+## 📚 Архив (завершённые фазы)
 
-**Issue #50: `/explain` слишком длинный**
-- [x] Проблема: 6 обязательных разделов для любого кода (даже 1 строка)
-- [x] Анализ: избыточное использование токенов, плохой UX
-- [x] Решение: адаптивная детализация по сложности
-- [x] Реализация: `.claude/commands/explain.md`
-  - [x] Step 1: Complexity Assessment (Simple/Medium/Complex)
-  - [x] Step 2: Adaptive Explanation (50-100 / 200-400 / Full)
-  - [x] Guidelines + Examples (Good/Bad)
-- [x] Token economy: 90% reduction для simple code
+### Phase 13: Hotfix - Critical Bugs v2.4.2 ✅ (2026-01-16)
 
-**Metafiles:**
-- [x] CHANGELOG.md (v2.4.2 entry)
-- [x] SNAPSHOT.md (v2.4.2 description)
-- [x] BACKLOG.md (этот файл)
-- [ ] Version bump (2.4.1 → 2.4.2)
-- [ ] Build distribution
-- [ ] GitHub Release v2.4.2
+**Завершено:** Исправлены критические баги для internationalization и UX
 
-**Результат:**
-- ✅ Framework работает с любыми языками (internationalization)
-- ✅ `/explain` даёт адекватные ответы (UX improvement)
-- ✅ Обратная совместимость сохранена (legacy projects)
+**Ключевые достижения:**
+- Issue #54: Dialog export с кириллицей (sessions-index.json, 100% точность)
+- Issue #50: Adaptive /explain (90% token savings для simple code)
+- Framework работает с любыми языками в путях
+- UX improvement: адекватные ответы от /explain
+- Обратная совместимость сохранена
+
+**Files:**
+- `src/claude-export/exporter.ts` — findClaudeProjectDir() rewrite
+- `.claude/commands/explain.md` — adaptive complexity assessment
 
 ---
 
