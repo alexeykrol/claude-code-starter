@@ -10,7 +10,7 @@
 > - Для совсем нулевых: [Бесплатный курс для начинающих](https://alexeykrol.com/courses/ai_intro/)
 
 [![GitHub](https://img.shields.io/badge/GitHub-claude--code--starter-blue)](https://github.com/alexeykrol/claude-code-starter)
-[![Version](https://img.shields.io/badge/version-2.4.2-orange.svg)](https://github.com/alexeykrol/claude-code-starter)
+[![Version](https://img.shields.io/badge/version-2.4.3-orange.svg)](https://github.com/alexeykrol/claude-code-starter)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
 ---
