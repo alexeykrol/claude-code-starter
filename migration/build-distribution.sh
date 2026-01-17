@@ -102,10 +102,9 @@ cp "$PROJECT_ROOT/.claude/protocols/cold-start.md" "$TEMP_DIR/framework/.claude/
 cp "$PROJECT_ROOT/.claude/protocols/completion.md" "$TEMP_DIR/framework/.claude/protocols/"
 echo -e "${GREEN}✓${NC} Copied protocol files (cold-start + completion)"
 
-# 7. .github/ISSUE_TEMPLATE/ (GitHub issue templates)
-mkdir -p "$TEMP_DIR/framework/.github/ISSUE_TEMPLATE"
-cp "$PROJECT_ROOT/.github/ISSUE_TEMPLATE/bug_report.yml" "$TEMP_DIR/framework/.github/ISSUE_TEMPLATE/"
-echo -e "${GREEN}✓${NC} Copied GitHub issue template"
+# 7. .github/ISSUE_TEMPLATE/ - EXCLUDED from distribution
+# Note: GitHub issue templates are for public repo only, not needed in user projects
+# Users don't need bug_report.yml in their host projects
 
 # ============================================================================
 # Create Framework Archive

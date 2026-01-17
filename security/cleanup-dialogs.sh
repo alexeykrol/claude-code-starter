@@ -91,14 +91,14 @@ for FILE in $DIALOG_FILES; do
   # ==========================================
 
   # 1. SSH Credentials: user@host patterns
-  # Example: root@192.168.1.1, alexeykrol@45.145.187.249
+  # Example: root@192.168.1.1, user@192.168.1.100
   if grep -qE "[a-zA-Z0-9_-]+@[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}" "$TEMP_FILE" 2>/dev/null; then
     sed -i.bak -E 's/[a-zA-Z0-9_-]+@[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}/[REDACTED_SSH_USER]@[REDACTED_IP]/g' "$TEMP_FILE"
     REDACTION_COUNT=$((REDACTION_COUNT + 1))
   fi
 
   # 2. IPv4 addresses (standalone)
-  # Example: 192.168.1.1, 45.145.187.249
+  # Example: 192.168.1.1, 192.168.1.100
   # Skip if already redacted
   if grep -qE "[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}" "$TEMP_FILE" 2>/dev/null && ! grep -q "\[REDACTED_IP\]" "$TEMP_FILE" 2>/dev/null; then
     sed -i.bak -E 's/([^0-9]|^)([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})([^0-9]|$)/\1[REDACTED_IP]\3/g' "$TEMP_FILE"
@@ -151,7 +151,7 @@ for FILE in $DIALOG_FILES; do
   fi
 
   # 9. SSH port specifications
-  # Example: -p 65002, --port 22000
+  # Example: -p 2222, --port 22000
   if grep -qE "(\-p|--port)[[:space:]]+[0-9]{4,5}" "$TEMP_FILE" 2>/dev/null; then
     sed -i.bak -E 's/(\-p|--port)[[:space:]]+[0-9]{4,5}/\1 [REDACTED_PORT]/g' "$TEMP_FILE"
     REDACTION_COUNT=$((REDACTED_COUNT + 1))

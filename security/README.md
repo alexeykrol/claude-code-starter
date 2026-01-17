@@ -217,7 +217,7 @@ Claude AI may mention:
 | Base64-encoded API key | ❌ | ✅ Encoded |
 
 **Why this matters:**
-- Projects with DevOps (supabase-bridge) = credentials in code, not just dialogs
+- Projects with DevOps = credentials in code, not just dialogs
 - Sprint changes may include .env files, config, SSH commands
 - AI understands context that regex cannot parse
 

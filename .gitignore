@@ -222,35 +222,27 @@ dev/
 # Test directories - excluded from repo
 test2/
 
-# ✅ IMPORTANT: DO NOT IGNORE (these are part of the framework):
-#
-# Root meta-files (framework development context):
-#   - CLAUDE.md (AI context for developing THIS framework)
-#   - .claude/BACKLOG.md (framework development tasks)
-#   - .claude/SNAPSHOT.md (framework state tracking)
-#
-# Installation system:
-#   - init-project.sh (5.3KB loader in root - users download via "Save Link As")
-#   - migration/init-project.sh (same file, template for build)
-#   - migration/build-distribution.sh (builds release)
-#   - migration/templates/ (meta file templates)
-#
-# Source code:
-#   - src/claude-export/ (TypeScript source)
-#   - dist/claude-export/ (compiled JavaScript)
-#
-# Documentation (public):
-#   - README.md, README_RU.md, CHANGELOG.md, etc.
-#
-# NOTE: Framework archive (framework.tar.gz, 56KB) is NOT in git!
-# It's created by build-distribution.sh and uploaded to GitHub Releases.
-# The loader script downloads it automatically when run.
+# ==========================================
+# FRAMEWORK INTERNAL DEVELOPMENT (not for public)
+# ==========================================
 
-# Dialog export utility (compiled, needed for /ui and /watch commands)
-!.claude-export/dist/
-!Init/.claude-export/dist/
+# Our meta-documentation for framework development (internal kitchen)
+.claude/SNAPSHOT.md
+.claude/BACKLOG.md
+.claude/ARCHITECTURE.md
+.claude/ROADMAP.md
+.claude/IDEAS.md
+.claude/CLAUDE2.md
+CLAUDE.md
 
-# Archived historical files
+# Internal UI for viewing dialogs (framework development only)
+html-viewer/
+
+# Internal developer guides (framework development docs)
+AGENT_SKILLS_GUIDE.md
+BUG_REPORT_FRAMEWORK.md
+
+# Archived historical files (old development docs)
 archive/
 
 # Node.js
@@ -287,68 +279,3 @@ FRAMEWORK_IMPROVEMENTS.md
 # Security scan reports (contain detected credentials)
 security/reports/
 security/reports/**/*
-
-# Claude dialogs
-dialog/2026-01-17_session-387a6c72.md
-dialog/2026-01-17_session-c8949fcf.md
-dialog/2026-01-17_session-7f0d78cc.md
-dialog/2026-01-17_session-906ae2db.md
-dialog/2026-01-17_session-62e48ea4.md
-dialog/2026-01-17_session-8431bf8b.md
-dialog/2026-01-17_session-bd1941f2.md
-dialog/2026-01-17_session-de06d973.md
-dialog/2026-01-17_session-363ea1e1.md
-dialog/2026-01-17_session-27060ff8.md
-dialog/2026-01-17_session-9d9f9dfa.md
-dialog/2026-01-16_session-423cbb5d.md
-dialog/2026-01-16_session-2c45bcfa.md
-dialog/2026-01-16_session-05fd6d0f.md
-dialog/2026-01-16_session-e3df566c.md
-dialog/2026-01-16_session-8f6994ae.md
-dialog/2026-01-16_session-64ef8bac.md
-dialog/2026-01-16_session-f83d31a5.md
-dialog/2026-01-16_session-7300f748.md
-dialog/2026-01-16_session-569b4851.md
-dialog/2026-01-16_session-34d1dec4.md
-dialog/2026-01-16_session-bd777bdf.md
-dialog/2026-01-16_session-3cbeeb63.md
-dialog/2026-01-16_session-4c7585fd.md
-dialog/2026-01-16_session-c87e5f18.md
-dialog/2026-01-16_session-6c241c9e.md
-dialog/2026-01-16_session-33023f0c.md
-dialog/2026-01-16_session-151fad14.md
-dialog/2026-01-16_session-d9ca827c.md
-dialog/2026-01-16_session-a54c4444.md
-dialog/2026-01-16_session-1f9c7217.md
-dialog/2026-01-16_session-3d4a4f6d.md
-dialog/2026-01-16_session-e49ad7f0.md
-dialog/2026-01-16_session-9977bb3c.md
-dialog/2026-01-16_session-4b606847.md
-dialog/2026-01-16_session-becdd44f.md
-dialog/2026-01-16_session-3756123f.md
-dialog/2026-01-16_session-0cfe4231.md
-dialog/2026-01-16_session-7996011a.md
-dialog/2026-01-16_session-a32b943c.md
-dialog/2026-01-16_session-4c589410.md
-dialog/2026-01-16_session-1f9d0d15.md
-dialog/2026-01-16_session-b6c7723e.md
-dialog/2026-01-16_session-805fef12.md
-dialog/2026-01-16_session-ca3e201b.md
-dialog/2026-01-16_session-9e693ed3.md
-dialog/2026-01-16_session-5be7a6ba.md
-dialog/2026-01-16_session-f543b262.md
-dialog/2026-01-16_session-ecfaab57.md
-dialog/2026-01-16_session-b52690b7.md
-dialog/2026-01-16_session-8f22fcde.md
-dialog/2026-01-16_session-a99b2c9e.md
-dialog/2026-01-16_session-5749e0b6.md
-dialog/2026-01-16_session-fd83a5a2.md
-dialog/2026-01-16_session-a03207be.md
-dialog/2026-01-16_session-194f8527.md
-dialog/2026-01-16_session-aa13f73d.md
-dialog/2026-01-16_session-34f8ac2c.md
-dialog/2026-01-16_session-f477841f.md
-dialog/2026-01-16_session-9a20d420.md
-dialog/2026-01-16_session-5684b454.md
-dialog/2026-01-16_session-cfc0f95d.md
-dialog/2026-01-16_session-c37b1080.md
