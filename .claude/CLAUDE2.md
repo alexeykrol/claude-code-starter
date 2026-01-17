@@ -290,134 +290,25 @@ fi
 
 ---
 
-### Step 0.4: Framework Developer Mode — Check Bug Reports
-
-**Purpose:** Automatically check for new bug reports from host projects (framework project only).
-
-**Trigger:** Only runs in claude-code-starter framework repository.
-
-```bash
-# Check if this is the framework project
-if [ -d "migration" ] && [ -f "migration/build-distribution.sh" ]; then
-  echo ""
-  echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-  echo "🔧 Framework Developer Mode"
-  echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-  echo ""
-
-  # Check if gh CLI is available
-  if ! command -v gh &> /dev/null; then
-    echo "ℹ️  GitHub CLI not installed - skipping bug report check"
-    echo "   Install: brew install gh (macOS) or sudo apt install gh (Linux)"
-    echo ""
-  else
-    # Check if authenticated
-    if ! gh auth status &> /dev/null; then
-      echo "ℹ️  GitHub CLI not authenticated - skipping bug report check"
-      echo "   Run: gh auth login"
-      echo ""
-    else
-      # Fetch bug reports from GitHub Issues
-      echo "📊 Checking for bug reports from host projects..."
-
-      BUG_REPORTS=$(gh issue list \
-        --repo "alexeykrol/claude-code-starter" \
-        --label "bug-report" \
-        --state "open" \
-        --json number,title,createdAt \
-        --limit 100 2>/dev/null)
-
-      if [ $? -eq 0 ]; then
-        REPORT_COUNT=$(echo "$BUG_REPORTS" | jq length 2>/dev/null || echo "0")
-
-        if [ "$REPORT_COUNT" -gt 0 ]; then
-          echo ""
-          echo "⚠️  Found $REPORT_COUNT open bug report(s)"
-          echo ""
-
-          # Show recent reports (last 5)
-          echo "Recent reports:"
-          echo "$BUG_REPORTS" | jq -r '.[:5] | .[] | "  • #\(.number): \(.title)"' 2>/dev/null
-          echo ""
-
-          # Count by recency (last 7 days)
-          WEEK_AGO=$(date -u -v-7d +%Y-%m-%dT%H:%M:%SZ 2>/dev/null || date -u -d '7 days ago' +%Y-%m-%dT%H:%M:%SZ)
-          RECENT_COUNT=$(echo "$BUG_REPORTS" | jq --arg week "$WEEK_AGO" '[.[] | select(.createdAt > $week)] | length' 2>/dev/null || echo "0")
-
-          if [ "$RECENT_COUNT" -gt 0 ]; then
-            echo "📌 $RECENT_COUNT new report(s) in the last 7 days"
-            echo ""
-          fi
-
-          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-          echo ""
-          echo "💡 Recommended actions:"
-          echo "   1. Run /analyze-bugs for detailed analysis"
-          echo "   2. Review and prioritize bug reports"
-          echo "   3. Create fixes for critical issues"
-          echo ""
-
-          # Save bug report summary for later reference
-          export BUG_REPORT_COUNT="$REPORT_COUNT"
-          export BUG_RECENT_COUNT="$RECENT_COUNT"
-        else
-          echo "✅ No open bug reports"
-          echo ""
-        fi
-      else
-        echo "⚠️  Failed to fetch bug reports"
-        echo ""
-      fi
-    fi
-  fi
-fi
-```
-
-**Notes:**
-- Only runs in framework repository (claude-code-starter)
-- Requires GitHub CLI (`gh`) installed and authenticated
-- Shows count of open bug reports with "bug-report" label
-- Highlights reports from last 7 days
-- Suggests running `/analyze-bugs` for detailed analysis
-- Non-blocking: continues even if gh CLI unavailable
-- First priority task: fix user-reported issues
-
----
-
-### Step 0.5: Security Cleanup & Export Sessions
-
-**CRITICAL: Security First**
-
+### Step 0.5: Clean Last Dialog & Export Sessions
 ```bash
 # Security: Clean LAST dialog (from previous session)
-# Removes credentials before export to prevent leaks in git
 if [ -f "security/cleanup-dialogs.sh" ]; then
   bash security/cleanup-dialogs.sh --last
 fi
 
 npm run dialog:export --no-html
+
 node dist/claude-export/cli.js generate-html
 git add html-viewer/index.html && git commit -m "chore: Update student UI with latest dialogs"
 ```
-
-**What this does:**
-1. **Security cleanup** — Redacts credentials from last closed dialog
-   - SSH credentials (user@host, IP addresses, SSH keys)
-   - Database URLs (postgres://, mysql://, mongodb://)
-   - API keys, JWT tokens, passwords
-   - Prevents credentials from leaking into git
-2. **Export dialogs** — Exports closed sessions without HTML generation
-3. **Update Student UI** — Generates html-viewer/index.html with ALL sessions
-4. **Auto-commit** — Commits student UI so students see complete history
-
-**Why --last flag:**
-- Only cleans LAST closed dialog (fast, 1 file vs 300+)
-- Each dialog gets cleaned on next Cold Start
-- Gradual cleanup ensures all dialogs eventually cleaned
-
-**Security guarantee:**
-- All closed dialogs are cleaned before ever being committed to git
-- Cleanup runs BEFORE export, blocking credentials at source
+- Exports any closed sessions from previous work (without HTML generation)
+- **Security check:** Runs cleanup script to remove production credentials
+- Verifies no credentials leaked into dialogs
+- Syncs current active session (if exists)
+- Generates html-viewer/index.html with ALL closed sessions (including last closed one)
+- Auto-commits student UI so students see complete dialog history
+- This ensures students see the most recent closed session
 
 ### Step 1: Mark Session Active
 ```bash
@@ -428,8 +319,6 @@ echo '{"status": "active", "timestamp": "'$(date -Iseconds)'"}' > .claude/.last_
 - `.claude/SNAPSHOT.md` — current version, what's in progress (~30-50 lines)
 - `.claude/BACKLOG.md` — current sprint tasks (~50-100 lines)
 - `.claude/ARCHITECTURE.md` — code structure (~100-200 lines)
-
-**CRITICAL: NEVER read `dialog/` files** — they are for archive only, not for context loading. Reading them wastes tokens.
 
 ### Step 3: Context (ON DEMAND — read when needed)
 - `.claude/ROADMAP.md` — strategic direction (when planning)
@@ -450,32 +339,7 @@ Ready to work!
 
 ## Completion Protocol
 
-### 0. Re-read Completion Protocol (Self-Check)
-
-**Purpose:** Ensure protocol is followed correctly by re-reading instructions.
-
-**Why needed:**
-- During long sessions, context may be compacted/summarized
-- Re-reading ensures sharp focus on protocol steps
-- Prevents forgetting metafile updates (CLAUDE.md, SNAPSHOT.md, BACKLOG.md)
-- "Practice what we preach" — we require this from host projects
-- Catches systemic errors where changes are made but not documented
-
-**Action:**
-```
-Read the Completion Protocol section from CLAUDE.md to refresh protocol steps.
-Mentally review what was done in this session and what needs to be updated.
-```
-
-**Self-check questions:**
-- Did I add new features? → Update SNAPSHOT.md, BACKLOG.md, CHANGELOG.md
-- Did I modify CLAUDE.md? → Ensure changes are in migration/CLAUDE.production.md too
-- Did I add new commands? → Are they in distribution?
-- Did I fix bugs? → Document in CHANGELOG.md
-
----
-
-### 0.1. Initialize Completion Logging
+### 0. Initialize Completion Logging
 
 **Purpose:** Set up logging for Completion protocol execution (if enabled).
 
@@ -530,7 +394,7 @@ EOF
 
     export -f log_completion_step log_completion_error
 
-    log_completion_step "Step 0.1: Logging initialized"
+    log_completion_step "Step 0: Logging initialized"
   fi
 fi
 ```
@@ -582,39 +446,17 @@ npm run dialog:export --no-html
 - Student UI will be updated on next Cold Start (Step 0.5)
 
 ### 3.5. Security: Clean Current Dialog
-
-**MANDATORY SECURITY CHECK** — Prevents credentials from leaking into git
-
 ```bash
 # Clean CURRENT dialog (this session) before commit
 if [ -f "security/cleanup-dialogs.sh" ]; then
   bash security/cleanup-dialogs.sh --last
 fi
 ```
-
-**What this does:**
-- Cleans CURRENT (active) dialog session before git commit
-- Redacts credentials that may have been mentioned during this session
-- Blocks commit if credentials detected (script exits with error)
-- **CRITICAL:** This is the LAST line of defense before credentials enter git
-
-**Why this is mandatory:**
-- Cold Start Step 0.5 cleans PREVIOUS session
-- This step cleans CURRENT session (the one being committed now)
-- Double protection: previous session (0.5) + current session (3.5)
-
-**What gets redacted:**
-- SSH credentials (user@host, IPs, SSH keys, ports)
-- Database URLs (postgres, mysql, mongodb)
-- API keys, tokens, passwords
-- JWT tokens, bearer tokens
-- Private keys (PEM format)
-
-**If credentials detected:**
-- Script exits with error (non-zero exit code)
-- Commit is blocked
-- Review `security/reports/cleanup-*.txt` for details
-- Manually verify redactions before proceeding
+- **Purpose:** Prevent credentials from leaking into git
+- Cleans only LAST dialog (current session) — fast, not all 300+ files
+- Removes: SSH hosts, IPs, Supabase project IDs, JWT tokens
+- Blocks git commit if violations detected
+- **CRITICAL:** This step protects production infrastructure from exposure
 
 ### 4. Git Commit
 ```bash
@@ -641,6 +483,53 @@ git log origin/main..HEAD --oneline
 ```
 - If **empty** → All merged, no PR needed
 - If **has commits** → Ask: "Create PR?"
+
+### 5.5 Create GitHub Release (if applicable)
+
+**Purpose:** Automatically create GitHub release when version changes.
+
+**Check if project uses releases:**
+```bash
+RELEASE_COUNT=$(gh release list --limit 1 2>/dev/null | wc -l | tr -d ' ')
+```
+
+**If project uses releases (RELEASE_COUNT > 0):**
+
+1. **Extract current version from README:**
+   ```bash
+   CURRENT_VERSION=$(grep -o 'version-[0-9.]*' README.md | head -1 | sed 's/version-//')
+   ```
+
+2. **Check if this version already has a release:**
+   ```bash
+   EXISTING_RELEASE=$(gh release view "v$CURRENT_VERSION" 2>/dev/null)
+   ```
+
+3. **If release doesn't exist, create it:**
+   ```bash
+   if [ -z "$EXISTING_RELEASE" ] && [ -n "$CURRENT_VERSION" ]; then
+     echo "Creating GitHub Release v$CURRENT_VERSION..."
+
+     # Extract changelog entry for this version
+     CHANGELOG_ENTRY=$(awk "/## \[$CURRENT_VERSION\]/,/## \[/" CHANGELOG.md | sed '$d' | tail -n +2)
+
+     # Create release
+     gh release create "v$CURRENT_VERSION" \
+       --title "v$CURRENT_VERSION" \
+       --notes "$CHANGELOG_ENTRY"
+
+     echo "✅ GitHub Release v$CURRENT_VERSION created"
+   else
+     echo "ℹ️  Release v$CURRENT_VERSION already exists or version not found"
+   fi
+   ```
+
+**Notes:**
+- Only runs if project has existing releases (detects via `gh release list`)
+- Reads version from README badge (format: `version-X.Y.Z`)
+- Reads release notes from CHANGELOG.md for that version
+- Skips if release already exists (idempotent)
+- Safe to run - won't create duplicates
 
 ### 6. Mark Session Clean
 ```bash
@@ -776,7 +665,7 @@ npm run dialog:list     # List sessions
 1. **Framework as AI Extension** — not just docs, but functionality
 2. **Privacy by Default** — dialogs private in .gitignore
 3. **Local Processing** — no external APIs
-4. **Token Economy** — minimal context loading (NEVER read dialog/ files)
+4. **Token Economy** — minimal context loading
 
 ## Warnings
 
@@ -784,7 +673,6 @@ npm run dialog:list     # List sessions
 - DO NOT forget `npm run build` after code changes
 - DO NOT commit without updating metafiles
 - ALWAYS mark session clean at completion
-- NEVER read files from `dialog/` directory — wastes tokens
 
 ---
 
@@ -938,4 +826,60 @@ fi
    - Use normal Cold Start Protocol
 
 ---
-*Framework: Claude Code Starter v2.4.0 | Updated: 2026-01-16*
+
+## Production Deployment Rules
+
+**⚠️ CRITICAL: Read before ANY production operations**
+
+### Rule #1: NO Cache Management
+
+**NEVER touch cache without explicit user permission.**
+
+```
+❌ FORBIDDEN:
+- Cache clearing commands
+- Cache configuration changes
+- Suggesting cache-related fixes
+- Accessing cache management panels
+```
+
+**Reason:** All plugin pages (`/test-no-elem-2/`, `/reg_*/`, auth forms) are **already excluded** from LiteSpeed Cache. User has configured this correctly. Do NOT interfere.
+
+### Rule #2: File Upload Locations
+
+**WordPress plugin files MUST go to plugin directory:**
+
+```bash
+# ✅ CORRECT:
+scp file.php alexeykrol-prod:/home/.../wp-content/plugins/supabase-bridge/
+
+# ❌ WRONG:
+scp file.html alexeykrol-prod:/home/.../public_html/
+```
+
+**Files:**
+- `supabase-bridge.php` → plugin directory
+- `auth-form.html` → plugin directory
+- `callback.html` → plugin directory
+
+Plugin reads files from its own directory, NOT site root.
+
+### Rule #3: Always Ask Before Deploy
+
+**NEVER deploy without explicit "yes" / "да" / "deploy".**
+
+1. Show what will be changed
+2. Wait for user confirmation
+3. Only then execute `scp` commands
+
+### Rule #4: SSH Credentials
+
+**Always use credentials from `.production-credentials`:**
+- SSH key: `~/.ssh/claude_prod_new`
+- Port: `65002`
+- Host: `45.145.187.249`
+- User: `u465545808`
+- Alias: `alexeykrol-prod`
+
+---
+*Framework: Claude Code Starter v2.3.1 | Updated: 2025-12-16*

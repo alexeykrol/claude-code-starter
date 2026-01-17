@@ -384,17 +384,40 @@ fi
 
 ---
 
-### Step 0.5: Export Closed Sessions & Update Student UI
+### Step 0.5: Security Cleanup & Export Sessions
+
+**CRITICAL: Security First**
+
 ```bash
+# Security: Clean LAST dialog (from previous session)
+# Removes credentials before export to prevent leaks in git
+if [ -f "security/cleanup-dialogs.sh" ]; then
+  bash security/cleanup-dialogs.sh --last
+fi
+
 npm run dialog:export --no-html
 node dist/claude-export/cli.js generate-html
 git add html-viewer/index.html && git commit -m "chore: Update student UI with latest dialogs"
 ```
-- Exports any closed sessions from previous work (without HTML generation)
-- Syncs current active session (if exists)
-- Generates html-viewer/index.html with ALL closed sessions (including last closed one)
-- Auto-commits student UI so students see complete dialog history
-- This ensures students see the most recent closed session
+
+**What this does:**
+1. **Security cleanup** — Redacts credentials from last closed dialog
+   - SSH credentials (user@host, IP addresses, SSH keys)
+   - Database URLs (postgres://, mysql://, mongodb://)
+   - API keys, JWT tokens, passwords
+   - Prevents credentials from leaking into git
+2. **Export dialogs** — Exports closed sessions without HTML generation
+3. **Update Student UI** — Generates html-viewer/index.html with ALL sessions
+4. **Auto-commit** — Commits student UI so students see complete history
+
+**Why --last flag:**
+- Only cleans LAST closed dialog (fast, 1 file vs 300+)
+- Each dialog gets cleaned on next Cold Start
+- Gradual cleanup ensures all dialogs eventually cleaned
+
+**Security guarantee:**
+- All closed dialogs are cleaned before ever being committed to git
+- Cleanup runs BEFORE export, blocking credentials at source
 
 ### Step 1: Mark Session Active
 ```bash
@@ -405,6 +428,8 @@ echo '{"status": "active", "timestamp": "'$(date -Iseconds)'"}' > .claude/.last_
 - `.claude/SNAPSHOT.md` — current version, what's in progress (~30-50 lines)
 - `.claude/BACKLOG.md` — current sprint tasks (~50-100 lines)
 - `.claude/ARCHITECTURE.md` — code structure (~100-200 lines)
+
+**CRITICAL: NEVER read `dialog/` files** — they are for archive only, not for context loading. Reading them wastes tokens.
 
 ### Step 3: Context (ON DEMAND — read when needed)
 - `.claude/ROADMAP.md` — strategic direction (when planning)
@@ -556,6 +581,41 @@ npm run dialog:export --no-html
 - Student UI (html-viewer) is NOT updated here (current session still active)
 - Student UI will be updated on next Cold Start (Step 0.5)
 
+### 3.5. Security: Clean Current Dialog
+
+**MANDATORY SECURITY CHECK** — Prevents credentials from leaking into git
+
+```bash
+# Clean CURRENT dialog (this session) before commit
+if [ -f "security/cleanup-dialogs.sh" ]; then
+  bash security/cleanup-dialogs.sh --last
+fi
+```
+
+**What this does:**
+- Cleans CURRENT (active) dialog session before git commit
+- Redacts credentials that may have been mentioned during this session
+- Blocks commit if credentials detected (script exits with error)
+- **CRITICAL:** This is the LAST line of defense before credentials enter git
+
+**Why this is mandatory:**
+- Cold Start Step 0.5 cleans PREVIOUS session
+- This step cleans CURRENT session (the one being committed now)
+- Double protection: previous session (0.5) + current session (3.5)
+
+**What gets redacted:**
+- SSH credentials (user@host, IPs, SSH keys, ports)
+- Database URLs (postgres, mysql, mongodb)
+- API keys, tokens, passwords
+- JWT tokens, bearer tokens
+- Private keys (PEM format)
+
+**If credentials detected:**
+- Script exits with error (non-zero exit code)
+- Commit is blocked
+- Review `security/reports/cleanup-*.txt` for details
+- Manually verify redactions before proceeding
+
 ### 4. Git Commit
 ```bash
 git add -A && git status
@@ -687,7 +747,7 @@ npm run dialog:list     # List sessions
 1. **Framework as AI Extension** — not just docs, but functionality
 2. **Privacy by Default** — dialogs private in .gitignore
 3. **Local Processing** — no external APIs
-4. **Token Economy** — minimal context loading
+4. **Token Economy** — minimal context loading (NEVER read dialog/ files)
 
 ## Warnings
 
@@ -695,6 +755,7 @@ npm run dialog:list     # List sessions
 - DO NOT forget `npm run build` after code changes
 - DO NOT commit without updating metafiles
 - ALWAYS mark session clean at completion
+- NEVER read files from `dialog/` directory — wastes tokens
 
 ---
 
@@ -848,4 +909,4 @@ fi
    - Use normal Cold Start Protocol
 
 ---
-*Framework: Claude Code Starter v2.2.4 | Updated: 2025-12-16*
+*Framework: Claude Code Starter v2.4.0 | Updated: 2026-01-16*

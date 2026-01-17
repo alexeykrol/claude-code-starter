@@ -322,6 +322,96 @@ export function getAllSessions(): SessionInfo[] {
 }
 
 // Convert session to Markdown
+/**
+ * Redact sensitive data from content before exporting
+ * Prevents accidental exposure of tokens, API keys, passwords, etc.
+ */
+export function redactSensitiveData(content: string): string {
+  if (!content) return content;
+
+  let redacted = content;
+
+  // 1. OAuth/Bearer tokens
+  // Patterns: access_token=eyJ..., bearer eyJ..., token=eyJ...
+  redacted = redacted.replace(
+    /\b(access_token|bearer|token)([\s=]+)[a-zA-Z0-9._-]{20,}/gi,
+    (match, prefix, separator) => `${prefix}${separator === ' ' ? ' ' : '='}[REDACTED_TOKEN]`
+  );
+
+  // 2. JWT tokens (eyJ... format)
+  // Matches: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ...
+  redacted = redacted.replace(
+    /\beyJ[a-zA-Z0-9_-]{10,}\.eyJ[a-zA-Z0-9_-]{10,}\.[a-zA-Z0-9_-]{10,}/g,
+    '[REDACTED_JWT_TOKEN]'
+  );
+
+  // 3. Generic API keys (various formats)
+  // sk-..., pk-..., AIza..., AKIA..., etc.
+  const apiKeyPatterns = [
+    /\b(sk|pk)[-_][a-zA-Z0-9_-]{20,}/g,         // Stripe-like: sk-..., pk-..., sk-test_...
+    /\bAIza[a-zA-Z0-9_-]{35}/g,                 // Google API: AIza...
+    /\bAKIA[A-Z0-9]{16}/g,                      // AWS Access Key: AKIA...
+    /\b[a-f0-9]{40}\b/g,                        // 40-char hex (GitHub, etc)
+    /\bghp_[a-zA-Z0-9]{36,}/g,                  // GitHub personal token
+    /\bgho_[a-zA-Z0-9]{36,}/g,                  // GitHub OAuth token
+    /\bghs_[a-zA-Z0-9]{36,}/g,                  // GitHub server token
+    /\bghr_[a-zA-Z0-9]{36,}/g,                  // GitHub refresh token
+  ];
+
+  apiKeyPatterns.forEach(pattern => {
+    redacted = redacted.replace(pattern, '[REDACTED_API_KEY]');
+  });
+
+  // 4. Private keys
+  // -----BEGIN PRIVATE KEY----- ... -----END PRIVATE KEY-----
+  redacted = redacted.replace(
+    /-----BEGIN\s+(?:RSA\s+)?PRIVATE\s+KEY-----[\s\S]*?-----END\s+(?:RSA\s+)?PRIVATE\s+KEY-----/g,
+    '[REDACTED_PRIVATE_KEY]'
+  );
+
+  // 5. AWS Secret Access Keys (40 alphanumeric characters)
+  redacted = redacted.replace(
+    /(?:aws_secret_access_key|secret.?key)[\s:=]+[a-zA-Z0-9/+=]{40}/gi,
+    'aws_secret_access_key=[REDACTED_AWS_SECRET]'
+  );
+
+  // 6. Database connection strings
+  // postgres://user:pass@host:port/db, mysql://user:pass@host, mongodb://...
+  redacted = redacted.replace(
+    /(postgres|mysql|mongodb|redis):\/\/[^:]+:([^@]+)@/gi,
+    '$1://[REDACTED_USER]:[REDACTED_PASSWORD]@'
+  );
+
+  // 7. Passwords in URLs or config
+  // password=..., pwd=..., pass=...
+  redacted = redacted.replace(
+    /\b(password|passwd|pwd|pass)[\s:=]+[^\s'"<>]{6,}/gi,
+    '$1=[REDACTED_PASSWORD]'
+  );
+
+  // 8. Email addresses in sensitive contexts (optional)
+  // Only redact emails that appear near auth/token keywords
+  redacted = redacted.replace(
+    /\b(email|user|username)[\s:=]+[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/gi,
+    '$1=[REDACTED_EMAIL]'
+  );
+
+  // 9. Credit card numbers (basic pattern, 13-19 digits with optional separators)
+  redacted = redacted.replace(
+    /\b(?:\d{4}[\s-]?){3}\d{1,7}\b/g,
+    '[REDACTED_CARD_NUMBER]'
+  );
+
+  // 10. IPv4 addresses in sensitive contexts (optional, can be too aggressive)
+  // Only uncomment if needed - might redact legitimate IPs in logs
+  // redacted = redacted.replace(
+  //   /\b(?:\d{1,3}\.){3}\d{1,3}\b/g,
+  //   '[REDACTED_IP]'
+  // );
+
+  return redacted;
+}
+
 export function toMarkdown(messages: Message[], session: SessionInfo): string {
   const dialogMessages = messages.filter(m => m.type === 'user' || m.type === 'assistant');
   const summaries = messages.filter(m => m.type === 'summary');
@@ -354,7 +444,8 @@ export function toMarkdown(messages: Message[], session: SessionInfo): string {
     lines.push('## Summaries');
     lines.push('');
     summaries.forEach(s => {
-      lines.push(`- ${s.summary || ''}`);
+      const safeSummary = redactSensitiveData(s.summary || '');
+      lines.push(`- ${safeSummary}`);
     });
     lines.push('');
   }
@@ -371,9 +462,12 @@ export function toMarkdown(messages: Message[], session: SessionInfo): string {
 
     if (!content.trim()) continue;
 
+    // Redact sensitive data before adding to markdown
+    const safeContent = redactSensitiveData(content);
+
     lines.push(`### ${role} *(${time})*`);
     lines.push('');
-    lines.push(content);
+    lines.push(safeContent);
     lines.push('');
     lines.push('---');
     lines.push('');

@@ -444,6 +444,47 @@ app.get('*', (req: Request, res: Response) => {
 });
 
 export function startServer(port: number = 3333, projectPath?: string, outputDir?: string): void {
+  // Check if public/ folder exists
+  const publicDir = path.join(__dirname, 'public');
+  const publicIndexHtml = path.join(publicDir, 'index.html');
+
+  if (!fs.existsSync(publicDir) || !fs.existsSync(publicIndexHtml)) {
+    console.error('');
+    console.error('═'.repeat(60));
+    console.error('  ⚠️  ERROR: Missing Web UI Files');
+    console.error('═'.repeat(60));
+    console.error('');
+    console.error('The Web UI files are missing from:');
+    console.error(`  ${publicDir}`);
+    console.error('');
+    console.error('This usually happens when:');
+    console.error('  1. Framework was installed manually (not via init-project.sh)');
+    console.error('  2. Files were deleted accidentally');
+    console.error('  3. Incomplete framework installation');
+    console.error('');
+    console.error('To fix this issue:');
+    console.error('');
+    console.error('  Option 1: Re-install the framework');
+    console.error('  --------');
+    console.error('  Download and run the installer:');
+    console.error('');
+    console.error('    curl -O https://github.com/alexeykrol/claude-code-starter/releases/latest/download/init-project.sh');
+    console.error('    chmod +x init-project.sh');
+    console.error('    ./init-project.sh');
+    console.error('');
+    console.error('  Option 2: Manual fix (advanced)');
+    console.error('  --------');
+    console.error('  Download framework.tar.gz and extract:');
+    console.error('');
+    console.error('    curl -L https://github.com/alexeykrol/claude-code-starter/releases/latest/download/framework.tar.gz -o /tmp/framework.tar.gz');
+    console.error('    tar -xzf /tmp/framework.tar.gz -C /tmp');
+    console.error('    cp -r /tmp/framework/.claude/dist/claude-export/public .claude/dist/claude-export/');
+    console.error('');
+    console.error('═'.repeat(60));
+    console.error('');
+    process.exit(1);
+  }
+
   if (projectPath) {
     currentProjectPath = path.resolve(projectPath);
   }
