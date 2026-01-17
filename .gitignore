@@ -289,6 +289,16 @@ security/reports/
 security/reports/**/*
 
 # Claude dialogs
+dialog/2026-01-16_session-ca3e201b.md
+dialog/2026-01-16_session-9e693ed3.md
+dialog/2026-01-16_session-5be7a6ba.md
+dialog/2026-01-16_session-f543b262.md
+dialog/2026-01-16_session-ecfaab57.md
+dialog/2026-01-16_session-b52690b7.md
+dialog/2026-01-16_session-8f22fcde.md
+dialog/2026-01-16_session-a99b2c9e.md
+dialog/2026-01-16_session-5749e0b6.md
+dialog/2026-01-16_session-fd83a5a2.md
 dialog/2026-01-16_session-a03207be.md
 dialog/2026-01-16_session-194f8527.md
 dialog/2026-01-16_session-aa13f73d.md

@@ -5,7 +5,7 @@
 ## Current State
 
 **Version:** 2.4.1
-**Status:** Production - Security Layer 4: Advisory Mode + Smart Triggers
+**Status:** Production - Phase 12: Hybrid Protocol Files Architecture
 **Branch:** main
 
 ## What's New in v2.0
@@ -39,6 +39,9 @@ claude-code-starter/
 ├── dist/claude-export/    ✅ Compiled
 ├── .claude/
 │   ├── commands/          ✅ Framework commands
+│   ├── protocols/         ✅ Protocol files (NEW in v2.4.1)
+│   │   ├── cold-start.md  ✅ Cold Start Protocol
+│   │   └── completion.md  ✅ Completion Protocol
 │   ├── SNAPSHOT.md        ✅ This file
 │   ├── ARCHITECTURE.md    ✅ Code structure
 │   └── BACKLOG.md         ✅ Tasks
@@ -46,7 +49,7 @@ claude-code-starter/
 │
 ├── package.json           ✅ npm scripts
 ├── tsconfig.json          ✅ TypeScript config
-├── CLAUDE.md              ✅ AI protocols
+├── CLAUDE.md              ✅ AI protocols (router)
 ├── CHANGELOG.md           ✅ Version history
 └── README.md / README_RU.md
 ```
@@ -148,6 +151,32 @@ claude-code-starter/
 - Email addresses, IP addresses
 
 ## What's New in v2.4.1
+
+**Hybrid Protocol Files Architecture (Phase 12):**
+
+**Problem:**
+- After long sessions, context compaction might compress CLAUDE.md content
+- Monolithic CLAUDE.md (~1000 lines) difficult to maintain and navigate
+- Protocol steps mixed with documentation creates cognitive overhead
+
+**Solution: Modular Protocol Files**
+- New `.claude/protocols/cold-start.md` (600+ lines)
+- New `.claude/protocols/completion.md` (490+ lines)
+- Protocols read fresh from disk, immune to context compaction
+- CLAUDE.md reduced to ~330 lines (router architecture)
+
+**Benefits:**
+- Token economy: Protocols loaded only when needed (~3-4k vs constant 8.7k)
+- Better maintainability: Each protocol in dedicated file
+- Guaranteed fresh reads: Protocol files never summarized
+- Modular architecture: Easy to extend with new protocols
+
+**Integration:**
+- Cold Start: Reads `.claude/protocols/cold-start.md` on "start" trigger
+- Completion: `/fi` command uses Skill tool to load fresh protocol
+- Distribution: `build-distribution.sh` includes protocol files in framework.tar.gz
+
+---
 
 **Security Layer 4: Advisory Mode + Smart Triggers**
 

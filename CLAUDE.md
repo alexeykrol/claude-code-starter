@@ -1,806 +1,123 @@
 # CLAUDE.md — AI Agent Instructions
 
-**Framework:** Claude Code Starter v2.0
+**Framework:** Claude Code Starter v2.4.1
 **Type:** Meta-framework extending Claude Code capabilities
 
-## Triggers
+---
 
-**"start", "начать":**
-→ Execute Cold Start Protocol
+## Architecture: Hybrid Protocol Files
 
-**"заверши", "завершить", "finish", "done":**
-→ Execute Completion Protocol
+**NEW in v2.4.1:** Protocols are now modular files, immune to context compaction.
+
+**Why this matters:**
+- Long sessions → context compaction → protocol details lost
+- Solution: Protocol files are read FRESH each time
+- No agent overhead (fast, deterministic)
+- CLAUDE.md becomes simple router
+
+**Protocol Files:**
+- `.claude/protocols/cold-start.md` — Session initialization
+- `.claude/protocols/completion.md` — Sprint finalization
+
+---
+
+## Triggers (Critical - Immune to Compaction)
+
+**IMPORTANT FOR CLAUDE AI:** When user says ANY of these phrases (in any grammatical form), execute the corresponding protocol immediately. This instruction survives context compaction.
+
+### Completion Triggers
+**When user says:** "заверши", "завершить", "завершай", "finish", "done", "complete", "финиш", or any variant
+**Action:** Call Skill tool with `skill: "fi"` to guarantee fresh protocol execution
+
+### Cold Start Triggers
+**When user says:** "start", "начать", "запустись", "старт", or any variant
+**Action:** Read `.claude/protocols/cold-start.md` and execute all steps
 
 ---
 
 ## Cold Start Protocol
 
-### Step 0: First Launch Detection
+**Purpose:** Initialize framework session, load context, prepare for work.
 
-**Check for migration context first:**
+### Routing Logic
+
+**Step 1: Check for First Launch / Migration**
+
 ```bash
 cat .claude/migration-context.json 2>/dev/null
 ```
 
-If file exists, this is first launch after installation.
+**If file exists** → This is first launch after installation:
+- Read `"mode"` field from JSON
+- If `"mode": "legacy"` → Execute **Legacy Migration Protocol** (defined below)
+- If `"mode": "upgrade"` → Execute **Framework Upgrade Protocol** (defined below)
+- If `"mode": "new"` → Execute **New Project Setup Protocol** (defined below)
+- After workflow completes, delete marker: `rm .claude/migration-context.json`
+- **STOP HERE** — workflow will instruct user to restart session
 
-**Read context and route:**
-- If `"mode": "legacy"` → Execute Legacy Migration workflow (see below)
-- If `"mode": "upgrade"` → Execute Framework Upgrade workflow (see below)
-- If `"mode": "new"` → Execute New Project Setup workflow (see below)
+**If no migration context** → Continue to Step 2
 
-After completing workflow, delete marker:
-```bash
-rm .claude/migration-context.json
+### Step 2: Execute Cold Start Protocol
+
+**Read and execute the protocol file:**
+
+```
+Read .claude/protocols/cold-start.md and execute all steps.
 ```
 
-If no migration context, continue to Step 0.05 (Migration Cleanup).
-
----
-
-### Step 0.05: Migration Cleanup Recovery
-
-Check for leftover migration files and clean them up:
-
-```bash
-# Check for production CLAUDE.md waiting to be swapped
-if [ -f ".claude/CLAUDE.production.md" ]; then
-  echo "⚠️  Found leftover migration files. Cleaning up..."
-
-  # Swap CLAUDE.md if needed
-  if grep -q "Migration Mode" CLAUDE.md 2>/dev/null; then
-    cp .claude/CLAUDE.production.md CLAUDE.md
-    echo "✓ Swapped CLAUDE.md to production version"
-  fi
-
-  # Remove all migration artifacts
-  rm -f .claude/CLAUDE.production.md
-  rm -f .claude/migration-context.json
-  rm -f .claude/migration-log.json
-  rm -f .claude/commands/migrate-legacy.md
-  rm -f .claude/commands/upgrade-framework.md
-  rm -f .claude/framework-pending.tar.gz
-
-  echo "✓ Migration cleanup complete"
-fi
-```
-
-If cleanup performed, continue to Step 0.1 (Crash Recovery).
-
-If no cleanup needed, continue to Step 0.1 (Crash Recovery).
-
----
-
-### Step 0.1: Crash Recovery & Auto-Recovery
-```bash
-cat .claude/.last_session
-```
-- If `"status": "active"` → Check if real crash or just missing `/fi`:
-  ```bash
-  # Check for uncommitted changes
-  if git diff --quiet && git diff --staged --quiet; then
-    # Working tree clean - probably forgot /fi
-    echo "ℹ️  Previous session didn't run /fi but working tree is clean."
-    echo "Auto-recovering to clean state..."
-    echo '{"status": "clean", "timestamp": "'$(date -Iseconds)'"}' > .claude/.last_session
-    # Continue to Step 0.5
-  else
-    # True crash - has uncommitted changes
-    echo "⚠️  Previous session crashed with uncommitted changes"
-    git status
-    npm run dialog:export --no-html
-    # Read .claude/SNAPSHOT.md for context
-    # Ask: "Continue or commit first?"
-  fi
-  ```
-- If `"status": "clean"` → OK, continue to Step 0.2
-
-### Step 0.2: Framework Version Check
-
-**Purpose:** Automatically update framework to latest version if available.
-
-```bash
-# 1. Parse local version from CLAUDE.md
-LOCAL_VERSION=$(grep "Framework: Claude Code Starter v" CLAUDE.md | tail -1 | sed 's/.*v\([0-9.]*\).*/\1/')
-
-# 2. Get latest version from GitHub
-LATEST_VERSION=$(curl -s https://api.github.com/repos/alexeykrol/claude-code-starter/releases/latest | grep '"tag_name"' | sed 's/.*"v\(.*\)".*/\1/')
-
-# 3. If newer version available - auto-update (aggressive)
-if [ "$LOCAL_VERSION" != "$LATEST_VERSION" ] && [ "$LATEST_VERSION" != "" ]; then
-  echo "📦 Framework update available: v$LOCAL_VERSION → v$LATEST_VERSION"
-  echo "Updating framework..."
-
-  # Download CLAUDE.md
-  curl -sL "https://github.com/alexeykrol/claude-code-starter/releases/download/v$LATEST_VERSION/CLAUDE.md" -o CLAUDE.md.new
-
-  # Download framework commands (5 files)
-  curl -sL "https://github.com/alexeykrol/claude-code-starter/releases/download/v$LATEST_VERSION/framework-commands.tar.gz" -o /tmp/fw-cmd.tar.gz
-
-  # Verify downloads successful
-  if [ -f "CLAUDE.md.new" ] && [ -f "/tmp/fw-cmd.tar.gz" ]; then
-    # Replace CLAUDE.md
-    mv CLAUDE.md.new CLAUDE.md
-
-    # Extract commands
-    tar -xzf /tmp/fw-cmd.tar.gz -C .claude/commands/
-    rm /tmp/fw-cmd.tar.gz
-
-    echo "✅ Framework updated to v$LATEST_VERSION"
-    echo ""
-    echo "⚠️  IMPORTANT: Restart this session to use new framework version"
-    echo "   Type 'exit' and start new session with 'claude'"
-    echo ""
-  else
-    echo "⚠️  Update failed - continuing with v$LOCAL_VERSION"
-    rm -f CLAUDE.md.new /tmp/fw-cmd.tar.gz
-  fi
-fi
-```
-
-**Notes:**
-- Updates only framework files (CLAUDE.md + 5 commands)
-- Does NOT touch user files (SNAPSHOT.md, BACKLOG.md, etc.)
-- Safe to run - preserves all project data
-- Requires session restart to use new version
-
----
-
-### Step 0.15: Bug Reporting Consent (First Run Only)
-
-**Purpose:** Ask user for consent to collect anonymous bug reports on first framework run.
-
-```bash
-# Check if first run or consent not yet given
-if [ ! -f ".claude/.framework-config" ]; then
-  # Initialize config file
-  PROJECT_NAME=$(basename "$(pwd)")
-  cat > .claude/.framework-config <<EOF
-{
-  "bug_reporting_enabled": false,
-  "project_name": "$PROJECT_NAME",
-  "first_run_completed": false,
-  "consent_version": "1.0"
-}
-EOF
-fi
-
-# Read config
-FIRST_RUN=$(cat .claude/.framework-config | grep -o '"first_run_completed": *[^,}]*' | sed 's/.*: *//' | tr -d ' ')
-
-if [ "$FIRST_RUN" = "false" ]; then
-  echo ""
-  echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-  echo "🔒 Framework Bug Reporting"
-  echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-  echo ""
-  echo "The framework can collect anonymous bug reports to help improve it."
-  echo ""
-  echo "What gets sent (if errors occur):"
-  echo "  • Error messages and stack traces (anonymized)"
-  echo "  • Framework version and protocol step"
-  echo "  • Timestamp"
-  echo ""
-  echo "What does NOT get sent:"
-  echo "  • Your code or file contents"
-  echo "  • File paths (anonymized)"
-  echo "  • API keys, tokens, secrets (removed)"
-  echo "  • Project name (anonymized)"
-  echo ""
-  echo "Reports are sent to: github.com/alexeykrol/claude-code-starter/issues"
-  echo ""
-  echo "You can change this anytime with: /bug-reporting enable|disable"
-  echo ""
-  echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-  echo ""
-
-  # Ask for consent
-  read -p "Enable anonymous bug reporting? (y/N) " -n 1 -r
-  echo ""
-
-  if [[ $REPLY =~ ^[Yy]$ ]]; then
-    # Enable bug reporting
-    cat .claude/.framework-config | sed 's/"bug_reporting_enabled": false/"bug_reporting_enabled": true/' | sed 's/"first_run_completed": false/"first_run_completed": true/' > .claude/.framework-config.tmp
-    mv .claude/.framework-config.tmp .claude/.framework-config
-    echo "✅ Bug reporting enabled. Thank you for helping improve the framework!"
-  else
-    # Mark first run complete but keep disabled
-    cat .claude/.framework-config | sed 's/"first_run_completed": false/"first_run_completed": true/' > .claude/.framework-config.tmp
-    mv .claude/.framework-config.tmp .claude/.framework-config
-    echo "ℹ️  Bug reporting disabled. You can enable it later with: /bug-reporting enable"
-  fi
-  echo ""
-fi
-```
-
-**Notes:**
-- Only runs once on first framework launch
-- Stores preference in `.claude/.framework-config`
-- Can be changed anytime with `/bug-reporting` command
-- Fully opt-in, default is disabled
-
----
-
-### Step 0.3: Initialize Protocol Logging
-
-**Purpose:** Set up logging for Cold Start protocol execution (if enabled).
-
-```bash
-# Check if bug reporting enabled
-if [ -f ".claude/.framework-config" ]; then
-  BUG_REPORTING=$(cat .claude/.framework-config | grep -o '"bug_reporting_enabled": *[^,}]*' | sed 's/.*: *//' | tr -d ' ')
-
-  if [ "$BUG_REPORTING" = "true" ]; then
-    # Create log directory
-    mkdir -p .claude/logs/cold-start
-
-    # Generate log filename with timestamp
-    PROJECT_NAME=$(basename "$(pwd)")
-    TIMESTAMP=$(date +%Y%m%d-%H%M%S)
-    LOG_FILE=".claude/logs/cold-start/${PROJECT_NAME}-${TIMESTAMP}.md"
-
-    # Initialize log file
-    cat > "$LOG_FILE" <<EOF
-# Cold Start Protocol Log
-
-**Project:** ${PROJECT_NAME}_anon
-**Started:** $(date -Iseconds)
-**Framework:** $(grep "Framework: Claude Code Starter v" CLAUDE.md | tail -1 | sed 's/.*v/v/')
-
-## Protocol Execution
-
-EOF
-
-    # Export log file path for use in subsequent steps
-    export COLD_START_LOG="$LOG_FILE"
-
-    # Log function
-    log_step() {
-      if [ -n "$COLD_START_LOG" ]; then
-        echo "- [$(date +%H:%M:%S)] $1" >> "$COLD_START_LOG"
-      fi
-    }
-
-    # Log error function
-    log_error() {
-      if [ -n "$COLD_START_LOG" ]; then
-        echo "" >> "$COLD_START_LOG"
-        echo "## ⚠️ ERROR at $(date +%H:%M:%S)" >> "$COLD_START_LOG"
-        echo "" >> "$COLD_START_LOG"
-        echo '```' >> "$COLD_START_LOG"
-        echo "$1" >> "$COLD_START_LOG"
-        echo '```' >> "$COLD_START_LOG"
-        echo "" >> "$COLD_START_LOG"
-      fi
-    }
-
-    export -f log_step log_error
-
-    log_step "Step 0.3: Logging initialized"
-  fi
-fi
-```
-
-**Notes:**
-- Only creates logs if bug reporting is enabled
-- Log files named: `{project}-{timestamp}.md`
-- Stored in `.claude/logs/cold-start/` (gitignored)
-- Includes project name (anonymized), timestamp, framework version
-- Provides `log_step()` and `log_error()` functions for protocol steps
-
----
-
-### Step 0.4: Framework Developer Mode — Check Bug Reports
-
-**Purpose:** Automatically check for new bug reports from host projects (framework project only).
-
-**Trigger:** Only runs in claude-code-starter framework repository.
-
-```bash
-# Check if this is the framework project
-if [ -d "migration" ] && [ -f "migration/build-distribution.sh" ]; then
-  echo ""
-  echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-  echo "🔧 Framework Developer Mode"
-  echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-  echo ""
-
-  # Check if gh CLI is available
-  if ! command -v gh &> /dev/null; then
-    echo "ℹ️  GitHub CLI not installed - skipping bug report check"
-    echo "   Install: brew install gh (macOS) or sudo apt install gh (Linux)"
-    echo ""
-  else
-    # Check if authenticated
-    if ! gh auth status &> /dev/null; then
-      echo "ℹ️  GitHub CLI not authenticated - skipping bug report check"
-      echo "   Run: gh auth login"
-      echo ""
-    else
-      # Fetch bug reports from GitHub Issues
-      echo "📊 Checking for bug reports from host projects..."
-
-      BUG_REPORTS=$(gh issue list \
-        --repo "alexeykrol/claude-code-starter" \
-        --label "bug-report" \
-        --state "open" \
-        --json number,title,createdAt \
-        --limit 100 2>/dev/null)
-
-      if [ $? -eq 0 ]; then
-        REPORT_COUNT=$(echo "$BUG_REPORTS" | jq length 2>/dev/null || echo "0")
-
-        if [ "$REPORT_COUNT" -gt 0 ]; then
-          echo ""
-          echo "⚠️  Found $REPORT_COUNT open bug report(s)"
-          echo ""
-
-          # Show recent reports (last 5)
-          echo "Recent reports:"
-          echo "$BUG_REPORTS" | jq -r '.[:5] | .[] | "  • #\(.number): \(.title)"' 2>/dev/null
-          echo ""
-
-          # Count by recency (last 7 days)
-          WEEK_AGO=$(date -u -v-7d +%Y-%m-%dT%H:%M:%SZ 2>/dev/null || date -u -d '7 days ago' +%Y-%m-%dT%H:%M:%SZ)
-          RECENT_COUNT=$(echo "$BUG_REPORTS" | jq --arg week "$WEEK_AGO" '[.[] | select(.createdAt > $week)] | length' 2>/dev/null || echo "0")
-
-          if [ "$RECENT_COUNT" -gt 0 ]; then
-            echo "📌 $RECENT_COUNT new report(s) in the last 7 days"
-            echo ""
-          fi
-
-          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-          echo ""
-          echo "💡 Recommended actions:"
-          echo "   1. Run /analyze-bugs for detailed analysis"
-          echo "   2. Review and prioritize bug reports"
-          echo "   3. Create fixes for critical issues"
-          echo ""
-
-          # Save bug report summary for later reference
-          export BUG_REPORT_COUNT="$REPORT_COUNT"
-          export BUG_RECENT_COUNT="$RECENT_COUNT"
-        else
-          echo "✅ No open bug reports"
-          echo ""
-        fi
-      else
-        echo "⚠️  Failed to fetch bug reports"
-        echo ""
-      fi
-    fi
-  fi
-fi
-```
-
-**Notes:**
-- Only runs in framework repository (claude-code-starter)
-- Requires GitHub CLI (`gh`) installed and authenticated
-- Shows count of open bug reports with "bug-report" label
-- Highlights reports from last 7 days
-- Suggests running `/analyze-bugs` for detailed analysis
-- Non-blocking: continues even if gh CLI unavailable
-- First priority task: fix user-reported issues
-
----
-
-### Step 0.5: Security Cleanup & Export Sessions
-
-**CRITICAL: Security First**
-
-```bash
-# Security: Clean LAST dialog (from previous session)
-# Removes credentials before export to prevent leaks in git
-if [ -f "security/cleanup-dialogs.sh" ]; then
-  bash security/cleanup-dialogs.sh --last
-fi
-
-npm run dialog:export --no-html
-node dist/claude-export/cli.js generate-html
-git add html-viewer/index.html && git commit -m "chore: Update student UI with latest dialogs"
-```
-
-**What this does:**
-1. **Security cleanup** — Redacts credentials from last closed dialog
-   - SSH credentials (user@host, IP addresses, SSH keys)
-   - Database URLs (postgres://, mysql://, mongodb://)
-   - API keys, JWT tokens, passwords
-   - Prevents credentials from leaking into git
-2. **Export dialogs** — Exports closed sessions without HTML generation
-3. **Update Student UI** — Generates html-viewer/index.html with ALL sessions
-4. **Auto-commit** — Commits student UI so students see complete history
-
-**Why --last flag:**
-- Only cleans LAST closed dialog (fast, 1 file vs 300+)
-- Each dialog gets cleaned on next Cold Start
-- Gradual cleanup ensures all dialogs eventually cleaned
-
-**Security guarantee:**
-- All closed dialogs are cleaned before ever being committed to git
-- Cleanup runs BEFORE export, blocking credentials at source
-
-### Step 1: Mark Session Active
-```bash
-echo '{"status": "active", "timestamp": "'$(date -Iseconds)'"}' > .claude/.last_session
-```
-
-### Step 2: Load Context (ALWAYS read — keep compact!)
-- `.claude/SNAPSHOT.md` — current version, what's in progress (~30-50 lines)
-- `.claude/BACKLOG.md` — current sprint tasks (~50-100 lines)
-- `.claude/ARCHITECTURE.md` — code structure (~100-200 lines)
-
-**CRITICAL: NEVER read `dialog/` files** — they are for archive only, not for context loading. Reading them wastes tokens.
-
-### Step 3: Context (ON DEMAND — read when needed)
-- `.claude/ROADMAP.md` — strategic direction (when planning)
-- `.claude/IDEAS.md` — ideas backlog (when exploring ideas)
-- `CHANGELOG.md` — version history (when need history)
-
-### Step 4: Confirm
-```
-Context loaded. Directory: [pwd]
-Framework: Claude Code Starter v2.2
-Ready to work!
-```
-
-> **Token Economy:** Files in Step 2 are read EVERY session — keep them compact.
-> Historical/strategic content → Step 3 files or CHANGELOG.md.
+**What this file contains:**
+- Step 0.05: Migration Cleanup Recovery
+- Step 0.1: Crash Recovery & Auto-Recovery
+- Step 0.2: Framework Version Check
+- Step 0.15: Bug Reporting Consent (first run only)
+- Step 0.3: Initialize Protocol Logging
+- Step 0.4: Framework Developer Mode (framework project only)
+- Step 0.5: Security Cleanup & Export Sessions
+- Step 1: Mark Session Active
+- Step 2: Load Context (SNAPSHOT, BACKLOG, ARCHITECTURE)
+- Step 3: Context ON DEMAND (ROADMAP, IDEAS, CHANGELOG)
+- Step 4: Confirm
+
+**Why read fresh:**
+- Long sessions → context compaction → protocol details lost
+- Reading protocol file ensures complete, up-to-date instructions
+- Immune to context compaction (file read is fresh every time)
+- ~3-5k tokens vs 50-100k for full project scan
+
+**Token Economy:** Protocol file is compact and self-contained.
 
 ---
 
 ## Completion Protocol
 
-### 0. Re-read Completion Protocol (Self-Check)
+**Purpose:** Finalize sprint/task, update metafiles, export sessions, commit changes.
 
-**Purpose:** Ensure protocol is followed correctly by re-reading instructions.
+**Read and execute the protocol file:**
 
-**Why needed:**
-- During long sessions, context may be compacted/summarized
-- Re-reading ensures sharp focus on protocol steps
-- Prevents forgetting metafile updates (CLAUDE.md, SNAPSHOT.md, BACKLOG.md)
-- "Practice what we preach" — we require this from host projects
-- Catches systemic errors where changes are made but not documented
-
-**Action:**
 ```
-Read the Completion Protocol section from CLAUDE.md to refresh protocol steps.
-Mentally review what was done in this session and what needs to be updated.
+Read .claude/protocols/completion.md and execute all steps.
 ```
 
-**Self-check questions:**
-- Did I add new features? → Update SNAPSHOT.md, BACKLOG.md, CHANGELOG.md
-- Did I modify CLAUDE.md? → Ensure changes are in migration/CLAUDE.production.md too
-- Did I add new commands? → Are they in distribution?
-- Did I fix bugs? → Document in CHANGELOG.md
-
----
-
-### 0.1. Initialize Completion Logging
-
-**Purpose:** Set up logging for Completion protocol execution (if enabled).
-
-```bash
-# Check if bug reporting enabled
-if [ -f ".claude/.framework-config" ]; then
-  BUG_REPORTING=$(cat .claude/.framework-config | grep -o '"bug_reporting_enabled": *[^,}]*' | sed 's/.*: *//' | tr -d ' ')
-
-  if [ "$BUG_REPORTING" = "true" ]; then
-    # Create log directory
-    mkdir -p .claude/logs/completion
-
-    # Generate log filename with timestamp
-    PROJECT_NAME=$(basename "$(pwd)")
-    TIMESTAMP=$(date +%Y%m%d-%H%M%S)
-    LOG_FILE=".claude/logs/completion/${PROJECT_NAME}-${TIMESTAMP}.md"
-
-    # Initialize log file
-    cat > "$LOG_FILE" <<EOF
-# Completion Protocol Log
-
-**Project:** ${PROJECT_NAME}_anon
-**Started:** $(date -Iseconds)
-**Framework:** $(grep "Framework: Claude Code Starter v" CLAUDE.md | tail -1 | sed 's/.*v/v/')
-
-## Protocol Execution
-
-EOF
-
-    # Export log file path for use in subsequent steps
-    export COMPLETION_LOG="$LOG_FILE"
-
-    # Log function
-    log_completion_step() {
-      if [ -n "$COMPLETION_LOG" ]; then
-        echo "- [$(date +%H:%M:%S)] $1" >> "$COMPLETION_LOG"
-      fi
-    }
-
-    # Log error function
-    log_completion_error() {
-      if [ -n "$COMPLETION_LOG" ]; then
-        echo "" >> "$COMPLETION_LOG"
-        echo "## ⚠️ ERROR at $(date +%H:%M:%S)" >> "$COMPLETION_LOG"
-        echo "" >> "$COMPLETION_LOG"
-        echo '```' >> "$COMPLETION_LOG"
-        echo "$1" >> "$COMPLETION_LOG"
-        echo '```' >> "$COMPLETION_LOG"
-        echo "" >> "$COMPLETION_LOG"
-      fi
-    }
-
-    export -f log_completion_step log_completion_error
-
-    log_completion_step "Step 0.1: Logging initialized"
-  fi
-fi
-```
-
-**Notes:**
-- Only creates logs if bug reporting is enabled
-- Log files named: `{project}-{timestamp}.md`
-- Stored in `.claude/logs/completion/` (gitignored)
-
----
-
-### 1. Build (if code changed)
-```bash
-npm run build
-```
-
-### 2. Update Metafiles
-- `.claude/BACKLOG.md` — mark completed tasks `[x]`
-- `.claude/SNAPSHOT.md` — update version and status
-- `CHANGELOG.md` — add entry (if release)
-- `README.md` + `README_RU.md` — update if major features added
-- `.claude/ARCHITECTURE.md` — update if code structure changed
-
-### 2.1 Version Bumping (if creating release)
-
-**Semantic Versioning (X.Y.Z):**
-- **X** (major) — breaking changes, major architecture rewrites
-- **Y** (minor) — new features, significant improvements (e.g., 2.1.0 → 2.2.0)
-- **Z** (patch) — bug fixes, small tweaks (e.g., 2.2.0 → 2.2.1)
-
-**Files to update with new version:**
-- `init-project.sh` — line 4 (comment) and line 11 (VERSION variable)
-- `migration/build-distribution.sh` — line 4 (comment) and line 12 (VERSION variable)
-- `README.md` — version badge (line ~13)
-- `README_RU.md` — version badge (line ~13)
-- `.claude/SNAPSHOT.md` — Version field
-- `CHANGELOG.md` — new section header
-
-**After version bump:**
-1. Run `bash migration/build-distribution.sh` to rebuild dist-release/
-2. Create GitHub Release with `gh release create vX.Y.Z dist-release/init-project.sh dist-release/framework.tar.gz`
-
-### 3. Export Dialogs
-```bash
-npm run dialog:export --no-html
-```
-- Exports dialog sessions without generating html-viewer
-- Student UI (html-viewer) is NOT updated here (current session still active)
-- Student UI will be updated on next Cold Start (Step 0.5)
-
-### 3.5. Security: Clean Current Dialog + Auto AI Agent
-
-**MANDATORY SECURITY CHECK** — Prevents credentials from leaking into git
-
-**Part 1: Regex-Based Cleanup (Layer 2)**
-
-```bash
-# Clean CURRENT dialog (this session) before commit
-if [ -f "security/cleanup-dialogs.sh" ]; then
-  bash security/cleanup-dialogs.sh --last
-  CLEANUP_EXIT=$?
-fi
-```
-
-**What this does:**
-- Cleans CURRENT (active) dialog session before git commit
-- Redacts credentials using regex patterns (fast, ~1-2 seconds)
-- Blocks commit if credentials detected (script exits with error)
-- **CRITICAL:** This is the LAST line of defense before credentials enter git
-
-**Part 2: Smart Trigger Detection (Advisory for Claude AI)**
-
-```bash
-# Check security triggers (advisory mode)
-if [ -f "security/auto-invoke-agent.sh" ]; then
-  bash security/auto-invoke-agent.sh
-  TRIGGER_EXIT=$?
-fi
-```
-
-**Claude AI Decision Logic:**
-
-**Exit code interpretation:**
-- `0` = No triggers → skip deep scan
-- `1` = CRITICAL + release mode → **auto-invoke agent (no confirmation)**
-- `10` = CRITICAL triggers → **ask user**
-- `11` = HIGH triggers → **ask user**
-- `12` = MEDIUM triggers → **optional mention**
-
-**If exit code = 1 (Release Mode):**
-```
-Claude automatically invokes /security-dialogs without asking.
-User sees: "🚨 RELEASE MODE: Running mandatory deep scan..."
-```
-
-**If exit code = 10 or 11 (CRITICAL/HIGH):**
-```
-Claude asks user:
-
-⚠️  Обнаружены потенциальные риски безопасности:
-  • [reasons from trigger detection]
-
-Рекомендую запустить deep scan изменений спринта (1-2 минуты).
-Запустить AI-агент для проверки? (y/N)
-
-If user answers "y" → Claude invokes /security-dialogs
-If user answers "N" → Claude skips, proceeds with commit
-```
-
-**If exit code = 12 (MEDIUM):**
-```
-Claude optionally mentions:
-"💡 Если хотите дополнительную проверку, можете запустить /security-dialogs"
-```
-
-**Important:**
-- Claude (AI) reads trigger info and sprint context
-- Claude decides whether to ask based on what was discussed in session
-- Only release mode (git tag v2.x.x) auto-invokes without asking
-- Normal commits → user always decides
-
-**Why this is mandatory:**
-- Cold Start Step 0.5 cleans PREVIOUS session
-- This step cleans CURRENT session (the one being committed now)
-- Double protection: previous session (0.5) + current session (3.5)
-- **NEW:** Auto-invokes AI agent when high-risk conditions detected
-
-**What gets redacted by regex:**
-- SSH credentials (user@host, IPs, SSH keys, ports)
-- Database URLs (postgres, mysql, mongodb)
-- API keys, tokens, passwords
-- JWT tokens, bearer tokens
-- Private keys (PEM format)
-
-**When AI agent is invoked automatically:**
-
-**CRITICAL triggers (always invoke, no confirmation):**
-- Production credentials file exists (`.production-credentials`)
-- Git release tag detected (creating release)
-- Release workflow in recent dialogs
-
-**HIGH triggers (invoke with explanation):**
-- Regex cleanup found credentials
-- Security-sensitive keywords in dialogs (ssh, api key, password, etc.)
-- Production/deployment discussion detected
-
-**MEDIUM triggers (suggest, allow skip):**
-- Large diff (>500 lines changed)
-- Many new dialog files (>5 uncommitted)
-- Security config files modified
-
-**If credentials detected:**
-- Script exits with error (non-zero exit code)
-- Commit is blocked
-- Review `security/reports/cleanup-*.txt` for details
-- AI agent may be invoked for deep context analysis
-- Manually verify redactions before proceeding
-
-### 4. Git Commit
-```bash
-git add -A && git status
-git commit -m "$(cat <<'EOF'
-type: Brief description
-
-🤖 Generated with [Claude Code](https://claude.com/claude-code)
-
-Co-Authored-By: Claude <noreply@anthropic.com>
-EOF
-)"
-```
-
-### 5. Ask About Push & PR
-
-**Push:**
-- Ask user: "Push to remote?"
-- If yes: `git push`
-
-**Check PR status:**
-```bash
-git log origin/main..HEAD --oneline
-```
-- If **empty** → All merged, no PR needed
-- If **has commits** → Ask: "Create PR?"
-
-### 6. Mark Session Clean
-```bash
-echo '{"status": "clean", "timestamp": "'$(date -Iseconds)'"}' > .claude/.last_session
-```
-
-### 6.5 Finalize Completion Log & Create Bug Report
-
-**Purpose:** Complete the log, check for errors, and create bug report if needed.
-
-```bash
-# Finalize log if enabled
-if [ -n "$COMPLETION_LOG" ] && [ -f "$COMPLETION_LOG" ]; then
-  log_completion_step "Step 6: Session marked clean"
-
-  # Add completion timestamp
-  cat >> "$COMPLETION_LOG" <<EOF
-
-## Completion
-
-**Finished:** $(date -Iseconds)
-**Status:** Success
-EOF
-
-  echo "✅ Completion log saved: $COMPLETION_LOG"
-
-  # Check if bug reporting is enabled
-  if [ -f ".claude/.framework-config" ] && grep -q '"bug_reporting_enabled": true' ".claude/.framework-config" 2>/dev/null; then
-    # Check if there were any errors in the log
-    if grep -q "## ⚠️ ERROR" "$COMPLETION_LOG"; then
-      echo ""
-      echo "⚠️  Errors detected during completion protocol"
-      echo "Log contains error information: $COMPLETION_LOG"
-      echo ""
-    else
-      echo ""
-      echo "✓ Completion protocol executed successfully (no errors)"
-      echo ""
-    fi
-
-    # ALWAYS offer to create bug report (for analytics & telemetry)
-    echo "📊 Bug reporting is enabled (analytics & telemetry)"
-    read -p "Create anonymized report? (y/N) " -n 1 -r
-    echo ""
-
-    if [[ $REPLY =~ ^[Yy]$ ]]; then
-      # Run anonymization script
-      if [ -f ".claude/scripts/anonymize-report.sh" ]; then
-        REPORT_FILE=$(bash .claude/scripts/anonymize-report.sh "$COMPLETION_LOG")
-        echo "✅ Report created: $REPORT_FILE"
-        echo ""
-
-        # Offer to submit to GitHub automatically
-        read -p "Submit report to GitHub? (y/N) " -n 1 -r
-        echo ""
-
-        if [[ $REPLY =~ ^[Yy]$ ]]; then
-          # Submit to GitHub Issues
-          if [ -f ".claude/scripts/submit-bug-report.sh" ]; then
-            ISSUE_URL=$(bash .claude/scripts/submit-bug-report.sh "$REPORT_FILE")
-            if [ $? -eq 0 ]; then
-              echo "✅ Submitted to GitHub: $ISSUE_URL"
-            fi
-          else
-            echo "⚠️  Submit script not found"
-            echo "You can submit manually: github.com/alexeykrol/claude-code-starter/issues"
-          fi
-        else
-          echo "ℹ️  Report saved locally: $REPORT_FILE"
-          echo "You can submit later: github.com/alexeykrol/claude-code-starter/issues"
-        fi
-      else
-        echo "⚠️  Anonymization script not found"
-        echo "Manual review needed before sharing: $COMPLETION_LOG"
-      fi
-    fi
-  fi
-fi
-```
-
-**Notes:**
-- Finalizes log with completion timestamp
-- Checks for errors in log
-- **ALWAYS offers to create bug report if bug reporting is enabled** (for analytics & telemetry)
-- Creates report regardless of errors (successful executions are valuable data)
-- Uses anonymization script to remove sensitive data
-- Two-step confirmation: create report → submit to GitHub
+**What this file contains:**
+- Step 0: Re-read Completion Protocol (Self-Check)
+- Step 0.1: Initialize Completion Logging
+- Step 1: Build (if code changed)
+- Step 2: Update Metafiles (BACKLOG, SNAPSHOT, CHANGELOG, README, ARCHITECTURE)
+- Step 2.1: Version Bumping (if creating release)
+- Step 3: Export Dialogs
+- Step 3.5: Security - Clean Current Dialog + Smart Trigger Detection
+- Step 4: Git Commit
+- Step 5: Ask About Push & PR
+- Step 6: Mark Session Clean
+- Step 6.5: Finalize Completion Log & Create Bug Report
+
+**Why read fresh:**
+- Long sessions → context compaction → protocol details lost
+- Reading protocol file ensures complete, up-to-date instructions
+- Immune to context compaction (file read is fresh every time)
+- Includes full security decision logic for trigger handling
+
+**Token Economy:** Protocol file is compact and self-contained (~3-4k tokens)
 
 ---
 
@@ -812,6 +129,9 @@ claude-code-starter/
 ├── dist/claude-export/     # Compiled JavaScript
 ├── .claude/
 │   ├── commands/           # 19 slash commands
+│   ├── protocols/          # Protocol files (NEW in v2.4.1)
+│   │   ├── cold-start.md   #   Session initialization
+│   │   └── completion.md   #   Sprint finalization
 │   ├── SNAPSHOT.md         # Current state
 │   ├── ARCHITECTURE.md     # Code structure
 │   └── BACKLOG.md          # Tasks
@@ -820,7 +140,7 @@ claude-code-starter/
 │
 ├── package.json            # npm scripts
 ├── tsconfig.json           # TypeScript config
-├── CLAUDE.md               # THIS FILE
+├── CLAUDE.md               # THIS FILE (Router)
 ├── CHANGELOG.md            # Version history
 ├── README.md / README_RU.md
 └── init-project.sh         # Installer (for distribution)
@@ -1011,4 +331,4 @@ fi
    - Use normal Cold Start Protocol
 
 ---
-*Framework: Claude Code Starter v2.4.0 | Updated: 2026-01-16*
+*Framework: Claude Code Starter v2.4.1 | Updated: 2026-01-16*

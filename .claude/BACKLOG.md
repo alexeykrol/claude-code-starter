@@ -16,6 +16,78 @@
 
 ## 🎯 Текущие задачи (приоритизированные)
 
+### Phase 12: Hybrid Protocol Files Architecture v2.4.1 ✅
+
+**Статус:** Завершено
+**Цель:** Модульная архитектура протоколов, immune to context compaction
+
+**Проблема:**
+- После долгих сессий происходит context compaction, что может сжимать содержимое CLAUDE.md
+- Монолитный CLAUDE.md (~1000 строк) трудно поддерживать и навигировать
+- Смешивание протокольных шагов с документацией создаёт cognitive overhead
+- Token cost: CLAUDE.md постоянно в контексте (~8.7k tokens)
+
+**Решение: Hybrid Protocol Files**
+
+**Принципы:**
+1. **Модульность** — каждый протокол в отдельном файле
+2. **Guaranteed fresh** — протоколы читаются с диска, не compactизируются
+3. **Router pattern** — CLAUDE.md как роутер (~330 строк), протоколы отдельно
+4. **Token economy** — протоколы загружаются только при необходимости (~3-4k vs 8.7k)
+
+**Задачи: Protocol Files Creation**
+- [x] Создать `.claude/protocols/cold-start.md` (600+ строк, 15.7KB)
+- [x] Создать `.claude/protocols/completion.md` (490+ строк, 14.2KB)
+- [x] Извлечь все шаги протоколов из CLAUDE.md
+- [x] Добавить versioning и timestamps в protocol files
+- [x] Включить полные bash команды и инструкции
+
+**Задачи: CLAUDE.md Router Architecture**
+- [x] Переработать CLAUDE.md в router (~330 строк vs ~1000)
+- [x] Добавить триггеры для чтения protocol files
+- [x] Cold Start trigger → read `.claude/protocols/cold-start.md`
+- [x] Completion trigger → use Skill tool to load `/fi` fresh
+- [x] Документировать Hybrid Architecture в CLAUDE.md
+
+**Задачи: Integration**
+- [x] Обновить `.claude/commands/fi.md` для чтения protocol file
+- [x] Синхронизировать `migration/CLAUDE.production.md`
+- [x] Обновить `migration/build-distribution.sh` (Step 6.5: copy protocols)
+- [x] Обновить `init-project.sh` version to 2.4.1
+- [x] Добавить protocols/ в Repository Structure
+
+**Задачи: Documentation & Metafiles**
+- [x] Обновить FRAMEWORK_IMPROVEMENTS.md (Section 8: Hybrid Protocol Files)
+- [x] Обновить CHANGELOG.md (v2.4.1 entry)
+- [x] Обновить README.md + README_RU.md (version badges 2.4.0 → 2.4.1)
+- [x] Обновить .claude/SNAPSHOT.md (version, status, structure)
+- [x] Обновить .claude/BACKLOG.md (этот файл)
+
+**Задачи: Testing & Validation**
+- [ ] Тестировать Cold Start с protocol file read
+- [ ] Тестировать Completion `/fi` с Skill tool
+- [ ] Verify protocol files в distribution (tar -tzf)
+- [ ] Test на host project
+
+**Результаты:**
+
+| Метрика | До (v2.4.0) | После (v2.4.1) |
+|---------|-------------|----------------|
+| Размер CLAUDE.md | ~1000 строк | **~330 строк** (router) |
+| Модульность | Монолит | **3 файла** (CLAUDE.md + 2 protocols) |
+| Token cost (loading) | ~8.7k (всегда) | **~3.5k** (router only) |
+| Protocols token cost | N/A | **~3-4k** (on demand) |
+| Immunity to compaction | Нет | **Да** (files read fresh) |
+
+**Преимущества:**
+- ✅ **Модульность:** Легко поддерживать и расширять
+- ✅ **Token economy:** 60% reduction (8.7k → 3.5k router + 3-4k on demand)
+- ✅ **Guaranteed fresh:** Протоколы всегда читаются с диска
+- ✅ **Better UX:** CLAUDE.md теперь понятный router, не монолит
+- ✅ **Maintainability:** Каждый протокол в своём файле
+
+---
+
 ### Phase 11: Security Layer 4 — Advisory Mode + Smart Triggers v2.4.1 ✅
 
 **Статус:** Завершено
