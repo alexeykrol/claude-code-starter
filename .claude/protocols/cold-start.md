@@ -99,7 +99,21 @@ cat .claude/.last_session
     git status
     npm run dialog:export --no-html
     # Read .claude/SNAPSHOT.md for context
-    # Ask: "Continue or commit first?"
+
+    # Ask user what to do with uncommitted changes
+    echo ""
+    echo "У вас есть незакоммиченные изменения из crashed session."
+    echo ""
+    echo "Варианты:"
+    echo "  1. Continue - начать новую работу (изменения останутся uncommitted)"
+    echo "  2. Commit first - сначала закоммитить изменения из crashed session"
+    echo ""
+    read -p "Ваш выбор? (1/2): " CRASH_CHOICE
+
+    if [ "$CRASH_CHOICE" = "2" ]; then
+      echo "Создаю commit для crashed session..."
+      # Guide user through commit
+    fi
   fi
   ```
 - If `"status": "clean"` → OK, continue to Step 0.2

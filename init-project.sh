@@ -1,14 +1,14 @@
 #!/bin/bash
 #
 # Claude Code Starter Framework — Installer
-# Version: 2.4.4
+# Version: 2.4.5
 #
 # Downloads and installs the framework from GitHub Releases
 #
 
 set -e  # Exit on error
 
-VERSION="2.4.4"
+VERSION="2.4.5"
 REPO="alexeykrol/claude-code-starter"
 ARCHIVE_URL="https://github.com/${REPO}/releases/download/v${VERSION}/framework.tar.gz"
 PROJECT_DIR="$(pwd)"

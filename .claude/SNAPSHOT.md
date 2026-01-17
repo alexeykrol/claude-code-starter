@@ -4,8 +4,8 @@
 
 ## Current State
 
-**Version:** 2.4.4
-**Status:** Production - Hotfix: Subdirectory Scanning Fix
+**Version:** 2.4.5
+**Status:** Production - Hotfix: UX Improvements
 **Branch:** main
 
 ## What's New in v2.0
@@ -149,6 +149,25 @@ claude-code-starter/
 - File paths (replaced with /PROJECT_ROOT/...)
 - API keys, tokens, secrets (removed)
 - Email addresses, IP addresses
+
+## What's New in v2.4.5
+
+**Hotfix Release: UX Improvements**
+
+**Issue #41 - UX: Пояснение к "Continue or commit first?" в Crash Recovery:**
+- **Проблема:** Пользователь забывает что означает каждый вариант
+- **Решение:** Добавлено понятное пояснение с описанием вариантов
+- **Файл:** `.claude/protocols/cold-start.md` — Step 0.1 (Crash Recovery)
+
+**Closed Issues:**
+- #23: Спам issue (closed as invalid)
+- #3: Documentation уже исправлена (no restart required)
+
+**Impact:**
+- ✅ Понятный выбор при crash recovery
+- ✅ Confirmed correct installation instructions
+
+---
 
 ## What's New in v2.4.4
 
