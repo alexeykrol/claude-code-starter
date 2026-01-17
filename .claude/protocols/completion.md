@@ -304,10 +304,125 @@ Claude optionally mentions:
 
 ---
 
-## Step 4: Git Commit
+## Step 4: Git Commit (with COMMIT_POLICY check)
+
+**CRITICAL: Check COMMIT_POLICY.md BEFORE staging files to prevent accidental leaks.**
+
+**NEW in v2.5.0:** Replaced dangerous `git add -A` with policy-based selective staging.
+
+### Step 4.1: Load COMMIT_POLICY
+
+**Action:** Read `.claude/COMMIT_POLICY.md` to understand what can be committed.
+
+**If file doesn't exist:**
+- Project uses old framework version
+- Warn user: "⚠️ COMMIT_POLICY.md not found. Update framework or add manually."
+- Fallback to cautious mode: only stage src/, tests/, README.md, package.json
+
+### Step 4.2: Get Changed Files
 
 ```bash
-git add -A && git status
+git status --short
+```
+
+**Parse output:** Extract modified/added/deleted files from git status.
+
+### Step 4.3: Claude AI Analyzes Each File
+
+**For each changed file, check against COMMIT_POLICY patterns:**
+
+**1. Check "НИКОГДА" patterns (auto-block):**
+```
+notes/, scratch/, experiments/, WIP_*, INTERNAL_*, DRAFT_*
+dialog/, .claude/logs/, *.debug.log, debug/
+*.local.*, .env.local, .vscode/, .idea/
+secrets/, credentials/, *.key, *.pem, .production-credentials, backup/
+```
+
+**If file matches "НИКОГДА":**
+- DO NOT stage this file
+- Add to blocked list
+- Continue to next file
+
+**2. Check "ВСЕГДА" patterns (auto-approve):**
+```
+src/, lib/, tests/
+README.md, CHANGELOG.md, LICENSE
+package.json, tsconfig.json, .gitignore
+.claude/ARCHITECTURE.md (if public project)
+```
+
+**If file matches "ВСЕГДА":**
+- Add to staging list
+- Continue to next file
+
+**3. Check "СПРОСИТЬ" patterns (ask user):**
+```
+- New folders not in НИКОГДА/ВСЕГДА lists
+- Filenames containing: api-key, password, secret, prod, production
+- Files >1000 lines (may be generated)
+```
+
+**If file matches "СПРОСИТЬ":**
+- Add to ask-user list
+- Will prompt user later
+
+### Step 4.4: Show What Will Be Staged
+
+**If blocked files found:**
+```
+⚠️  WARNING: Following files match COMMIT_POLICY "НИКОГДА" and will NOT be committed:
+
+  • notes/my-internal-plans.md (matches: notes/)
+  • WIP_new-feature.js (matches: WIP_*)
+  • .vscode/settings.json (matches: .vscode/)
+
+Review .claude/COMMIT_POLICY.md if this is incorrect.
+```
+
+**If ask-user files found:**
+```
+⚠️  These files are not in COMMIT_POLICY auto-approval list:
+
+  • config/production.yml (contains: 'production')
+  • data/export.csv (new file, 2500 lines)
+
+Add these files to commit? (y/N)
+```
+
+**Wait for user response:**
+- If "y" → Add to staging list
+- If "N" → Do NOT stage
+
+### Step 4.5: Stage Only Approved Files
+
+```bash
+# НЕ git add -A! Селективный staging:
+git add src/ tests/ README.md package.json CHANGELOG.md
+# (только файлы из auto-approve + user-approved)
+```
+
+**Important:** Use explicit paths, NOT `git add -A`!
+
+### Step 4.6: Show Final Status
+
+```bash
+git status
+```
+
+**Output shows exactly what will be committed.**
+
+Ask user: "Review changes above. Proceed with commit? (y/N)"
+
+**If user says "N":**
+- Cancel commit
+- User can manually adjust
+
+### Step 4.7: Create Commit
+
+**Only after user approval:**
+
+```bash
 git commit -m "$(cat <<'EOF'
 type: Brief description
 
@@ -328,6 +443,24 @@ EOF
 - `fix: Resolve trigger detection parsing error on macOS`
 - `refactor: Extract protocols into modular files`
 - `docs: Update completion protocol with security steps`
+
+### Step 4.8: Pre-commit Hook Protection
+
+**Last line of defense:** Git pre-commit hook runs automatically.
+
+**If blocked files somehow got staged:**
+```
+❌ COMMIT BLOCKED by COMMIT_POLICY.md
+
+Forbidden files detected:
+  • dialog/2026-01-17_session-abc123.md
+
+Review .claude/COMMIT_POLICY.md
+```
+
+**Hook location:** `.git/hooks/pre-commit` (installed by framework)
+
+**Result:** Commit fails, user must fix and retry.
 
 ---
 

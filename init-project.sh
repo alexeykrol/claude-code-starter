@@ -1,14 +1,14 @@
 #!/bin/bash
 #
 # Claude Code Starter Framework — Installer
-# Version: 2.4.6
+# Version: 2.5.0
 #
 # Downloads and installs the framework from GitHub Releases
 #
 
 set -e  # Exit on error
 
-VERSION="2.4.6"
+VERSION="2.5.0"
 REPO="alexeykrol/claude-code-starter"
 ARCHIVE_URL="https://github.com/${REPO}/releases/download/v${VERSION}/framework.tar.gz"
 PROJECT_DIR="$(pwd)"
@@ -343,6 +343,13 @@ if [ "$MIGRATION_MODE" = "new" ]; then
             sed -e "s/{{PROJECT_NAME}}/$PROJECT_NAME/g" \
                 .claude/templates/.framework-config.template.json > .claude/.framework-config
             log_success "Generated .claude/.framework-config"
+        fi
+
+        # Generate COMMIT_POLICY.md from template (NEW in v2.5.0)
+        if [ -f ".claude/templates/COMMIT_POLICY.template.md" ]; then
+            sed -e "s/{{PROJECT_NAME}}/$PROJECT_NAME/g" \
+                .claude/templates/COMMIT_POLICY.template.md > .claude/COMMIT_POLICY.md
+            log_success "Generated .claude/COMMIT_POLICY.md"
         fi
     fi
 

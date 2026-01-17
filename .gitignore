@@ -258,7 +258,20 @@ node_modules/
 # SECURITY: Privacy & Credentials Protection
 # ==========================================
 
-# Claude dialogs (privacy-sensitive, may contain credentials)
+# ==========================================
+# COMMIT_POLICY.md Patterns (v2.5.0+)
+# These files should NEVER be committed
+# ==========================================
+
+# Internal development (personal notes, drafts, experiments)
+notes/
+scratch/
+experiments/
+WIP_*
+INTERNAL_*
+DRAFT_*
+
+# Framework logs and dialogs (CRITICAL!)
 # CRITICAL: These files may contain SSH keys, API tokens, passwords, DB URLs
 # mentioned during conversations. NEVER commit to git.
 dialog/

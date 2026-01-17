@@ -449,6 +449,32 @@ git add html-viewer/index.html && git commit -m "chore: Update student UI with l
 
 ---
 
+## Step 0.6: Install Git Hooks (COMMIT_POLICY protection)
+
+**Purpose:** Install pre-commit hook for last line of defense against accidental leaks.
+
+**NEW in v2.5.0:** Automatic git hook installation for COMMIT_POLICY enforcement.
+
+```bash
+bash .claude/scripts/install-git-hooks.sh
+```
+
+**What this does:**
+1. Checks if project is a git repository
+2. Installs `.git/hooks/pre-commit` symlink to `.claude/scripts/pre-commit-hook.sh`
+3. Hook blocks commits if forbidden files (from COMMIT_POLICY) are staged
+
+**Protection:**
+- Even if Claude AI makes mistake in Step 4 (Completion)
+- Git hook will block commit if forbidden files are staged
+- User sees clear error message with instructions
+
+**Silent operation:**
+- No output if successful (hooks already installed)
+- Only shows message if hook installation fails
+
+---
+
 ## Step 1: Mark Session Active
 
 ```bash
