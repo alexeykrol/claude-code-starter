@@ -7,6 +7,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.4.5] - 2026-01-17
+
+### Fixed
+
+- **UX: Пояснение к "Continue or commit first?" в Crash Recovery (#41)**
+  - Проблема: Через пару дней пользователь забывает что означает каждый вариант
+  - Решение: Добавлено понятное пояснение с описанием вариантов
+  - Файл: `.claude/protocols/cold-start.md` — Step 0.1 (Crash Recovery)
+  - Формат:
+    ```
+    Варианты:
+      1. Continue - начать новую работу (изменения останутся uncommitted)
+      2. Commit first - сначала закоммитить изменения из crashed session
+    ```
+
+### Closed
+
+- **#23:** Спам issue (invalid content)
+- **#3:** Documentation уже исправлена (no restart required in installation)
+
+### Impact
+
+- **User Experience:** Понятный выбор при crash recovery
+- **Documentation:** Confirmed correct installation instructions
+
+---
+
 ## [2.4.4] - 2026-01-17
 
 ### Fixed
