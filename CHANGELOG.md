@@ -7,6 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.4.3] - 2026-01-17
+
+### Fixed
+
+- **CRITICAL: init-project.sh не копирует .claude/commands/ для legacy проектов (#4)**
+  - Проблема: при установке в legacy проект копировались только 2 команды (migrate-legacy.md, upgrade-framework.md)
+  - Последствия: пользователи не могли запустить `/migrate`, `/fi`, `/ui` и другие команды
+  - Блокировало весь workflow миграции
+  - Решение: копирование всей структуры .claude/ (commands, dist, protocols, scripts, templates)
+  - Файл: `init-project.sh` — lines 349-375 (LEGACY/UPGRADE mode)
+  - Теперь legacy проекты получают полную функциональность фреймворка сразу после установки
+  - Включает: все slash команды, CLI tools, protocol files, helper scripts
+
+### Impact
+
+- **Migration Workflow:** Legacy проекты теперь могут сразу использовать `/migrate` и все другие команды
+- **User Experience:** Полная функциональность фреймворка доступна с первого запуска
+- **Compatibility:** Unified installation path для всех типов проектов (new, legacy, upgrade)
+
+---
+
 ## [2.4.2] - 2026-01-16
 
 ### Fixed

@@ -1,6 +1,6 @@
 # BACKLOG — Claude Code Starter Framework
 
-*Последнее обновление: 2026-01-16*
+*Последнее обновление: 2026-01-17*
 
 > 📋 **SINGLE SOURCE OF TRUTH для текущих задач**
 >
@@ -21,6 +21,41 @@
 ---
 
 ## 📚 Архив (завершённые фазы)
+
+### Phase 14: Hotfix - Migration Workflow Fix v2.4.3 ✅ (2026-01-17)
+
+**Завершено:** Исправлен критический баг, блокирующий миграцию legacy проектов
+
+**Проблема:**
+- Issue #4: init-project.sh не копировал .claude/commands/ для legacy/upgrade проектов
+- Копировались только 2 команды: migrate-legacy.md, upgrade-framework.md
+- Пользователи не могли запустить `/migrate`, `/fi`, `/ui` и другие команды
+- Полностью блокировался workflow миграции
+
+**Решение:**
+- Переписан else block в init-project.sh (lines 349-375)
+- Теперь копируется вся структура .claude/ (commands, dist, protocols, scripts, templates)
+- Unified installation path для всех типов проектов (new, legacy, upgrade)
+- Legacy проекты получают полную функциональность сразу после установки
+
+**Ключевые достижения:**
+- [x] Исправлен init-project.sh (source + dist-release)
+- [x] Обновлен CHANGELOG.md с описанием Issue #4
+- [x] Version bump: 2.4.2 → 2.4.3 (все файлы)
+- [x] Обновлены metafiles (SNAPSHOT.md, BACKLOG.md)
+
+**Files:**
+- `init-project.sh` — lines 349-375 (LEGACY/UPGRADE mode rewritten)
+- `dist-release/init-project.sh` — synced with source
+- `migration/build-distribution.sh` — version bumped
+- `README.md`, `README_RU.md` — version badges updated
+
+**Impact:**
+- ✅ Migration workflow работает из коробки
+- ✅ Все slash команды доступны с первого запуска
+- ✅ No more chicken-and-egg problem
+
+---
 
 ### Phase 13: Hotfix - Critical Bugs v2.4.2 ✅ (2026-01-16)
 

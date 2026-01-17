@@ -1,11 +1,11 @@
 # SNAPSHOT — Claude Code Starter Framework
 
-*Last updated: 2026-01-16*
+*Last updated: 2026-01-17*
 
 ## Current State
 
-**Version:** 2.4.2
-**Status:** Production - Hotfix: Cyrillic Paths + Adaptive /explain
+**Version:** 2.4.3
+**Status:** Production - Hotfix: Migration Commands Copy Bug
 **Branch:** main
 
 ## What's New in v2.0
@@ -149,6 +149,25 @@ claude-code-starter/
 - File paths (replaced with /PROJECT_ROOT/...)
 - API keys, tokens, secrets (removed)
 - Email addresses, IP addresses
+
+## What's New in v2.4.3
+
+**Hotfix Release: Migration Workflow Fix**
+
+**Issue #4 - CRITICAL: init-project.sh не копирует .claude/commands/ для legacy проектов:**
+- **Проблема:** При установке в legacy проект копировались только 2 команды
+- **Последствия:** Пользователи не могли запустить `/migrate`, `/fi`, `/ui` и другие
+- **Блокировало:** Весь workflow миграции
+- **Решение:** Копирование всей структуры .claude/ (commands, dist, protocols, scripts, templates)
+- **Файл:** `init-project.sh` — lines 349-375 (LEGACY/UPGRADE mode)
+- **Теперь:** Legacy проекты получают полную функциональность сразу после установки
+
+**Impact:**
+- ✅ Migration workflow теперь работает из коробки
+- ✅ Все slash команды доступны сразу после установки
+- ✅ Unified installation path для всех типов проектов
+
+---
 
 ## What's New in v2.4.2
 

@@ -1,14 +1,14 @@
 #!/bin/bash
 #
 # Claude Code Starter Framework — Installer
-# Version: 2.4.2
+# Version: 2.4.3
 #
 # Downloads and installs the framework from GitHub Releases
 #
 
 set -e  # Exit on error
 
-VERSION="2.4.2"
+VERSION="2.4.3"
 REPO="alexeykrol/claude-code-starter"
 ARCHIVE_URL="https://github.com/${REPO}/releases/download/v${VERSION}/framework.tar.gz"
 PROJECT_DIR="$(pwd)"
@@ -347,15 +347,30 @@ if [ "$MIGRATION_MODE" = "new" ]; then
     fi
 
 else
-    # LEGACY or UPGRADE: Copy only minimum for Claude to run analysis
+    # LEGACY or UPGRADE: Copy full framework structure
     # Meta files will be created/updated by Claude after analysis
 
-    mkdir -p .claude/commands
+    # Copy full .claude directory (commands, dist, protocols, scripts, templates)
+    if [ -d "$TEMP_DIR/framework/.claude" ]; then
+        mkdir -p .claude
+        cp -r "$TEMP_DIR/framework/.claude/"* .claude/ 2>/dev/null || true
+        log_success "Installed .claude/ directory"
+    fi
 
-    # Copy only essential commands for migration
-    cp "$TEMP_DIR/framework/.claude/commands/migrate-legacy.md" .claude/commands/ 2>/dev/null || true
-    cp "$TEMP_DIR/framework/.claude/commands/upgrade-framework.md" .claude/commands/ 2>/dev/null || true
-    log_success "Installed migration commands"
+    # Install npm dependencies for framework CLI
+    if [ -f ".claude/dist/claude-export/package.json" ]; then
+        log_info "Installing framework dependencies..."
+        if command -v npm &> /dev/null; then
+            (cd .claude/dist/claude-export && npm install --silent 2>&1 | grep -v "^npm WARN" || true) && \
+                log_success "Framework dependencies installed" || {
+                log_warning "Failed to install dependencies automatically"
+                log_info "You can install them later with: cd .claude/dist/claude-export && npm install"
+            }
+        else
+            log_warning "npm not found - skipping dependency installation"
+            log_info "Install npm, then run: cd .claude/dist/claude-export && npm install"
+        fi
+    fi
 
     # Copy CLAUDE.migration.md as CLAUDE.md (temporary, will be replaced after migration)
     if [ -f "$TEMP_DIR/framework/CLAUDE.migration.md" ]; then
@@ -368,10 +383,6 @@ else
         cp "$TEMP_DIR/framework/CLAUDE.production.md" .claude/CLAUDE.production.md
         log_info "Staged CLAUDE.production.md for post-migration swap"
     fi
-
-    # Store framework archive for Claude to extract remaining files after analysis
-    cp "$TEMP_DIR/framework.tar.gz" .claude/framework-pending.tar.gz 2>/dev/null || true
-    log_info "Framework files staged for post-analysis installation"
 fi
 
 # Create migration context for all scenarios
