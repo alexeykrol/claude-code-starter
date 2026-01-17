@@ -4,8 +4,8 @@
 
 ## Current State
 
-**Version:** 2.4.5
-**Status:** Production - Hotfix: UX Improvements
+**Version:** 2.4.6
+**Status:** Production - Critical Bugfix: Auto-Update не выполнялся
 **Branch:** main
 
 ## What's New in v2.0
