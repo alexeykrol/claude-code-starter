@@ -4,8 +4,8 @@
 
 ## Current State
 
-**Version:** 2.4.3
-**Status:** Production - Hotfix: Migration Commands Copy Bug
+**Version:** 2.4.4
+**Status:** Production - Hotfix: Subdirectory Scanning Fix
 **Branch:** main
 
 ## What's New in v2.0
@@ -149,6 +149,31 @@ claude-code-starter/
 - File paths (replaced with /PROJECT_ROOT/...)
 - API keys, tokens, secrets (removed)
 - Email addresses, IP addresses
+
+## What's New in v2.4.4
+
+**Hotfix Release: Subdirectory Scanning Fix**
+
+**Issue #7 - CRITICAL: `/migrate` пропускает docs/ с мета-документацией:**
+- **Проблема:** `/migrate-legacy` находил только файлы в корне проекта
+- **Последствия:** Пропускал docs/BACKLOG.md (491 строка!), docs/STATUS.md
+- **Результат:** .claude/BACKLOG.md оставался пустым template после миграции
+- **Нарушение:** "Single source of truth" - создавал два источника истины
+- **Решение:** Сканирование subdirectories (docs/, documentation/, notes/, wiki/, .github/)
+- **Файл:** `.claude/commands/migrate-legacy.md` — Steps 2.1, 2.3, 3, 5, 6, 9
+- **Новое:**
+  - Классификация по содержимому (мета vs code docs)
+  - Интерактивное подтверждение для ambiguous файлов
+  - Правильный mapping: docs/BACKLOG.md → .claude/BACKLOG.md
+  - Архивирование docs/ после миграции
+
+**Impact:**
+- ✅ Migration находит ВСЮ мета-документацию, не только в корне
+- ✅ .claude/BACKLOG.md заполнен реальным контентом
+- ✅ Single source of truth - без путаницы
+- ✅ Token economy - AI не ищет docs/BACKLOG.md
+
+---
 
 ## What's New in v2.4.3
 

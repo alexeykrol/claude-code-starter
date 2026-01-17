@@ -67,9 +67,12 @@ Search for potential analog files and project info.
 
 ### 2.1 Find Documentation Files
 
+**IMPORTANT:** Scan both root AND subdirectories (docs/, documentation/, notes/, wiki/, .github/)
+
 ```bash
-# Search for potential analogs (max depth 3 to avoid node_modules)
-find . -maxdepth 3 -type f \( \
+# Step 2.1.1: Search root directory for common meta-documentation files
+echo "🔍 Scanning root directory..."
+ROOT_DOCS=$(find . -maxdepth 1 -type f \( \
   -name "README*" -o \
   -name "TODO*" -o \
   -name "TASKS*" -o \
@@ -77,8 +80,91 @@ find . -maxdepth 3 -type f \( \
   -name "ROADMAP*" -o \
   -name "ARCHITECTURE*" -o \
   -name "DESIGN*" -o \
+  -name "STATUS*" -o \
   -name "CHANGELOG*" \
-\) 2>/dev/null | grep -v node_modules | grep -v .git
+\) 2>/dev/null)
+
+# Step 2.1.2: Search subdirectories for meta-documentation
+echo "🔍 Scanning subdirectories (docs/, documentation/, notes/, wiki/, .github/)..."
+
+SUBDIRS_DOCS=""
+
+# Scan each subdirectory if it exists
+for DIR in docs documentation notes wiki .github; do
+  if [ -d "$DIR" ]; then
+    # Find ALL .md files in subdirectory
+    SUBDIR_MD=$(find "$DIR" -type f -name "*.md" 2>/dev/null | grep -v node_modules | grep -v .git)
+
+    if [ -n "$SUBDIR_MD" ]; then
+      SUBDIRS_DOCS="$SUBDIRS_DOCS
+$SUBDIR_MD"
+    fi
+  fi
+done
+
+# Combine results
+ALL_DOCS="$ROOT_DOCS
+$SUBDIRS_DOCS"
+```
+
+**Step 2.1.3: Classify by Content (Meta-documentation vs Code docs)**
+
+For each found .md file, read first 50 lines and classify:
+
+```bash
+# Function to classify file by content
+classify_doc() {
+  FILE=$1
+  CONTENT=$(head -50 "$FILE" 2>/dev/null)
+
+  # Meta-documentation indicators
+  META_SCORE=0
+  echo "$CONTENT" | grep -qi "roadmap\|backlog\|todo\|status\|project intake\|requirements\|we decided\|our project\|architecture decision\|design decision\|security policy\|workflow\|meeting notes" && META_SCORE=$((META_SCORE + 1))
+
+  # Code documentation indicators
+  CODE_SCORE=0
+  echo "$CONTENT" | grep -qi "api reference\|api documentation\|function reference\|class documentation\|how to use\|tutorial\|example:\|usage:" && CODE_SCORE=$((CODE_SCORE + 1))
+
+  # Classify
+  if [ $META_SCORE -gt $CODE_SCORE ]; then
+    echo "meta"
+  elif [ $CODE_SCORE -gt $META_SCORE ]; then
+    echo "code"
+  else
+    # Ambiguous - default to meta if contains certain keywords in filename
+    if echo "$FILE" | grep -qi "backlog\|roadmap\|status\|architecture\|design\|requirements"; then
+      echo "meta"
+    else
+      echo "ambiguous"
+    fi
+  fi
+}
+
+# Classify all found docs
+META_DOCS=""
+CODE_DOCS=""
+AMBIGUOUS_DOCS=""
+
+while IFS= read -r FILE; do
+  [ -z "$FILE" ] && continue
+
+  CLASSIFICATION=$(classify_doc "$FILE")
+
+  case $CLASSIFICATION in
+    meta)
+      META_DOCS="$META_DOCS
+$FILE"
+      ;;
+    code)
+      CODE_DOCS="$CODE_DOCS
+$FILE"
+      ;;
+    ambiguous)
+      AMBIGUOUS_DOCS="$AMBIGUOUS_DOCS
+$FILE"
+      ;;
+  esac
+done <<< "$ALL_DOCS"
 ```
 
 ### 2.2 Check Project Metadata
@@ -96,15 +182,42 @@ gh issue list --limit 50 --state all 2>/dev/null
 
 ### 2.3 Report Discovery Results
 
-Show user what you found:
-```
+Show user what you found with classification:
+
+````
 🔍 Discovery Results:
 
-📁 Found Documentation:
-  ✅ README.md (has roadmap section)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📋 META-DOCUMENTATION (will be migrated)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Root directory:
+  ✅ README.md (145 lines, has roadmap section)
   ✅ TODO.md (23 tasks)
-  ✅ docs/architecture.md
-  ❌ CHANGELOG.md (not found)
+
+docs/ subdirectory:
+  ✅ docs/BACKLOG.md (491 lines, roadmap v0.2-v1.3) ← CRITICAL!
+  ✅ docs/STATUS.md (273 lines, project status v0.3.3)
+  ✅ docs/ARCHITECTURE.md (89 lines)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📖 CODE DOCUMENTATION (will be skipped)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+docs/ subdirectory:
+  🟡 docs/api-reference.md (API documentation)
+  🟡 docs/installation.md (user guide)
+  🟡 docs/tutorial.md (how-to guide)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+❓ AMBIGUOUS (need your input)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+docs/ subdirectory:
+  ⚪ docs/project-notes.md (87 lines)
+     Reason: Contains both project decisions and usage examples
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 📦 Project Info:
   • Name: [from package.json]
@@ -119,7 +232,28 @@ Show user what you found:
 🐛 Issues:
   • Open: 8
   • Closed: 45
-```
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+````
+
+**If ambiguous files found, ask user:**
+
+````
+❓ Question: How to handle ambiguous files?
+
+I found docs/project-notes.md which contains both:
+• Project decisions (meta-documentation)
+• Usage examples (code documentation)
+
+Options:
+1. Migrate it (include in .claude/)
+2. Skip it (leave in docs/)
+3. Show me first 20 lines to decide
+
+My recommendation: Option 3 (show content first)
+
+Your choice? (1/2/3 or 'best')
+````
 
 ---
 
@@ -518,15 +652,34 @@ Use Task tool:
     5. Active development areas from recent commits"
 ```
 
-After Explore agent completes, read found documentation files:
+After Explore agent completes, read found meta-documentation files:
 
 ```bash
-# Read analog files in detail
+# Read ALL classified meta-documentation files
+# Root directory
 cat README.md
 cat TODO.md
-cat docs/architecture.md
-# etc for each found file
+
+# Subdirectories (docs/, documentation/, notes/)
+cat docs/BACKLOG.md        # ← CRITICAL: Don't skip this!
+cat docs/STATUS.md
+cat docs/ARCHITECTURE.md
+cat documentation/design-decisions.md
+cat notes/roadmap.md
+# etc for EACH file classified as "meta"
 ```
+
+**IMPORTANT:** Read files from BOTH root and subdirectories.
+
+**Specific subdirectory handling:**
+
+| Subdirectory | Typical files | Priority |
+|--------------|---------------|----------|
+| `docs/` | BACKLOG.md, STATUS.md, ARCHITECTURE.md | **HIGH** |
+| `documentation/` | Design decisions, requirements | HIGH |
+| `notes/` | Meeting notes, project notes | MEDIUM |
+| `wiki/` | Project wiki pages | MEDIUM |
+| `.github/` | CONTRIBUTING.md, SECURITY.md | LOW |
 
 Synthesize findings into project understanding.
 
@@ -671,7 +824,10 @@ Create comprehensive analysis report and show to user BEFORE generating files.
 
 ## 📚 Found Documentation
 
-### README.md ✅
+### Root Directory
+
+#### README.md ✅
+- **Location:** Root
 - **Size:** 156 lines
 - **Contains:**
   • Installation instructions
@@ -680,7 +836,8 @@ Create comprehensive analysis report and show to user BEFORE generating files.
 - **Quality:** Good, well-maintained
 - **Will use for:** ROADMAP.md base
 
-### TODO.md ✅
+#### TODO.md ✅
+- **Location:** Root
 - **Size:** 45 lines
 - **Contains:** 23 active tasks
 - **Categories:**
@@ -688,9 +845,33 @@ Create comprehensive analysis report and show to user BEFORE generating files.
   • Features: 15 items
   • Refactoring: 5 items
 - **Quality:** Up-to-date (last modified 2 days ago)
-- **Will use for:** BACKLOG.md base
+- **Will use for:** BACKLOG.md base (partial)
 
-### docs/architecture.md ✅
+### docs/ Subdirectory ⭐ NEW SCAN
+
+#### docs/BACKLOG.md ✅ ← CRITICAL!
+- **Location:** docs/
+- **Size:** 491 lines (!)
+- **Contains:**
+  • Complete roadmap (v0.2.0 → v1.3.0)
+  • 87 active tasks across 12 phases
+  • Architecture migration plan
+- **Quality:** Comprehensive, actively maintained
+- **Priority:** **HIGH** - This is the actual project roadmap!
+- **Will use for:** BACKLOG.md + ROADMAP.md (primary source)
+
+#### docs/STATUS.md ✅
+- **Location:** docs/
+- **Size:** 273 lines
+- **Contains:**
+  • Current project status (v0.3.3)
+  • Recent achievements
+  • Ongoing work breakdown
+- **Quality:** Detailed, up-to-date
+- **Will use for:** SNAPSHOT.md (current state)
+
+#### docs/ARCHITECTURE.md ✅
+- **Location:** docs/
 - **Size:** 89 lines
 - **Contains:**
   • Component hierarchy
@@ -699,8 +880,10 @@ Create comprehensive analysis report and show to user BEFORE generating files.
 - **Quality:** Good but incomplete
 - **Will use for:** ARCHITECTURE.md base
 
-### CHANGELOG.md ❌
-- **Status:** Not found
+### Not Found
+
+#### CHANGELOG.md ❌
+- **Status:** Not found in root or docs/
 - **Impact:** Will extract version history from git log
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -891,18 +1074,61 @@ For each file:
 | Resolved / Completed issues | → DELETE (not needed) |
 | Release history | → `CHANGELOG.md` or skip |
 
+**IMPORTANT: Check subdirectories first!**
+
+**Priority of sources:**
+
+1. **docs/BACKLOG.md** (if exists) ← **HIGHEST PRIORITY**
+   - If found: Use as primary source
+   - Extract ONLY active tasks (current sprint)
+   - Move strategic plans to ROADMAP.md
+   - Compress to ~100 lines max
+
+2. **TODO.md** (root) ← Secondary
+   - If no docs/BACKLOG.md found
+   - Extract active tasks only
+
+3. **GitHub Issues** ← Tertiary
+   - If neither found
+   - Use open issues as tasks
+
 **Guidelines:**
-- Extract ONLY active tasks from TODO.md/Issues
+- **Always scan docs/ FIRST** before using root TODO.md
+- Extract ONLY active tasks from source
 - Do NOT copy resolved issues or historical content
 - Strategic plans → ROADMAP.md (not BACKLOG)
 - Target size: < 100 lines
 - Link to GitHub Issues if applicable
+
+**Example: When docs/BACKLOG.md exists (491 lines)**
+
+```markdown
+# Original: docs/BACKLOG.md (491 lines)
+## Phase 1 [DONE]
+## Phase 2 [DONE]
+## Phase 3 [DONE]
+## Phase 4 [IN PROGRESS]
+- [ ] Task A
+- [ ] Task B
+## Phase 5 [PLANNED]
+## Phase 6-12 [FUTURE]
+
+# After migration: .claude/BACKLOG.md (~100 lines)
+## Current Sprint (Phase 4)
+- [ ] Task A
+- [ ] Task B
+
+# After migration: .claude/ROADMAP.md
+## Phase 5 (Q1 2025)
+## Phase 6-12 (Future)
+```
 
 **Example structure:**
 ```markdown
 # BACKLOG — [Project Name]
 
 *Current Sprint: [date]*
+*Source: docs/BACKLOG.md (extracted active tasks)*
 
 > 📋 Active tasks only. Strategic planning → [ROADMAP.md](./ROADMAP.md)
 
@@ -1112,7 +1338,67 @@ rm .claude/commands/upgrade-framework.md 2>/dev/null
 echo "✅ Removed migration commands"
 ```
 
-### 9.4 Cleanup Temporary Files
+### 9.4 Archive Migrated Subdirectories
+
+**IMPORTANT:** Move migrated meta-documentation subdirectories to archive.
+
+**Purpose:** Establish .claude/ as single source of truth.
+
+```bash
+# Archive docs/ if meta-documentation was migrated from there
+if [ -d "docs" ]; then
+  # Check if docs/ contains migrated meta-docs
+  META_MIGRATED=false
+
+  # Check if any meta-docs were found in docs/
+  for FILE in BACKLOG.md STATUS.md ARCHITECTURE.md ROADMAP.md; do
+    if [ -f "docs/$FILE" ]; then
+      META_MIGRATED=true
+      break
+    fi
+  done
+
+  if [ "$META_MIGRATED" = true ]; then
+    echo "📦 Archiving docs/ directory..."
+    mkdir -p archive/legacy-docs
+    mv docs archive/legacy-docs/docs-$(date +%Y%m%d)
+    echo "✅ Migrated docs/ archived to: archive/legacy-docs/docs-$(date +%Y%m%d)"
+    echo ""
+    echo "⚠️  IMPORTANT: .claude/ is now the single source of truth"
+    echo "   - Use .claude/BACKLOG.md (not docs/BACKLOG.md)"
+    echo "   - Use .claude/SNAPSHOT.md (not docs/STATUS.md)"
+    echo ""
+  else
+    echo "ℹ️  docs/ contains only code documentation - keeping in place"
+  fi
+fi
+
+# Archive other subdirectories if needed
+for DIR in documentation notes wiki; do
+  if [ -d "$DIR" ]; then
+    # Similar check and archive logic
+    # ...
+  fi
+done
+```
+
+**What gets archived:**
+
+| Subdirectory | When to archive | Why |
+|--------------|-----------------|-----|
+| `docs/` | Contains migrated meta-docs (BACKLOG, STATUS, etc.) | Prevent confusion - .claude/ is source of truth |
+| `documentation/` | Contains migrated meta-docs | Same reason |
+| `notes/` | Contains migrated project notes | Same reason |
+| `wiki/` | Contains migrated wiki pages | Same reason |
+
+**What stays:**
+
+| Subdirectory | Keep if contains | Why |
+|--------------|-----------------|-----|
+| `docs/` | Only code documentation (API reference, tutorials) | Not meta-docs, still useful |
+| `.github/` | CONTRIBUTING.md, SECURITY.md | Active files, not archived |
+
+### 9.5 Cleanup Temporary Files
 
 ```bash
 rm .claude/migration-log.json 2>/dev/null
@@ -1121,7 +1407,7 @@ rm .claude/framework-pending.tar.gz 2>/dev/null
 echo "✅ Migration cleanup complete"
 ```
 
-### 9.5 Commit Migration Changes
+### 9.6 Commit Migration Changes
 
 Commit all migration changes so next Cold Start is clean:
 
@@ -1143,7 +1429,7 @@ EOF
 echo "✅ Migration changes committed"
 ```
 
-### 9.6 Show Final Message
+### 9.7 Show Final Message
 
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -1155,6 +1441,14 @@ Framework is now in production mode.
 📁 Migration artifacts saved:
   • reports/[PROJECT]-migration-log.json
   • reports/[PROJECT]-MIGRATION_REPORT.md
+
+📦 Archived subdirectories (if applicable):
+  • archive/legacy-docs/docs-[DATE]/ (old meta-documentation)
+
+⭐ Single Source of Truth:
+  • Use .claude/BACKLOG.md (NOT docs/BACKLOG.md)
+  • Use .claude/SNAPSHOT.md (NOT docs/STATUS.md)
+  • Use .claude/ARCHITECTURE.md (NOT docs/ARCHITECTURE.md)
 
 ⚠️ IMPORTANT: Restart terminal for new commands!
 
