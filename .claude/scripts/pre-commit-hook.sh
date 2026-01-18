@@ -30,6 +30,7 @@ FORBIDDEN_PATTERNS=(
   "^\.claude/logs/"
   "\.debug\.log$"
   "^debug/"
+  "^reports/"
 
   # Local configs
   "\.local\."

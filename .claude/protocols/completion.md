@@ -1,6 +1,6 @@
 # Completion Protocol
 
-**Version:** 2.4.1
+**Version:** 2.5.1
 **Last updated:** 2026-01-16
 
 **Purpose:** Finalize sprint/task, update metafiles, export sessions, commit changes.
@@ -308,16 +308,103 @@ Claude optionally mentions:
 
 **CRITICAL: Check COMMIT_POLICY.md BEFORE staging files to prevent accidental leaks.**
 
-**NEW in v2.5.0:** Replaced dangerous `git add -A` with policy-based selective staging.
+**NEW in v2.5.1:** Replaced dangerous `git add -A` with policy-based selective staging.
 
-### Step 4.1: Load COMMIT_POLICY
+### Step 4.1: Load COMMIT_POLICY (MANDATORY)
+
+**CRITICAL:** This step is MANDATORY. Do NOT skip or proceed without COMMIT_POLICY.
 
 **Action:** Read `.claude/COMMIT_POLICY.md` to understand what can be committed.
 
-**If file doesn't exist:**
-- Project uses old framework version
-- Warn user: "⚠️ COMMIT_POLICY.md not found. Update framework or add manually."
-- Fallback to cautious mode: only stage src/, tests/, README.md, package.json
+```bash
+# Check if COMMIT_POLICY.md exists
+if [ ! -f ".claude/COMMIT_POLICY.md" ]; then
+  echo ""
+  echo "⚠️ CRITICAL: COMMIT_POLICY.md not found!"
+  echo ""
+
+  # Try to create from template
+  if [ -f "migration/templates/COMMIT_POLICY.template.md" ]; then
+    echo "Creating from template..."
+    PROJECT_NAME=$(basename "$(pwd)")
+    sed "s/{{PROJECT_NAME}}/${PROJECT_NAME}/g" \
+      migration/templates/COMMIT_POLICY.template.md > .claude/COMMIT_POLICY.md
+    echo "✅ COMMIT_POLICY.md created"
+    echo ""
+  else
+    echo "⚠️ Template not found. Creating minimal COMMIT_POLICY.md..."
+
+    # Create minimal version with hardcoded rules
+    cat > .claude/COMMIT_POLICY.md <<'EOF'
+# Commit Policy
+
+## ❌ НИКОГДА:
+\`\`\`
+dialog/
+.claude/logs/
+reports/
+notes/
+scratch/
+secrets/
+credentials/
+*.key
+*.pem
+\`\`\`
+
+## ✅ ВСЕГДА:
+\`\`\`
+src/
+tests/
+README.md
+CHANGELOG.md
+package.json
+\`\`\`
+EOF
+    echo "✅ Minimal COMMIT_POLICY.md created"
+    echo ""
+  fi
+
+  echo "📝 Please review .claude/COMMIT_POLICY.md before committing"
+  echo ""
+
+  # Ask user to confirm
+  read -p "Continue with commit? Review policy first? (y/N) " -n 1 -r
+  echo ""
+  if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+    echo "Commit cancelled. Please review .claude/COMMIT_POLICY.md"
+    exit 1
+  fi
+fi
+```
+
+**Hardcoded Fallback Rules (if COMMIT_POLICY.md cannot be read):**
+
+**NEVER stage these patterns (last resort):**
+```
+dialog/                 # Framework dialogs
+.claude/logs/           # Framework logs
+reports/                # Bug reports (CRITICAL - already in GitHub)
+notes/                  # Personal notes
+scratch/                # Scratch files
+experiments/            # Experiments
+WIP_*, INTERNAL_*, DRAFT_*
+secrets/                # Secrets
+credentials/            # Credentials
+*.key, *.pem            # Private keys
+.vscode/, .idea/        # IDE configs
+*.local.*               # Local configs
+```
+
+**ALWAYS stage these patterns (safe files):**
+```
+src/, lib/, tests/      # Source code
+README.md, CHANGELOG.md, LICENSE
+package.json, tsconfig.json
+.claude/SNAPSHOT.md, .claude/BACKLOG.md, .claude/ARCHITECTURE.md
+.gitignore
+```
+
+**If unsure:** ASK USER before staging!
 
 ### Step 4.2: Get Changed Files
 
@@ -334,7 +421,7 @@ git status --short
 **1. Check "НИКОГДА" patterns (auto-block):**
 ```
 notes/, scratch/, experiments/, WIP_*, INTERNAL_*, DRAFT_*
-dialog/, .claude/logs/, *.debug.log, debug/
+dialog/, .claude/logs/, *.debug.log, debug/, reports/
 *.local.*, .env.local, .vscode/, .idea/
 secrets/, credentials/, *.key, *.pem, .production-credentials, backup/
 ```

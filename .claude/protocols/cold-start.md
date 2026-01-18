@@ -1,6 +1,6 @@
 # Cold Start Protocol
 
-**Version:** 2.4.1
+**Version:** 2.5.1
 **Last updated:** 2026-01-16
 
 **Purpose:** Initialize framework session, load context, prepare for work.
@@ -146,6 +146,23 @@ if [ "$LOCAL_VERSION" != "$LATEST_VERSION" ] && [ "$LATEST_VERSION" != "" ]; the
 
   # Verify downloads successful
   if [ -f "CLAUDE.md.new" ] && [ -f "/tmp/fw-cmd.tar.gz" ]; then
+    # Self-healing: Verify downloaded version matches expected
+    DOWNLOADED_VERSION=$(grep "Framework: Claude Code Starter v" CLAUDE.md.new | tail -1 | sed 's/.*v\([0-9.]*\).*/\1/')
+
+    if [ "$DOWNLOADED_VERSION" != "$LATEST_VERSION" ]; then
+      echo "⚠️  Downloaded CLAUDE.md has wrong version (v$DOWNLOADED_VERSION)"
+      echo "   Auto-correcting to v$LATEST_VERSION..."
+
+      # Fix version in downloaded file (Darwin/BSD sed requires '' after -i)
+      if [[ "$OSTYPE" == "darwin"* ]]; then
+        sed -i '' "s/v$DOWNLOADED_VERSION/v$LATEST_VERSION/g" CLAUDE.md.new
+      else
+        sed -i "s/v$DOWNLOADED_VERSION/v$LATEST_VERSION/g" CLAUDE.md.new
+      fi
+
+      echo "   ✓ Version corrected in CLAUDE.md"
+    fi
+
     # Replace CLAUDE.md
     mv CLAUDE.md.new CLAUDE.md
 
@@ -449,6 +466,105 @@ git add html-viewer/index.html && git commit -m "chore: Update student UI with l
 
 ---
 
+## Step 0.55: Auto-Create COMMIT_POLICY.md (If Missing)
+
+**Purpose:** Ensure COMMIT_POLICY.md exists to protect against accidental leaks.
+
+**NEW in v2.5.1:** Auto-recovery for missing COMMIT_POLICY.md file.
+
+```bash
+# Check if COMMIT_POLICY.md exists
+if [ ! -f ".claude/COMMIT_POLICY.md" ]; then
+  echo ""
+  echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+  echo "⚠️  COMMIT_POLICY.md not found"
+  echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+  echo ""
+  echo "Creating from template..."
+
+  # Check if template exists
+  if [ -f "migration/templates/COMMIT_POLICY.template.md" ]; then
+    # Get project name
+    PROJECT_NAME=$(basename "$(pwd)")
+
+    # Create COMMIT_POLICY.md from template
+    sed "s/{{PROJECT_NAME}}/${PROJECT_NAME}/g" \
+      migration/templates/COMMIT_POLICY.template.md > .claude/COMMIT_POLICY.md
+
+    echo "✅ COMMIT_POLICY.md created"
+    echo ""
+    echo "📝 Review: .claude/COMMIT_POLICY.md"
+    echo "   Add project-specific patterns if needed."
+    echo ""
+  else
+    echo "⚠️  Template not found: migration/templates/COMMIT_POLICY.template.md"
+    echo "   Creating minimal COMMIT_POLICY.md with hardcoded rules..."
+
+    # Create minimal COMMIT_POLICY.md with essential rules
+    cat > .claude/COMMIT_POLICY.md <<'EOF'
+# Commit Policy — Что можно коммитить?
+
+## ❌ НИКОГДА не коммитим:
+
+```
+# Framework files (CRITICAL!)
+dialog/                 # Claude dialogs
+.claude/logs/           # Framework logs
+reports/                # Bug reports (already in GitHub)
+
+# Development scratch
+notes/
+scratch/
+experiments/
+WIP_*
+INTERNAL_*
+
+# Sensitive data
+secrets/
+credentials/
+*.key
+*.pem
+```
+
+## ✅ ВСЕГДА коммитим:
+
+```
+src/
+tests/
+README.md
+CHANGELOG.md
+package.json
+tsconfig.json
+.gitignore
+```
+
+**Редактируйте этот файл под свой проект!**
+EOF
+
+    echo "✅ Minimal COMMIT_POLICY.md created"
+    echo ""
+    echo "⚠️  IMPORTANT: Review and customize .claude/COMMIT_POLICY.md"
+    echo ""
+  fi
+
+  echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+  echo ""
+fi
+```
+
+**What this does:**
+- Checks if `.claude/COMMIT_POLICY.md` exists
+- If missing, creates from template (`migration/templates/COMMIT_POLICY.template.md`)
+- If template also missing, creates minimal version with hardcoded essential rules
+- Protects against commits without policy check
+
+**Why this matters:**
+- COMMIT_POLICY.md is critical for preventing accidental leaks
+- Without it, Claude AI might commit forbidden files (reports/, dialog/, etc.)
+- Auto-recovery ensures policy always exists
+
+---
+
 ## Step 0.6: Install Git Hooks (COMMIT_POLICY protection)
 
 **Purpose:** Install pre-commit hook for last line of defense against accidental leaks.
@@ -511,7 +627,7 @@ Output confirmation message:
 
 ```
 Context loaded. Directory: [pwd]
-Framework: Claude Code Starter v2.4.1
+Framework: Claude Code Starter v2.5.0
 Ready to work!
 ```
 

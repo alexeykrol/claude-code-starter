@@ -9,7 +9,7 @@
 
 set -e  # Exit on error
 
-VERSION="2.5.0"
+VERSION="2.5.1"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 DIST_DIR="$PROJECT_ROOT/dist-release"
@@ -100,7 +100,7 @@ chmod +x "$TEMP_DIR/framework/.claude/scripts/pre-commit-hook.sh"
 chmod +x "$TEMP_DIR/framework/.claude/scripts/install-git-hooks.sh"
 echo -e "${GREEN}✓${NC} Copied scripts (bug reporting + git hooks)"
 
-# 6.5. .claude/protocols/ (protocol files - NEW in v2.4.1)
+# 6.5. .claude/protocols/ (protocol files - NEW in v2.5.1)
 mkdir -p "$TEMP_DIR/framework/.claude/protocols"
 cp "$PROJECT_ROOT/.claude/protocols/cold-start.md" "$TEMP_DIR/framework/.claude/protocols/"
 cp "$PROJECT_ROOT/.claude/protocols/completion.md" "$TEMP_DIR/framework/.claude/protocols/"

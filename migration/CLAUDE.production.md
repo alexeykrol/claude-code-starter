@@ -1,6 +1,6 @@
 # CLAUDE.md — AI Agent Instructions
 
-**Framework:** Claude Code Starter v2.4.3
+**Framework:** Claude Code Starter v2.5.1
 **Type:** Meta-framework extending Claude Code capabilities
 
 ---
@@ -327,4 +327,4 @@ fi
    - Use normal Cold Start Protocol
 
 ---
-*Framework: Claude Code Starter v2.4.3 | Updated: 2026-01-17*
+*Framework: Claude Code Starter v2.5.1 | Updated: 2026-01-17*

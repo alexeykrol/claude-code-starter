@@ -26,6 +26,7 @@ dialog/                 # Claude диалоги (могут содержать c
 .claude/logs/           # Framework execution logs
 *.debug.log             # Debug логи
 debug/                  # Debug файлы
+reports/                # Bug reports и migration logs (уже в GitHub Issues)
 ```
 
 ### 3. Технические файлы

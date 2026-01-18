@@ -28,9 +28,10 @@ dialog/                 # Claude диалоги (могут содержать c
 .claude/logs/           # Framework execution logs
 *.debug.log             # Debug логи
 debug/                  # Debug файлы
+reports/                # Bug reports и migration logs (уже в GitHub Issues)
 ```
 
-**Почему:** Диалоги могут содержать упоминания паролей, SSH ключей, API токенов в обсуждениях.
+**Почему:** Диалоги могут содержать упоминания паролей, SSH ключей, API токенов в обсуждениях. Bug reports уже отправлены в GitHub Issues, локальные копии не нужны в git.
 
 ### 3. Технические файлы
 
@@ -167,6 +168,7 @@ DRAFT_*
 # Framework logs and dialogs (CRITICAL!)
 dialog/
 .claude/logs/
+reports/
 
 # Sensitive data
 secrets/

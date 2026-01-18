@@ -7,6 +7,91 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.5.1] - 2026-01-17
+
+### Fixed
+
+- **🔧 CRITICAL: Framework Version Update Loop (#framework-version-loop-20260117)**
+  - **Проблема:** GitHub release v2.5.0 содержал CLAUDE.md с версией v2.4.3 вместо v2.5.0
+  - **Результат:** Пользователи застревали в бесконечном цикле обновлений
+  - **Решение:**
+    - Self-healing mechanism в Cold Start Protocol (Step 0.2)
+    - Автоматически исправляет неправильную версию в скачанном CLAUDE.md
+    - Предотвращает замкнутый цикл обновлений
+
+- **🔒 CRITICAL: COMMIT_POLICY Missing reports/ Pattern (#commit-policy-missing-reports-20260117)**
+  - **Проблема:** Bug reports коммитились в git (утечка приватной информации)
+  - **Причины:**
+    1. Template не содержал `reports/` в запрещённых паттернах
+    2. COMMIT_POLICY.md не создавался автоматически при установке
+    3. Claude AI не проверял наличие файла перед коммитом
+  - **Решение:**
+    - Добавлен `reports/` во все необходимые файлы:
+      - `migration/templates/COMMIT_POLICY.template.md`
+      - `.claude/COMMIT_POLICY.md`
+      - `.claude/scripts/pre-commit-hook.sh`
+    - Auto-create COMMIT_POLICY.md в Cold Start (новый Step 0.55)
+    - Strengthened Completion Protocol Step 4.1 (теперь MANDATORY)
+    - Добавлены hardcoded fallback rules для защиты
+  - **Defense in Depth:** 6 слоёв защиты против случайных коммитов
+
+### Added
+
+- **📋 Pre-release Validation Script (migration/validate-release.sh)**
+  - Проверяет консистентность версий перед релизом
+  - Валидирует: CLAUDE.md, protocols, package.json, CHANGELOG.md, git tags
+  - Предотвращает создание релизов с несоответствующими версиями
+
+- **📝 Version Update Utility (migration/update-version.sh)**
+  - Обновляет версию во всех framework файлах одной командой
+  - Поддержка macOS (BSD sed) и Linux (GNU sed)
+  - Гарантирует консистентность версий
+
+- **🚀 Automated Release Script (migration/create-release.sh)**
+  - Автоматизирует весь процесс релиза
+  - Интегрирует: validation → build → GitHub release
+  - Безопасный workflow с проверками
+
+- **Step 0.55 в Cold Start Protocol: Auto-Create COMMIT_POLICY.md**
+  - Автоматически создаёт COMMIT_POLICY.md если отсутствует
+  - Использует template или создаёт минимальную версию
+  - Гарантирует наличие policy перед любыми коммитами
+
+### Changed
+
+- **Strengthened Completion Protocol Step 4.1:**
+  - Теперь помечен как MANDATORY (обязательный)
+  - Автоматически создаёт COMMIT_POLICY.md если отсутствует
+  - Добавлены hardcoded fallback rules для защиты
+  - Невозможно пропустить проверку policy
+
+- **Enhanced Cold Start Protocol Step 0.2:**
+  - Добавлен self-healing mechanism для version mismatches
+  - Автоматически исправляет версию в скачанном CLAUDE.md
+  - OS-aware sed (поддержка macOS и Linux)
+
+### Security
+
+- **Enhanced COMMIT_POLICY enforcement:**
+  - 6 layers of protection: .gitignore → policy → auto-create (x2) → Claude check → pre-commit hook
+  - `reports/` теперь блокируется на всех уровнях
+  - Bug reports и migration logs не могут быть закоммичены
+
+### Documentation
+
+- **BUG_FIX_SUMMARY.md** — Детальное описание исправления version loop
+- **COMMIT_POLICY_FIX_SUMMARY.md** — Детальное описание исправления COMMIT_POLICY
+- **BUGS_FIXED_v2.5.1.md** — Общий summary для релиза
+
+### Testing
+
+- ✅ Self-healing mechanism протестирован (симуляция version mismatch)
+- ✅ Validation script обнаруживает несоответствия версий
+- ✅ Pre-commit hook блокирует reports/ файлы (integration test)
+- ✅ Auto-create COMMIT_POLICY.md работает корректно
+
+---
+
 ## [2.5.0] - 2026-01-17
 
 ### Added
