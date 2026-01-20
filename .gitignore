@@ -233,7 +233,10 @@ test2/
 .claude/ROADMAP.md
 .claude/IDEAS.md
 .claude/CLAUDE2.md
-CLAUDE.md
+
+# NOTE: CLAUDE.md (root) IS PUBLIC - needed for framework contributors and forks
+# It contains AI instructions for framework development (Framework Developer Mode, protocols, etc.)
+# Host projects get their own CLAUDE.md from migration/CLAUDE.production.md template
 
 # Internal UI for viewing dialogs (framework development only)
 html-viewer/
