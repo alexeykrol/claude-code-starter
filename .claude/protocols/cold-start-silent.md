@@ -270,8 +270,10 @@ fi
 
 ### Task 4: Security Cleanup
 ```bash
-# Silent security cleanup
-if [ -f "security/cleanup-dialogs.sh" ]; then
+# Check if dialog export enabled (no dialogs = no cleanup needed)
+DIALOG_ENABLED=$(cat .claude/.framework-config 2>/dev/null | grep -o '"dialog_export_enabled": *[^,}]*' | grep -o 'true\|false')
+
+if [ "$DIALOG_ENABLED" = "true" ] && [ -f "security/cleanup-dialogs.sh" ]; then
   RESULT=$(bash security/cleanup-dialogs.sh --last 2>&1)
   if echo "$RESULT" | grep -q "credentials redacted"; then
     COUNT=$(echo "$RESULT" | grep -o '[0-9]\+ credentials' | head -1 | grep -o '[0-9]\+')
@@ -280,15 +282,21 @@ if [ -f "security/cleanup-dialogs.sh" ]; then
     echo "SECURITY:clean"
   fi
 else
-  echo "SECURITY:skipped"
+  echo "SECURITY:skipped:dialogs_disabled"
 fi
 ```
 
 ### Task 5: Dialog Export
 ```bash
-# Silent export
-npm run dialog:export --no-html 2>&1 | tail -1
-echo "EXPORT:done"
+# Check if dialog export enabled
+DIALOG_ENABLED=$(cat .claude/.framework-config 2>/dev/null | grep -o '"dialog_export_enabled": *[^,}]*' | grep -o 'true\|false')
+
+if [ "$DIALOG_ENABLED" = "true" ]; then
+  npm run dialog:export --no-html 2>&1 | tail -1
+  echo "EXPORT:done"
+else
+  echo "EXPORT:skipped:disabled"
+fi
 ```
 
 ### Task 6: COMMIT_POLICY Check

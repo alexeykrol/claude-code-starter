@@ -348,21 +348,29 @@ fi
 
 ### Task 2: Dialog Export
 ```bash
-# Silent export
-npm run dialog:export --no-html 2>&1 | tail -1
-EXIT_CODE=$?
+# Check if dialog export enabled
+DIALOG_ENABLED=$(cat .claude/.framework-config 2>/dev/null | grep -o '"dialog_export_enabled": *[^,}]*' | grep -o 'true\|false')
 
-if [ $EXIT_CODE -eq 0 ]; then
-  echo "EXPORT:success"
+if [ "$DIALOG_ENABLED" = "true" ]; then
+  npm run dialog:export --no-html 2>&1 | tail -1
+  EXIT_CODE=$?
+
+  if [ $EXIT_CODE -eq 0 ]; then
+    echo "EXPORT:success"
+  else
+    echo "EXPORT:failed:${EXIT_CODE}"
+  fi
 else
-  echo "EXPORT:failed:${EXIT_CODE}"
+  echo "EXPORT:skipped:disabled"
 fi
 ```
 
 ### Task 3: Security Cleanup
 ```bash
-# Silent security check
-if [ -f "security/cleanup-dialogs.sh" ]; then
+# Check if dialog export enabled (no dialogs = no cleanup needed)
+DIALOG_ENABLED=$(cat .claude/.framework-config 2>/dev/null | grep -o '"dialog_export_enabled": *[^,}]*' | grep -o 'true\|false')
+
+if [ "$DIALOG_ENABLED" = "true" ] && [ -f "security/cleanup-dialogs.sh" ]; then
   RESULT=$(bash security/cleanup-dialogs.sh --last 2>&1)
 
   if echo "$RESULT" | grep -q "credentials redacted"; then
@@ -372,7 +380,7 @@ if [ -f "security/cleanup-dialogs.sh" ]; then
     echo "SECURITY:clean"
   fi
 else
-  echo "SECURITY:skipped"
+  echo "SECURITY:skipped:dialogs_disabled"
 fi
 ```
 
