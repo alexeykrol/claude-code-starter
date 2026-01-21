@@ -216,6 +216,13 @@ storybook-static/
 .claude/logs/
 .claude/.framework-config
 
+# Bug fix reports and summaries (framework internal development, not for public repo)
+BUGS_FIXED_*.md
+BUG_FIX_SUMMARY.md
+COMMIT_POLICY_FIX_SUMMARY.md
+commit-policy-missing-*.md
+framework-version-*.md
+
 # Development/testing directory - excluded from repo
 dev/
 
