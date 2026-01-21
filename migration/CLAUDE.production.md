@@ -1,33 +1,75 @@
 # CLAUDE.md — AI Agent Instructions
 
-**Framework:** Claude Code Starter v2.5.1
+**Framework:** Claude Code Starter v3.0.0
 **Type:** Meta-framework extending Claude Code capabilities
 
 ---
 
-## Architecture: Hybrid Protocol Files
+## Architecture: Python Framework Core + Silent Mode Protocols
 
-**NEW in v2.4.1:** Protocols are now modular files, immune to context compaction.
+**NEW in v3.0.0:** Python utility replaces bash commands. Zero terminal noise, 1000x faster.
 
-**Why this matters:**
-- Long sessions → context compaction → protocol details lost
-- Solution: Protocol files are read FRESH each time
-- No agent overhead (fast, deterministic)
-- CLAUDE.md becomes simple router
+**Previous versions:**
+- v2.4.1-v2.5.1: Modular protocol files (5-6 min, verbose output)
+- v2.6.0: Optimized protocols (15-30s, compact output)
+- v2.7.0: True silent mode (bash background tasks)
+
+**Why Python utility:**
+- Bash = 10 separate commands = terminal spam (task notifications)
+- Python = 1 command, structured JSON output, true silent execution
+- Faster: 359ms vs minutes (1000x+ improvement)
+- Better: parallel execution, easy debugging, cross-platform
 
 **Protocol Files:**
-- `.claude/protocols/cold-start.md` — Session initialization
-- `.claude/protocols/completion.md` — Sprint finalization
+- `.claude/protocols/cold-start-silent.md` — Invisible session initialization
+- `.claude/protocols/completion-silent.md` — Invisible sprint finalization
+- `.claude/protocols/auto-triggers.md` — Automatic task completion detection
+
+**Python Utility:**
+- `src/framework-core/main.py` — CLI entry point
+- `python3 src/framework-core/main.py cold-start` — Execute all tasks
+- Returns JSON to stdout (AI parses, user sees nothing)
+- Logs to `.claude/logs/framework-core/`
+
+**Key improvements in v3.0.0:**
+- **Zero terminal noise:** JSON output instead of task notifications
+- **1000x faster:** 359ms vs minutes execution time
+- **True silent mode:** User sees NOTHING unless error/confirmation needed
+- **Parallel execution:** Python threading for all tasks
+- **Cross-platform:** Works on Windows native (no WSL)
+- **Easy debugging:** Proper code structure vs bash scripts
 
 ---
 
 ## Triggers
 
 **"start", "начать":**
-→ Execute Cold Start Protocol
+→ Execute Cold Start Protocol (silent mode)
 
-**"заверши", "завершить", "finish", "done":**
-→ Execute Completion Protocol
+**Manual Completion:**
+**"/fi", "заверши", "завершить", "finish":**
+→ Execute Completion Protocol (silent mode)
+
+**Auto-Trigger Detection (NEW in v2.7.0):**
+Framework automatically detects task completion and triggers Completion Protocol:
+
+**Explicit keywords** (instant trigger):
+- "готово", "сделано", "завершил", "закончил", "done", "completed"
+- Framework runs Completion automatically (or asks once, based on config)
+
+**Implicit signals** (suggest commit):
+- "задача завершена", "фича готова", "баг исправлен", "тесты проходят"
+- Framework suggests: "Commit changes? (Y/n)"
+
+**Significant changes detected** (git analysis):
+- 100+ lines changed, or 5+ files modified
+- Framework suggests commit
+
+**Context analysis** (AI analyzes conversation):
+- Framework detects task completion from conversation flow
+- Suggests commit when confidence high
+
+See `.claude/protocols/auto-triggers.md` for full specification.
 
 ---
 
@@ -55,65 +97,71 @@ cat .claude/migration-context.json 2>/dev/null
 
 ### Step 2: Execute Cold Start Protocol
 
-**Read and execute the protocol file:**
+**Read and execute the SILENT protocol file:**
 
 ```
-Read .claude/protocols/cold-start.md and execute all steps.
+Read .claude/protocols/cold-start-silent.md and execute all steps.
 ```
 
 **What this file contains:**
-- Step 0.05: Migration Cleanup Recovery
-- Step 0.1: Crash Recovery & Auto-Recovery
-- Step 0.2: Framework Version Check
-- Step 0.15: Bug Reporting Consent (first run only)
-- Step 0.3: Initialize Protocol Logging
-- Step 0.4: Framework Developer Mode (framework project only)
-- Step 0.5: Security Cleanup & Export Sessions
-- Step 1: Mark Session Active
-- Step 2: Load Context (SNAPSHOT, BACKLOG, ARCHITECTURE)
-- Step 3: Context ON DEMAND (ROADMAP, IDEAS, CHANGELOG)
-- Step 4: Confirm
+- Phase 1: Silent background execution (parallel, 10-20s)
+  - 10 background agents: Migration cleanup, Crash detection, Version check, Security cleanup, Dialog export, COMMIT_POLICY check, Git hooks, Config init, Load context, Mark active
+- Phase 2: Check results & show ONLY issues (if any)
+- Phase 3: Silent completion (show nothing or "✅ Ready")
+
+**Output philosophy:**
+- **Silent by default:** Show NOTHING if everything OK
+- **Show ONLY:** Crashes, critical errors, (optional) updates
+- **Result:** User doesn't think about protocol, just starts working
 
 **Why read fresh:**
 - Long sessions → context compaction → protocol details lost
 - Reading protocol file ensures complete, up-to-date instructions
 - Immune to context compaction (file read is fresh every time)
-- ~3-5k tokens vs 50-100k for full project scan
+- ~6.5-7.5k tokens (includes full silent mode logic)
 
-**Token Economy:** Protocol file is compact and self-contained.
+**Token Economy:** Protocol file is self-contained with all error handling.
 
 ---
 
 ## Completion Protocol
 
-**Purpose:** Finalize sprint/task, update metafiles, export sessions, commit changes.
+**Purpose:** Invisible sprint finalization. Auto-commit, auto-update metafiles, show ONLY result.
 
-**Read and execute the protocol file:**
+**Read and execute the SILENT protocol file:**
 
 ```
-Read .claude/protocols/completion.md and execute all steps.
+Read .claude/protocols/completion-silent.md and execute all steps.
 ```
 
 **What this file contains:**
-- Step 0: Re-read Completion Protocol (Self-Check)
-- Step 0.1: Initialize Completion Logging
-- Step 1: Build (if code changed)
-- Step 2: Update Metafiles (BACKLOG, SNAPSHOT, CHANGELOG, README, ARCHITECTURE)
-- Step 2.1: Version Bumping (if creating release)
-- Step 3: Export Dialogs
-- Step 3.5: Security - Clean Current Dialog + Smart Trigger Detection
-- Step 4: Git Commit
-- Step 5: Ask About Push & PR
-- Step 6: Mark Session Clean
-- Step 6.5: Finalize Completion Log & Create Bug Report
+- Phase 1: Silent background execution (parallel)
+  - 3 background agents: Build, Dialog export, Security cleanup
+  - AI updates metafiles in parallel: SNAPSHOT, BACKLOG, CHANGELOG, README, ARCHITECTURE
+- Phase 2: Check results & handle errors (silent unless error)
+- Phase 3: Silent commit (auto-commit or one confirmation)
+- Phase 4: Optional push/PR
+- Phase 5: Silent cleanup
 
-**Why read fresh:**
-- Long sessions → context compaction → protocol details lost
-- Reading protocol file ensures complete, up-to-date instructions
-- Immune to context compaction (file read is fresh every time)
-- Includes full security decision logic for trigger handling
+**Output philosophy:**
+- **Silent by default:** Everything happens in background, NO progress indicators
+- **Show ONLY:** Build errors, Security warnings, Commit confirmation (optional)
+- **Result:** "✓ Committed (hash)" or nothing at all
 
-**Token Economy:** Protocol file is compact and self-contained (~3-4k tokens)
+**Configuration options:**
+```json
+{
+  "completion": {
+    "silent_mode": true,
+    "auto_commit": false,        // Ask before commit (safe) or auto-commit
+    "show_commit_message": true, // Show for quick review
+    "auto_push": false,
+    "auto_trigger": true         // Enable auto-detection (see auto-triggers.md)
+  }
+}
+```
+
+**Presets:** "paranoid" (safe), "autopilot" (fully automated), "balanced" (default)
 
 ---
 
@@ -125,9 +173,10 @@ claude-code-starter/
 ├── dist/claude-export/     # Compiled JavaScript
 ├── .claude/
 │   ├── commands/           # 19 slash commands
-│   ├── protocols/          # Protocol files (NEW in v2.4.1)
-│   │   ├── cold-start.md   #   Session initialization
-│   │   └── completion.md   #   Sprint finalization
+│   ├── protocols/          # Protocol files (True Silent Mode in v2.7.0)
+│   │   ├── cold-start-silent.md   #   Invisible session initialization
+│   │   ├── completion-silent.md   #   Invisible sprint finalization
+│   │   └── auto-triggers.md       #   Automatic task completion detection
 │   ├── SNAPSHOT.md         # Current state
 │   ├── ARCHITECTURE.md     # Code structure
 │   └── BACKLOG.md          # Tasks
@@ -327,4 +376,4 @@ fi
    - Use normal Cold Start Protocol
 
 ---
-*Framework: Claude Code Starter v2.5.1 | Updated: 2026-01-17*
+*Framework: Claude Code Starter v2.7.0 | Updated: 2026-01-20*
