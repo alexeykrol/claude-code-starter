@@ -1,7 +1,7 @@
 #!/bin/bash
 #
 # Claude Code Starter Framework — Distribution Builder
-# Version: 2.5.0
+# Version: 3.0.0
 #
 # This script creates a self-extracting init-project.sh installer
 # that users can download and run directly.
@@ -9,7 +9,7 @@
 
 set -e  # Exit on error
 
-VERSION="2.5.1"
+VERSION="3.0.0"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 DIST_DIR="$PROJECT_ROOT/dist-release"
@@ -102,9 +102,19 @@ echo -e "${GREEN}✓${NC} Copied scripts (bug reporting + git hooks)"
 
 # 6.5. .claude/protocols/ (protocol files - NEW in v2.5.1)
 mkdir -p "$TEMP_DIR/framework/.claude/protocols"
-cp "$PROJECT_ROOT/.claude/protocols/cold-start.md" "$TEMP_DIR/framework/.claude/protocols/"
-cp "$PROJECT_ROOT/.claude/protocols/completion.md" "$TEMP_DIR/framework/.claude/protocols/"
-echo -e "${GREEN}✓${NC} Copied protocol files (cold-start + completion)"
+cp "$PROJECT_ROOT/.claude/protocols/cold-start-silent.md" "$TEMP_DIR/framework/.claude/protocols/"
+cp "$PROJECT_ROOT/.claude/protocols/completion-silent.md" "$TEMP_DIR/framework/.claude/protocols/"
+cp "$PROJECT_ROOT/.claude/protocols/auto-triggers.md" "$TEMP_DIR/framework/.claude/protocols/"
+echo -e "${GREEN}✓${NC} Copied protocol files (cold-start-silent + completion-silent + auto-triggers)"
+
+# 6.6. src/framework-core/ (Python utility - NEW in v3.0.0)
+mkdir -p "$TEMP_DIR/framework/src/framework-core"
+cp -r "$PROJECT_ROOT/src/framework-core/"* "$TEMP_DIR/framework/src/framework-core/"
+# Remove __pycache__ directories
+find "$TEMP_DIR/framework/src/framework-core" -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true
+# Make main.py executable
+chmod +x "$TEMP_DIR/framework/src/framework-core/main.py"
+echo -e "${GREEN}✓${NC} Copied Python framework core utility"
 
 # 7. .github/ISSUE_TEMPLATE/ - EXCLUDED from distribution
 # Note: GitHub issue templates are for public repo only, not needed in user projects

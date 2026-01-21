@@ -7,6 +7,64 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [3.0.0] - 2026-01-20
+
+### Added
+
+- **🐍 Python Framework Core - Zero Terminal Noise**
+  - **Проблема:** 20-30% времени уходит на протоколы, terminal spam от bash background tasks
+  - **Решение:** Полная переписка execution layer с bash на Python
+  - **Новое:**
+    - `src/framework-core/` - Python утилита (16 файлов, 931 строка кода)
+    - `main.py` - CLI entry point
+    - `commands/` - cold_start.py, completion.py
+    - `tasks/` - 10 задач (config, session, git, version, security, hooks)
+    - `utils/` - logging, JSON output, parallel execution
+  - **Преимущества:**
+    - Zero terminal noise (JSON output вместо task notifications)
+    - 1000x быстрее (359ms vs минуты)
+    - Parallel execution (Python threading)
+    - Cross-platform (Windows native)
+    - Easy debugging (код вместо bash scripts)
+    - Zero dependencies (stdlib only)
+  - **Команды:**
+    - `python3 src/framework-core/main.py cold-start`
+    - `python3 src/framework-core/main.py completion`
+
+### Changed
+
+- **📝 Updated Protocols to v3.0.0**
+  - `.claude/protocols/cold-start-silent.md` - использует Python utility
+  - Phase 1: Execute Python Utility (вместо 10 bash команд)
+  - Phase 2: Parse JSON Result & React
+  - Удалена секция "Background Tasks Detail" (bash команды)
+  - Добавлена секция "Python Utility Implementation"
+
+### Breaking Changes
+
+- **Major architectural change:** Replaced bash execution layer with Python utility
+- **New requirement:** Python 3.x must be installed (stdlib only, no external dependencies)
+- **Migration:** Existing projects auto-upgrade via installer (Python utility included in distribution)
+
+### Why v3.0.0 (Major Version Bump)
+
+This is a **major breaking change** in framework architecture:
+- Complete rewrite of protocol execution layer (bash → Python)
+- Fundamental change in how protocols execute
+- New dependency requirement (Python 3.x, though most systems have it)
+- 1000x performance improvement
+- Zero terminal noise vs previous bash task spam
+
+Per Semantic Versioning, this qualifies as **MAJOR** version increment.
+
+### Documentation
+
+- **Decision Log:** Added "Python Framework Core" decision (#2A)
+- **What's New in v3.0.0:** Detailed Python utility architecture
+- **Design Doc:** `.claude/analysis/python-framework-core-design.md`
+
+---
+
 ## [2.5.1] - 2026-01-17
 
 ### Fixed

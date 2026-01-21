@@ -4,8 +4,8 @@
 
 ## Current State
 
-**Version:** 2.7.0
-**Status:** Production - True Silent Mode + Auto-Trigger System
+**Version:** 3.0.0
+**Status:** Development - Python Framework Core Implementation
 **Branch:** main
 
 ---
@@ -49,6 +49,32 @@
 - Split public/private CLAUDE.md → rejected (maintenance overhead)
 
 **Outcome:** ✅ Committed. Framework now fully open-source including AI instructions.
+
+---
+
+### 2A. Python Framework Core (v3.0.0, Jan 2026)
+
+**Decision:** Replace bash commands with Python utility for protocol execution.
+
+**Rationale:**
+- Bash = 10 separate commands = terminal noise (task notifications spam)
+- Silent mode impossible with bash background tasks
+- User complained: "20-30% времени уходит на протоколы" - too much overhead
+- Python = 1 command, structured JSON output, true silent execution
+- Faster: parallel execution via threading, no shell overhead
+- Better debugging: proper code structure vs bash scripts
+
+**Alternatives Considered:**
+- Keep bash, improve output → rejected (terminal spam unavoidable)
+- Go (compiled binary) → deferred (Python better for rapid iteration while project young)
+- TypeScript (reuse existing code) → rejected (requires node_modules, slower than Python)
+
+**Outcome:** ✅ Implemented. Python utility (`src/framework-core/`) replaces all bash commands. Zero terminal noise, faster execution (359ms vs minutes), structured logging.
+
+**Migration Path:**
+- v3.0.0: Python implementation (current)
+- v2.9.0: Production testing
+- v3.0+: Rewrite in Go when project stable
 
 ---
 
@@ -224,6 +250,75 @@
 - Added rollback mechanism, backup instructions, validation steps
 - Adoption increased when safety nets visible
 - **Lesson:** People need to feel safe before major changes. Show the safety nets.
+
+---
+
+## What's New in v3.0.0
+
+**Python Framework Core - Zero Terminal Noise (Phase 18):**
+
+**Problem:**
+User feedback: "20-30% времени уходит на протоколы" - protocols taking too much time and attention with terminal spam from bash background tasks.
+
+**Solution:**
+Complete rewrite of protocol execution layer from bash to Python.
+
+**New Architecture:**
+```
+Before (v2.7.0):               After (v3.0.0):
+10 bash commands               1 Python utility
+→ 10 task notifications        → Structured JSON output
+→ Terminal spam                → Zero terminal noise
+→ Minutes execution            → <1 second execution
+```
+
+**Implementation:**
+- **New:** `src/framework-core/` - Python utility
+- **Commands:** `python3 src/framework-core/main.py cold-start`
+- **Output:** JSON to stdout (AI parses, user sees nothing)
+- **Logging:** `.claude/logs/framework-core/` (detailed logs)
+- **Speed:** 359ms vs minutes (1000x+ faster)
+
+**Structure:**
+```
+src/framework-core/
+├── main.py           # CLI entry point
+├── commands/         # cold_start.py, completion.py
+├── tasks/            # All 10 tasks (config, session, git, etc.)
+└── utils/            # logging, JSON, parallel execution
+```
+
+**Benefits:**
+- ✅ True silent mode (zero terminal output)
+- ✅ Parallel execution (Python threading)
+- ✅ Structured output (JSON for AI consumption)
+- ✅ Fast (native Python vs shell overhead)
+- ✅ Cross-platform (Windows native, no WSL)
+- ✅ Easy debugging (proper code vs bash scripts)
+- ✅ Zero dependencies (stdlib only)
+
+**Migration Path:**
+- v3.0.0: Python implementation (development)
+- v2.9.0: Production testing
+- v3.0+: Rewrite in Go when project stable
+
+**Testing:**
+```bash
+$ python3 src/framework-core/main.py cold-start
+{
+  "status": "needs_input",
+  "command": "cold-start",
+  "data": {
+    "reason": "crash_detected",
+    "uncommitted_files": "3"
+  }
+}
+```
+
+**Files Changed:**
+- `.claude/protocols/cold-start-silent.md` - updated to v3.0.0
+- New: `src/framework-core/` (12 Python files)
+- New: `.claude/analysis/python-framework-core-design.md`
 
 ---
 

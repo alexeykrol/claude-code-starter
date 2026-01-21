@@ -1,0 +1,6 @@
+# Framework Core Dependencies
+# Minimal dependencies - use stdlib where possible
+
+# No external dependencies needed!
+# All functionality uses Python stdlib:
+# - json, subprocess, pathlib, concurrent.futures, etc.

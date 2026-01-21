@@ -1,11 +1,13 @@
 # Cold Start Protocol (True Silent Mode)
 
-**Version:** 2.7.0
+**Version:** 3.0.0
 **Last updated:** 2026-01-20
 
 **Purpose:** Invisible session initialization. Show ONLY critical issues.
 
 **Philosophy:** User doesn't think about protocols. Framework works in background. Show output ONLY when user input required or critical error occurred.
+
+**NEW in v3.0.0:** Python utility replaces bash commands. Zero terminal noise, faster execution.
 
 ---
 
@@ -31,15 +33,21 @@
 
 ## Implementation
 
-### Phase 1: Silent Background Execution
+### Phase 1: Execute Python Utility
 
-**Launch ALL tasks in background (single Task tool call with multiple agents):**
+**Single command - all tasks run in parallel:**
 
-```typescript
-// Use Task tool, launch 6 agents in parallel, ALL in background
-// No output shown to user
+```bash
+python3 src/framework-core/main.py cold-start
+```
 
-Background agents:
+**What it does:**
+- Executes all 10 tasks in parallel (Python threading)
+- Returns JSON result to stdout
+- Logs everything to `.claude/logs/framework-core/`
+- User sees NOTHING during execution
+
+**Tasks executed (parallel):**
 1. Migration cleanup (if needed)
 2. Crash detection & auto-recovery
 3. Version check
@@ -50,90 +58,98 @@ Background agents:
 8. Config initialization
 9. Load context files (SNAPSHOT, BACKLOG, ARCHITECTURE)
 10. Mark session active
-```
-
-**All run silently. User sees NOTHING during execution.**
 
 ---
 
-### Phase 2: Check Results & Show ONLY Issues
+### Phase 2: Parse JSON Result & React
 
-**Parse background task outputs:**
+**Read JSON from stdout:**
 
-```typescript
-// Read all TaskOutput results
+```python
+import json
+import subprocess
 
-// Check for crash
-if (crash_detected && has_uncommitted_changes) {
-  // SHOW - needs user decision
-  output: `⚠️ Previous session crashed
+result = subprocess.run(
+    ["python3", "src/framework-core/main.py", "cold-start"],
+    capture_output=True,
+    text=True
+)
 
-  Uncommitted: ${file_count} files
+data = json.loads(result.stdout)
+status = data.get("status")
+```
 
-  1. Continue (keep uncommitted)
-  2. Commit first
+**React based on status:**
 
-  ? (1/2):`
+```python
+# Case 1: Needs user input (crash with uncommitted changes)
+if status == "needs_input":
+    reason = data["data"]["reason"]
+    file_count = data["data"]["uncommitted_files"]
 
-  wait_for_user_input()
+    # SHOW - ask user
+    print(f"⚠️ Previous session crashed\n")
+    print(f"Uncommitted: {file_count} files\n")
+    print("1. Continue (keep uncommitted)")
+    print("2. Commit first\n")
 
-  if (choice === "2") {
-    // Run completion protocol for crashed session
-    execute_completion_protocol()
-  }
-}
+    choice = input("? (1/2): ")
 
-// Check for version update
-if (update_available) {
-  // Option A: Show (configurable)
-  if (show_updates === true) {
-    output: `📦 Update: v${current} → v${latest}
+    if choice == "2":
+        # Run completion protocol for crashed session
+        execute_completion_protocol()
 
-    Updating...`
+    # Continue with session
+    mark_session_active()
 
-    perform_update()
+# Case 2: Critical error
+elif status == "error":
+    errors = data.get("errors", [])
 
-    output: `✓ Updated to v${latest}
+    # SHOW - user must fix
+    for error in errors:
+        print(f"❌ {error['task']} failed")
+        print(f"  {error['message']}\n")
 
-    Restart session: exit and run 'claude'`
+    # Exit - cannot continue
+    sys.exit(1)
 
-    exit()
-  }
+# Case 3: Success
+elif status == "success":
+    tasks = data.get("tasks", [])
 
-  // Option B: Silent auto-update (default)
-  perform_update_silently()
-  restart_session()
-}
+    # Check for version update
+    version_task = next((t for t in tasks if t["name"] == "version_check"), None)
+    if version_task and "UPDATE:available" in version_task["result"]:
+        # Extract versions
+        parts = version_task["result"].split(":")
+        current, latest = parts[2], parts[3]
 
-// Check for critical errors
-if (critical_error) {
-  // SHOW - user must fix
-  output: `❌ ${error_type}
+        # Optional: show update (configurable)
+        config = load_config()
+        if config.get("cold_start", {}).get("show_updates", False):
+            print(f"📦 Update: v{current} → v{latest}\n")
 
-  ${error_message}
+    # Check for security warnings
+    security_task = next((t for t in tasks if t["name"] == "security_cleanup"), None)
+    if security_task and "SECURITY:redacted" in security_task["result"]:
+        config = load_config()
+        if config.get("cold_start", {}).get("show_security_warnings", False):
+            count = security_task["result"].split(":")[-1]
+            print(f"⚠️ Security: {count} credentials redacted\n")
 
-  Fix: ${next_steps}`
+    # Get context files to read
+    context_task = next((t for t in tasks if t["name"] == "context_files"), None)
+    if context_task:
+        files = context_task["result"].replace("CONTEXT:", "").split(",")
+        # AI reads these files
+        for file_path in files:
+            read_file(file_path)
 
-  exit()
-}
-
-// Check for security issues (informational)
-if (security_credentials_found) {
-  // Optional: show warning
-  if (verbose_security === true) {
-    output: `⚠️ Security: ${count} credentials redacted`
-  }
-  // Otherwise: silent, log to file
-}
-
-// Framework developer mode (optional)
-if (is_framework_project && bug_reports > 0) {
-  // Optional: show count
-  if (show_bug_reports === true) {
-    output: `📊 ${bug_reports} bug report(s)`
-  }
-  // Otherwise: silent
-}
+    # Success - show nothing or minimal
+    config = load_config()
+    if config.get("cold_start", {}).get("show_ready", False):
+        print("✅ Ready")
 ```
 
 ---
@@ -220,153 +236,30 @@ Check results:
 
 ---
 
-## Background Tasks Detail
+## Python Utility Implementation
 
-**All tasks run via Task tool with `run_in_background=true`:**
+**All tasks implemented in `src/framework-core/`:**
 
-### Task 1: Migration Cleanup (if needed)
-```bash
-# Silent check and cleanup
-if [ -f ".claude/CLAUDE.production.md" ]; then
-  cp .claude/CLAUDE.production.md CLAUDE.md 2>/dev/null
-  rm -f .claude/CLAUDE.production.md .claude/migration-context.json 2>/dev/null
-fi
-echo "CLEANUP:done"
-```
+All 10 tasks now executed by Python utility (see `src/framework-core/tasks/`):
 
-### Task 2: Crash Detection
-```bash
-# Check last session status
-STATUS=$(cat .claude/.last_session 2>/dev/null | grep -o '"status": *"[^"]*"' | cut -d'"' -f4)
+1. **migration_cleanup()** - `tasks/config.py`
+2. **check_crash()** - `tasks/session.py`
+3. **check_update()** - `tasks/version.py`
+4. **cleanup_dialogs()** - `tasks/security.py`
+5. **export_dialogs()** - `tasks/security.py`
+6. **ensure_commit_policy()** - `tasks/config.py`
+7. **install_git_hooks()** - `tasks/hooks.py`
+8. **init_config()** - `tasks/config.py`
+9. **get_context_files()** - `tasks/config.py` (returns list)
+10. **mark_active()** - `tasks/session.py`
 
-if [ "$STATUS" = "active" ]; then
-  # Check for uncommitted changes
-  if git diff --quiet && git diff --staged --quiet; then
-    # Auto-recovery
-    echo '{"status": "clean", "timestamp": "'$(date -Iseconds)'"}' > .claude/.last_session
-    echo "CRASH:recovered_auto"
-  else
-    # True crash - need user input
-    FILE_COUNT=$(git status --short | wc -l | tr -d ' ')
-    echo "CRASH:needs_input:${FILE_COUNT}"
-  fi
-else
-  echo "CRASH:none"
-fi
-```
-
-### Task 3: Version Check
-```bash
-# Check for updates
-LOCAL=$(grep "Framework: Claude Code Starter v" CLAUDE.md | tail -1 | sed 's/.*v\([0-9.]*\).*/\1/')
-LATEST=$(curl -s https://api.github.com/repos/alexeykrol/claude-code-starter/releases/latest | grep '"tag_name"' | sed 's/.*"v\(.*\)".*/\1/')
-
-if [ "$LOCAL" != "$LATEST" ] && [ "$LATEST" != "" ]; then
-  echo "UPDATE:available:${LOCAL}:${LATEST}"
-else
-  echo "UPDATE:none:${LOCAL}"
-fi
-```
-
-### Task 4: Security Cleanup
-```bash
-# Check if dialog export enabled (no dialogs = no cleanup needed)
-DIALOG_ENABLED=$(cat .claude/.framework-config 2>/dev/null | grep -o '"dialog_export_enabled": *[^,}]*' | grep -o 'true\|false')
-
-if [ "$DIALOG_ENABLED" = "true" ] && [ -f "security/cleanup-dialogs.sh" ]; then
-  RESULT=$(bash security/cleanup-dialogs.sh --last 2>&1)
-  if echo "$RESULT" | grep -q "credentials redacted"; then
-    COUNT=$(echo "$RESULT" | grep -o '[0-9]\+ credentials' | head -1 | grep -o '[0-9]\+')
-    echo "SECURITY:redacted:${COUNT}"
-  else
-    echo "SECURITY:clean"
-  fi
-else
-  echo "SECURITY:skipped:dialogs_disabled"
-fi
-```
-
-### Task 5: Dialog Export
-```bash
-# Check if dialog export enabled
-DIALOG_ENABLED=$(cat .claude/.framework-config 2>/dev/null | grep -o '"dialog_export_enabled": *[^,}]*' | grep -o 'true\|false')
-
-if [ "$DIALOG_ENABLED" = "true" ]; then
-  npm run dialog:export --no-html 2>&1 | tail -1
-  echo "EXPORT:done"
-else
-  echo "EXPORT:skipped:disabled"
-fi
-```
-
-### Task 6: COMMIT_POLICY Check
-```bash
-# Auto-create if missing (silent)
-if [ ! -f ".claude/COMMIT_POLICY.md" ]; then
-  if [ -f "migration/templates/COMMIT_POLICY.template.md" ]; then
-    PROJECT_NAME=$(basename "$(pwd)")
-    sed "s/{{PROJECT_NAME}}/${PROJECT_NAME}/g" \
-      migration/templates/COMMIT_POLICY.template.md > .claude/COMMIT_POLICY.md
-    echo "POLICY:created"
-  else
-    # Create minimal version
-    cat > .claude/COMMIT_POLICY.md <<'EOF'
-# Commit Policy
-## ❌ Never commit:
-dialog/, .claude/logs/, reports/, notes/, secrets/
-## ✅ Always commit:
-src/, tests/, README.md, package.json
-EOF
-    echo "POLICY:created_minimal"
-  fi
-else
-  echo "POLICY:exists"
-fi
-```
-
-### Task 7: Git Hooks
-```bash
-# Silent install
-bash .claude/scripts/install-git-hooks.sh >/dev/null 2>&1
-echo "HOOKS:done"
-```
-
-### Task 8: Config Init
-```bash
-# Initialize config if missing
-if [ ! -f ".claude/.framework-config" ]; then
-  PROJECT_NAME=$(basename "$(pwd)")
-  cat > .claude/.framework-config <<EOF
-{
-  "bug_reporting_enabled": false,
-  "project_name": "$PROJECT_NAME",
-  "first_run_completed": false,
-  "cold_start": {
-    "silent_mode": true,
-    "show_ready": false,
-    "auto_update": true
-  }
-}
-EOF
-  echo "CONFIG:created"
-else
-  echo "CONFIG:exists"
-fi
-```
-
-### Task 9: Load Context
-```bash
-# Read context files (AI does this, not bash)
-# Return file paths to read
-echo "CONTEXT:.claude/SNAPSHOT.md,.claude/BACKLOG.md,.claude/ARCHITECTURE.md"
-```
-
-### Task 10: Mark Active
-```bash
-# Mark session active
-echo '{"status": "active", "timestamp": "'$(date -Iseconds)'"}' > .claude/.last_session
-echo "SESSION:active"
-```
+**Benefits over bash:**
+- Parallel execution (Python threading)
+- Structured JSON output
+- Comprehensive logging
+- Zero terminal noise
+- Faster (native Python vs shell overhead)
+- Cross-platform (works on Windows without WSL)
 
 ---
 

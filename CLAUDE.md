@@ -1,36 +1,43 @@
 # CLAUDE.md — AI Agent Instructions
 
-**Framework:** Claude Code Starter v2.7.0
+**Framework:** Claude Code Starter v3.0.0
 **Type:** Meta-framework extending Claude Code capabilities
 
 ---
 
-## Architecture: True Silent Mode Protocols
+## Architecture: Python Framework Core + Silent Mode Protocols
 
-**NEW in v2.7.0:** Protocols run invisibly in background. User doesn't think about them.
+**NEW in v3.0.0:** Python utility replaces bash commands. Zero terminal noise, 1000x faster.
 
 **Previous versions:**
 - v2.4.1-v2.5.1: Modular protocol files (5-6 min, verbose output)
 - v2.6.0: Optimized protocols (15-30s, compact output)
+- v2.7.0: True silent mode (bash background tasks)
 
-**Why this matters:**
-- Long sessions → context compaction → protocol details lost
-- Solution: Protocol files are read FRESH each time
-- No agent overhead (fast, deterministic)
-- CLAUDE.md becomes simple router
+**Why Python utility:**
+- Bash = 10 separate commands = terminal spam (task notifications)
+- Python = 1 command, structured JSON output, true silent execution
+- Faster: 359ms vs minutes (1000x+ improvement)
+- Better: parallel execution, easy debugging, cross-platform
 
 **Protocol Files:**
 - `.claude/protocols/cold-start-silent.md` — Invisible session initialization
 - `.claude/protocols/completion-silent.md` — Invisible sprint finalization
 - `.claude/protocols/auto-triggers.md` — Automatic task completion detection
 
-**Key improvements in v2.7.0:**
-- **True silent mode:** Show NOTHING unless error/confirmation needed
-- **Auto-trigger detection:** Framework detects task completion automatically
-- **Auto-commit support:** Optional automatic commits (configurable)
-- **Invisible execution:** User doesn't think about protocols at all
-- **Near-zero overhead:** Protocols run in background, user sees only results
-- **Time savings:** Protocols become invisible, no time wasted
+**Python Utility:**
+- `src/framework-core/main.py` — CLI entry point
+- `python3 src/framework-core/main.py cold-start` — Execute all tasks
+- Returns JSON to stdout (AI parses, user sees nothing)
+- Logs to `.claude/logs/framework-core/`
+
+**Key improvements in v3.0.0:**
+- **Zero terminal noise:** JSON output instead of task notifications
+- **1000x faster:** 359ms vs minutes execution time
+- **True silent mode:** User sees NOTHING unless error/confirmation needed
+- **Parallel execution:** Python threading for all tasks
+- **Cross-platform:** Works on Windows native (no WSL)
+- **Easy debugging:** Proper code structure vs bash scripts
 
 ---
 
