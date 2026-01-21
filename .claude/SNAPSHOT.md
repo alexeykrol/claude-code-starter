@@ -4,8 +4,8 @@
 
 ## Current State
 
-**Version:** 2.5.1
-**Status:** Production - Hotfix: Version Loop + COMMIT_POLICY Fixes
+**Version:** 2.7.0
+**Status:** Production - True Silent Mode + Auto-Trigger System
 **Branch:** main
 
 ---
@@ -224,6 +224,115 @@
 - Added rollback mechanism, backup instructions, validation steps
 - Adoption increased when safety nets visible
 - **Lesson:** People need to feel safe before major changes. Show the safety nets.
+
+---
+
+## What's New in v2.7.0
+
+**True Silent Mode + Auto-Trigger System (Phase 17):**
+
+**Problem from User:**
+> "почти 20% времени работы над проектом, а это очень много, если не 30% времени, уходит на постоянное обслуживание протоколов старта или протоколов завершения"
+
+> "концепция о том, что человек должен контролировать каждый твой шаг... это нонсенс"
+
+> "Ценность этих протоколов, ценность этого фреймворка в том, чтобы почти полностью автоматизировать рутину"
+
+**Solution:**
+- Protocols now **completely invisible** to user
+- Show output ONLY when user input required or critical error
+- Auto-detect task completion from natural language
+- User doesn't think about protocols at all
+
+**New Protocol Files:**
+- `.claude/protocols/cold-start-silent.md` (483 lines) — Invisible session initialization
+- `.claude/protocols/completion-silent.md` (655 lines) — Invisible sprint finalization
+- `.claude/protocols/auto-triggers.md` (601 lines) — Automatic task completion detection
+
+**Key Features:**
+
+**1. True Silent Mode:**
+- **Silent by default:** Show NOTHING if everything OK
+- **Show ONLY:** Crashes, critical errors, security warnings, commit confirmation (optional)
+- **Output examples:**
+  - Success: `✅ Ready` or nothing at all
+  - Error: `❌ Build failed` with fix instructions
+  - Commit: `✓ Committed (hash)` or optional 1-line confirmation
+
+**2. Auto-Trigger Detection:**
+- **Explicit keywords:** "готово", "done" → instant trigger
+- **Implicit signals:** "задача завершена", "баг исправлен" → suggest commit
+- **Git analysis:** 100+ lines changed, 5+ files modified → suggest commit
+- **Idle time:** 30+ min with uncommitted changes → suggest commit (optional, off by default)
+- **Context analysis:** AI analyzes conversation to detect completion
+
+**3. Configuration System:**
+```json
+{
+  "cold_start": {
+    "silent_mode": true,
+    "show_ready": false,
+    "auto_update": true
+  },
+  "completion": {
+    "silent_mode": true,
+    "auto_commit": false,
+    "auto_trigger": true
+  },
+  "auto_triggers": {
+    "enabled": true,
+    "explicit_keywords": true,
+    "implicit_signals": true,
+    "significant_changes": true
+  }
+}
+```
+
+**4. Presets:**
+- **"manual"** — No auto-triggers, user types `/fi` (old behavior)
+- **"assisted"** — Suggests commits, user confirms
+- **"balanced"** (default) — "готово" auto-commits, others ask
+- **"autopilot"** — Fully automated (risky, for experienced users)
+
+**Time Comparison:**
+
+| Version | Cold Start | Completion | Output | User Attention |
+|---------|------------|------------|--------|----------------|
+| v2.5.1 | 5-6 min | 5-6 min | 100-200+ lines | Constant |
+| v2.6.0 | 15-30 sec | 30-60 sec | 5-15 lines | Occasional |
+| v2.7.0 | Invisible | Invisible | 0-1 line | Near-zero |
+
+**Philosophy Shift:**
+- v2.5.1: "Show everything, ask everything"
+- v2.6.0: "Compact output, silent success"
+- v2.7.0: "User doesn't think about protocols"
+
+**Impact:**
+- ✅ Near-zero protocol overhead (invisible to user)
+- ✅ Auto-detection of task completion
+- ✅ User focuses on coding, framework handles housekeeping
+- ✅ Perceived time savings: 100% (protocols become invisible)
+- ✅ User controls results, not steps
+
+**Background Execution:**
+- Cold Start: 10 background agents (parallel)
+- Completion: 3 background agents + AI metafile updates (parallel)
+- All details logged to `.claude/logs/` files
+- Verbose mode: `export CLAUDE_MODE=verbose` for debugging
+
+**Migration from v2.6.0:**
+- No breaking changes
+- Auto-activates on next Cold Start
+- Old v2.6.0 protocols preserved (rollback available)
+- User can disable auto-triggers in config
+
+**Files:**
+- `.claude/protocols/cold-start-silent.md` (NEW)
+- `.claude/protocols/completion-silent.md` (NEW)
+- `.claude/protocols/auto-triggers.md` (NEW)
+- `.claude/analysis/true-silent-mode-v2.7.0.md` (NEW, documentation)
+- `.claude/analysis/protocol-optimization-v2.6.0.md` (v2.6.0 summary)
+- `CLAUDE.md` (updated to v2.7.0)
 
 ---
 
