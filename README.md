@@ -21,24 +21,43 @@ Meta-framework for structured AI-assisted development with Claude Code — now w
 
 ## 🚀 For Users: Want to Use This Framework?
 
-### Before installing the framework, Node.js must be installed on your computer
+### Before installing the framework, you need Node.js AND Python 3.x on your computer
 
-1. Check if Node.js is installed by opening Terminal on your computer and entering the command:
+#### 1. Check Node.js
+
+Check if Node.js is installed by opening Terminal on your computer and entering the command:
 ```bash
 node --version
 ```
-If the terminal shows something like v20.19.4, or v20.4, then everything is fine - proceed directly to Framework Installation. If the terminal shows nothing or a lower version, you need to install the latest version of node.js.
+If the terminal shows something like v20.19.4, or v20.4, then everything is fine. If the terminal shows nothing or a lower version, you need to install the latest version of node.js.
 
 **How to install Node.js** (if not already installed):
 1. Download from https://nodejs.org/ (choose LTS version)
-
 2. Install (just click "Next"/"Continue")
-
 3. Restart your terminal and enter the command again:
 ```bash
 node --version
 ```
 The terminal should show the correct node.js version number.
+
+#### 2. Check Python 3.x (NEW in v3.0.0)
+
+Check if Python 3 is installed:
+```bash
+python3 --version
+```
+If the terminal shows something like Python 3.9.6, or Python 3.10.x, or Python 3.11.x - everything is fine, proceed to Framework Installation. If the terminal shows nothing or Python 2.x, you need to install Python 3.
+
+**How to install Python 3** (if not already installed):
+1. Download from https://www.python.org/downloads/ (choose Python 3.x)
+2. Install (just click "Next"/"Continue")
+3. Restart your terminal and enter the command again:
+```bash
+python3 --version
+```
+The terminal should show Python 3.x version number.
+
+**Note:** Python 3.x is REQUIRED for framework v3.0.0+ (uses only stdlib, no external packages).
 
 ### Installation
 
