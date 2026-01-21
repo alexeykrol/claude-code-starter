@@ -226,10 +226,10 @@ test2/
 # FRAMEWORK INTERNAL DEVELOPMENT (not for public)
 # ==========================================
 
-# Our meta-documentation for framework development (internal kitchen)
-.claude/SNAPSHOT.md
-.claude/BACKLOG.md
-.claude/ARCHITECTURE.md
+# NOTE: Core metafiles (SNAPSHOT, BACKLOG, ARCHITECTURE) ARE PUBLIC
+# Framework contributors need these to understand current development state
+# Host projects get their own versions from migration/templates/
+# Only internal brainstorming files remain private:
 .claude/ROADMAP.md
 .claude/IDEAS.md
 .claude/CLAUDE2.md
