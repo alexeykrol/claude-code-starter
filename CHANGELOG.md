@@ -7,6 +7,50 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [3.1.1] - 2026-01-21
+
+### Fixed
+
+- **🔄 Restored Framework Auto-Update**
+  - **Проблема:** При переходе на Python в v3.0.0 случайно потеряли автообновление фреймворка
+  - **Симптом:** Хост-проекты НЕ получали обновления автоматически, только ручное обновление через `quick-update.sh`
+  - **Root cause:** Python utility только проверяет наличие обновления, но не скачивает/не устанавливает
+  - **Решение:** Восстановлен Phase 2.5 в Cold Start Protocol с полной реализацией автообновления
+  - **Изменения:**
+    - Добавлен Phase 2.5 в `.claude/protocols/cold-start-silent.md`
+    - Bash скрипт скачивает CLAUDE.md + framework-commands.tar.gz
+    - Aggressive strategy - автоматическая установка без подтверждения
+    - Self-healing - автокоррекция версии при несоответствии
+    - Безопасно: обновляются только framework файлы, user data не трогается
+  - **Как работает:**
+    - Phase 1: Python utility проверяет версию (tasks/version.py)
+    - Phase 2: Парсим результат JSON
+    - **Phase 2.5**: Если UPDATE:available - скачиваем и устанавливаем
+    - Phase 3: Просим перезапустить сессию
+  - **Что обновляется:**
+    - CLAUDE.md (framework instructions)
+    - 5 framework commands (fi, ui, watch, migrate-legacy, upgrade-framework)
+  - **Что НЕ обновляется:**
+    - User commands (commit, pr, fix, feature, review, test, etc.)
+    - Project files (SNAPSHOT, BACKLOG, ARCHITECTURE, IDEAS, ROADMAP)
+    - User configuration (.framework-config)
+    - Dialog files (dialog/)
+
+### Why Aggressive Strategy
+
+- **Safety:** Framework updates only touch framework files, never user data
+- **Benefit:** Users get bug fixes immediately without manual action
+- **Support:** Everyone on latest version = reduced support burden
+- **Tested:** Worked reliably in v2.2.4-v2.7.0 before v3.0.0 regression
+
+### Migration Notes
+
+- Хост-проекты на v3.1.0 автоматически обновятся до v3.1.1 при следующем `start`
+- Хост-проекты на v3.0.0 также получат автообновление (Phase 2.5 в протоколе)
+- После обновления потребуется перезапуск сессии (exit + claude)
+
+---
+
 ## [3.1.0] - 2026-01-21
 
 ### Added

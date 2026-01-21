@@ -19,7 +19,7 @@ from commands.completion import run_completion
 from utils.result import print_result
 from utils.logger import setup_logging
 
-__version__ = "3.1.0"
+__version__ = "3.1.1"
 
 
 def main():

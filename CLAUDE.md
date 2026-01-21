@@ -1,13 +1,13 @@
 # CLAUDE.md — AI Agent Instructions
 
-**Framework:** Claude Code Starter v3.1.0
+**Framework:** Claude Code Starter v3.1.1
 **Type:** Meta-framework extending Claude Code capabilities
 
 ---
 
 ## Architecture: Python Framework Core + Silent Mode Protocols
 
-**NEW in v3.1.0:** Python utility replaces bash commands. Zero terminal noise, 1000x faster.
+**NEW in v3.1.1:** Python utility replaces bash commands. Zero terminal noise, 1000x faster.
 
 **Previous versions:**
 - v2.4.1-v2.5.1: Modular protocol files (5-6 min, verbose output)
@@ -31,7 +31,7 @@
 - Returns JSON to stdout (AI parses, user sees nothing)
 - Logs to `.claude/logs/framework-core/`
 
-**Key improvements in v3.1.0:**
+**Key improvements in v3.1.1:**
 - **Zero terminal noise:** JSON output instead of task notifications
 - **1000x faster:** 359ms vs minutes execution time
 - **True silent mode:** User sees NOTHING unless error/confirmation needed

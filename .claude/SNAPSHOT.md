@@ -1,11 +1,11 @@
 # SNAPSHOT — Claude Code Starter Framework
 
-*Last updated: 2026-01-20*
+*Last updated: 2026-01-21*
 
 ## Current State
 
-**Version:** 3.1.0
-**Status:** Development - Migration Optimization
+**Version:** 3.1.1
+**Status:** Production - Bugfix (Auto-Update Restored)
 **Branch:** main
 
 ---
@@ -74,6 +74,48 @@
 - Генерировать все файлы одним агентом → rejected (prompts будут огромными)
 
 **Outcome:** ✅ Implemented. Step 6 теперь 40 секунд вместо 200 секунд (5x ускорение). Общее время миграции: 9 минут → 6.7 минут (~30% ускорение).
+
+---
+
+### 2A.1. Framework Auto-Update Regression & Fix (v3.1.1, Jan 2026)
+
+**Problem:** При переходе на Python в v3.0.0 случайно потеряли автообновление фреймворка.
+
+**Root Cause:**
+- v2.2.4-v2.7.0: Cold Start Protocol имел Step 0.2 (Framework Version Check) с bash скриптом
+- v3.0.0: Переписали на Python utility, но только проверка версии осталась (tasks/version.py)
+- Python utility возвращает UPDATE:available, но не скачивает и не устанавливает файлы
+- Логика установки была в bash-коде Step 0.2, который удалили при переходе
+
+**Impact:**
+- Хост-проекты на v3.0.0 и v3.1.0 НЕ получали обновления автоматически
+- Только ручное обновление через `quick-update.sh` работало
+- Регрессия с v2.7.0 где автообновление работало идеально
+
+**Decision:** Восстановить Phase 2.5 в Cold Start Protocol с полной реализацией автообновления.
+
+**Implementation:**
+- Добавлен Phase 2.5 в `.claude/protocols/cold-start-silent.md`
+- Bash скрипт после Phase 1 (Python utility execution)
+- Парсит результат version_check из JSON
+- Если UPDATE:available - скачивает CLAUDE.md + framework-commands.tar.gz
+- Заменяет файлы автоматически (aggressive strategy)
+- Self-healing: автокоррекция версии при несоответствии
+- Просит перезапустить сессию после обновления
+
+**Why Aggressive (No Confirmation):**
+- Framework updates только framework files, никогда user data
+- Безопасно: downloads сначала в temporary files, потом replace
+- Пользователи получают bugfixes немедленно
+- Reduced support burden (все на последней версии)
+- Проверено: работало надежно в v2.2.4-v2.7.0
+
+**Alternatives Considered:**
+- Реализовать в Python utility → deferred (bash проще и быстрее для hotfix)
+- Ask confirmation → rejected (aggressive strategy проверена, безопасна)
+- Оставить ручное обновление → rejected (плохой UX, регрессия)
+
+**Outcome:** ✅ Fixed in v3.1.1. Автообновление восстановлено. Хост-проекты снова получают обновления автоматически при `start`.
 
 ---
 

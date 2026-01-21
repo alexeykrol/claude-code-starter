@@ -198,6 +198,72 @@ Improvement: 5x faster Step 6, 30% faster total
 
 ---
 
+### Phase 19.1: Hotfix - Framework Auto-Update v3.1.1 ✅ (2026-01-21)
+
+**Завершено:** Восстановлено автообновление фреймворка после регрессии в v3.0.0
+
+**Проблема:**
+- v3.0.0: При переходе на Python случайно потеряли автообновление
+- Python utility только проверяет версию, но НЕ скачивает/не устанавливает
+- Хост-проекты на v3.0.0-v3.1.0 НЕ получали обновления автоматически
+- Регрессия: в v2.2.4-v2.7.0 автообновление работало идеально
+- Только ручное обновление через `quick-update.sh` работало
+
+**Root Cause:**
+- v2.2.4-v2.7.0: Cold Start Protocol имел Step 0.2 (bash скрипт с full implementation)
+- v3.0.0: Переписали на Python, но только проверка версии осталась (tasks/version.py)
+- Логика скачивания/установки была в Step 0.2, который удалили при переходе
+
+**Решение:**
+- Восстановлен Phase 2.5 в `.claude/protocols/cold-start-silent.md`
+- Bash скрипт запускается после Phase 1 (Python utility execution)
+- Парсит результат version_check из JSON
+- Если UPDATE:available - скачивает CLAUDE.md + framework-commands.tar.gz
+- Aggressive strategy - автоматическая установка без подтверждения
+
+**Задачи:**
+- [x] Изучить реализацию из v2.2.4 (git show коммитов)
+- [x] Добавить Phase 2.5 в cold-start-silent.md
+- [x] Self-healing логика (автокоррекция версии)
+- [x] Safety checks (download to temp, verify before replace)
+- [x] Обновить версию на v3.1.1 (8+ файлов)
+- [x] Обновить metafiles (CHANGELOG, SNAPSHOT, BACKLOG)
+
+**Ключевые достижения:**
+- ✅ Автообновление восстановлено (hotfix)
+- ✅ Aggressive strategy - безопасна, проверена в v2.2.4-v2.7.0
+- ✅ Self-healing - автокоррекция версии при несоответствии
+- ✅ Только framework files обновляются, user data не трогается
+- ✅ Backward compatible - работает на v3.0.0 и v3.1.0
+
+**Files:**
+- `.claude/protocols/cold-start-silent.md` — Phase 2.5 added (120+ lines)
+- `package.json`, `CLAUDE.md`, `README.md`, `README_RU.md` — version 3.1.1
+- `init-project.sh`, `migration/build-distribution.sh` — version 3.1.1
+- `src/framework-core/` — version 3.1.1 (__init__.py, main.py, logger.py)
+- `CHANGELOG.md` — v3.1.1 entry с root cause analysis
+- `.claude/SNAPSHOT.md` — Decision Log 2A.1 + version update
+- `.claude/BACKLOG.md` — этот файл
+
+**What Gets Updated:**
+- CLAUDE.md (framework instructions)
+- 5 framework commands (fi, ui, watch, migrate-legacy, upgrade-framework)
+
+**What Does NOT Get Updated:**
+- User commands (commit, pr, fix, feature, review, test, security, etc.)
+- Project files (SNAPSHOT, BACKLOG, ARCHITECTURE, IDEAS, ROADMAP)
+- User configuration (.framework-config)
+- Dialog files (dialog/)
+- Source code (src/)
+
+**Impact:**
+- ✅ Regression fixed - хост-проекты снова получают обновления автоматически
+- ✅ Seamless experience - users don't think about updates
+- ✅ Reduced support - everyone on latest version
+- ✅ Critical bugfix - v3.0.0 и v3.1.0 теперь обновятся при следующем `start`
+
+---
+
 ### Phase 18: Python Framework Core v3.0.0 ✅ (2026-01-20)
 
 **Завершено:** Полная переписка protocol execution layer с bash на Python
