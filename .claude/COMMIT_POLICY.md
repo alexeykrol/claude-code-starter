@@ -33,6 +33,18 @@ reports/                # Bug reports и migration logs (уже в GitHub Issues
 
 **Почему:** Диалоги могут содержать упоминания паролей, SSH ключей, API токенов в обсуждениях. Bug reports уже отправлены в GitHub Issues, локальные копии не нужны в git.
 
+### 2.1 Framework internal development files
+
+```
+BUGS_FIXED_*.md                 # Bug fix documentation (internal)
+BUG_FIX_SUMMARY.md              # Bug fix summaries (internal)
+COMMIT_POLICY_FIX_SUMMARY.md    # Commit policy fixes (internal)
+commit-policy-missing-*.md      # Policy violation reports (internal)
+framework-version-*.md          # Version issue reports (internal)
+```
+
+**Почему:** Эти файлы - внутренняя документация разработки фреймворка. Bug reports отправляются в GitHub Issues, локальные markdown-отчеты не нужны в публичном репозитории.
+
 ### 3. Технические файлы
 
 ```
@@ -169,6 +181,13 @@ DRAFT_*
 dialog/
 .claude/logs/
 reports/
+
+# Framework internal development files
+BUGS_FIXED_*.md
+BUG_FIX_SUMMARY.md
+COMMIT_POLICY_FIX_SUMMARY.md
+commit-policy-missing-*.md
+framework-version-*.md
 
 # Sensitive data
 secrets/
