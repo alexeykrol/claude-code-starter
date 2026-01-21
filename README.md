@@ -10,7 +10,7 @@ Meta-framework for structured AI-assisted development with Claude Code — now w
 > - For complete beginners: [Free AI Intro Course](https://alexeykrol.com/courses/ai_intro/) (Russian)
 
 [![GitHub](https://img.shields.io/badge/GitHub-claude--code--starter-blue)](https://github.com/alexeykrol/claude-code-starter)
-[![Version](https://img.shields.io/badge/version-3.0.0-orange.svg)](https://github.com/alexeykrol/claude-code-starter)
+[![Version](https://img.shields.io/badge/version-3.1.0-orange.svg)](https://github.com/alexeykrol/claude-code-starter)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
 ---
@@ -40,7 +40,7 @@ node --version
 ```
 The terminal should show the correct node.js version number.
 
-#### 2. Check Python 3.x (NEW in v3.0.0)
+#### 2. Check Python 3.x (NEW in v3.1.0)
 
 Check if Python 3 is installed:
 ```bash
@@ -57,7 +57,7 @@ python3 --version
 ```
 The terminal should show Python 3.x version number.
 
-**Note:** Python 3.x is REQUIRED for framework v3.0.0+ (uses only stdlib, no external packages).
+**Note:** Python 3.x is REQUIRED for framework v3.1.0+ (uses only stdlib, no external packages).
 
 ### Installation
 

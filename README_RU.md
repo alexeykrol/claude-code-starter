@@ -10,7 +10,7 @@
 > - Для совсем нулевых: [Бесплатный курс для начинающих](https://alexeykrol.com/courses/ai_intro/)
 
 [![GitHub](https://img.shields.io/badge/GitHub-claude--code--starter-blue)](https://github.com/alexeykrol/claude-code-starter)
-[![Version](https://img.shields.io/badge/version-3.0.0-orange.svg)](https://github.com/alexeykrol/claude-code-starter)
+[![Version](https://img.shields.io/badge/version-3.1.0-orange.svg)](https://github.com/alexeykrol/claude-code-starter)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
 ---
@@ -40,7 +40,7 @@ node --version
 ```
 Терминал должен показать правильный номер версии node.js.
 
-#### 2. Проверьте Python 3.x (НОВОЕ в v3.0.0)
+#### 2. Проверьте Python 3.x (НОВОЕ в v3.1.0)
 
 Проверьте, что Python 3 установлен:
 ```bash
@@ -57,7 +57,7 @@ python3 --version
 ```
 Терминал должен показать номер версии Python 3.x.
 
-**Примечание:** Python 3.x ОБЯЗАТЕЛЕН для фреймворка v3.0.0+ (используется только stdlib, без внешних пакетов).
+**Примечание:** Python 3.x ОБЯЗАТЕЛЕН для фреймворка v3.1.0+ (используется только stdlib, без внешних пакетов).
 
 ### Установка
 

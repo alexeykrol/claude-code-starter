@@ -9,7 +9,7 @@
 
 set -e  # Exit on error
 
-VERSION="3.0.0"
+VERSION="3.1.0"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 DIST_DIR="$PROJECT_ROOT/dist-release"

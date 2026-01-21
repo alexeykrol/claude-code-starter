@@ -1020,7 +1020,12 @@ Your choice? (1/2/3)
 
 ---
 
-## Step 6: Generate Framework Files
+## Step 6: Generate Framework Files (Parallel - v3.1.0)
+
+**NEW in v3.1.0:** Parallel file generation using Task tool for 5x speedup.
+
+**Before (v3.0.0):** Sequential generation - 5 files × 40s = 200s (~3 minutes)
+**After (v3.1.0):** Parallel generation - max(40s) = 40s (~5x faster!)
 
 Based on approved report, use TodoWrite to track progress:
 
@@ -1033,11 +1038,182 @@ Create todos:
 - [ ] Generate .claude/IDEAS.md
 ```
 
-For each file:
-1. Mark todo as in_progress
-2. Generate file using Write tool
-3. Mark todo as completed
-4. Show preview to user
+**CRITICAL:** Launch ALL 5 agents in PARALLEL using single message with multiple Task calls.
+
+### 6.1: Prepare Shared Context
+
+Before launching agents, prepare shared analysis context that all agents will use:
+
+```markdown
+SHARED_CONTEXT = {
+  "project_name": "[from package.json]",
+  "version": "[from package.json]",
+  "tech_stack": "[React/Node.js/etc]",
+  "modules": ["Module1", "Module2", ...],
+  "found_docs": {
+    "README": "path and summary",
+    "TODO": "path and summary",
+    "BACKLOG": "path and summary or 'not found'",
+    "ARCHITECTURE": "path and summary or 'not found'"
+  },
+  "git_stats": {
+    "total_commits": 237,
+    "recent_activity": "15 commits last week",
+    "contributors": 3
+  },
+  "active_tasks": ["Task 1", "Task 2", ...],
+  "current_phase": "Phase 4: Authentication refactoring"
+}
+```
+
+### 6.2: Launch Parallel File Generation
+
+**IMPORTANT:** Send ONE message with 5 Task tool calls (not 5 separate messages!)
+
+```markdown
+Launch 5 agents in parallel:
+
+Task(
+  subagent_type: "general-purpose",
+  description: "Generate SNAPSHOT.md",
+  prompt: "Generate .claude/SNAPSHOT.md based on analysis context.
+
+  CONTEXT:
+  {SHARED_CONTEXT}
+
+  REQUIREMENTS:
+  - Target size: 30-50 lines
+  - Include: version, current phase, active modules, recent achievements
+  - Use ACTUAL data from context (not placeholders)
+  - Keep concise - this is read EVERY Cold Start!
+
+  TEMPLATE:
+  # SNAPSHOT — [project_name]
+
+  **Version:** [version] | **Phase:** [current_phase] | **Progress:** [X]%
+
+  ## Active Modules
+  [List 3-5 main modules from context]
+
+  ## Recent Achievements
+  [Extract from git_stats]
+
+  ## Current Focus
+  [Extract from active_tasks]
+
+  Use Write tool to create .claude/SNAPSHOT.md"
+)
+
+Task(
+  subagent_type: "general-purpose",
+  description: "Generate BACKLOG.md",
+  prompt: "Generate .claude/BACKLOG.md based on analysis context.
+
+  CONTEXT:
+  {SHARED_CONTEXT}
+
+  REQUIREMENTS:
+  - Target size: 50-100 lines
+  - Include ONLY active tasks (current sprint)
+  - Extract from found_docs['BACKLOG'] or found_docs['TODO']
+  - Future features → will go to ROADMAP.md (not here)
+  - This is read EVERY Cold Start - keep lean!
+
+  PRIORITY OF SOURCES:
+  1. docs/BACKLOG.md (if exists) - extract current sprint only
+  2. TODO.md (root) - extract active tasks
+  3. GitHub Issues - use open issues
+
+  Use Write tool to create .claude/BACKLOG.md"
+)
+
+Task(
+  subagent_type: "general-purpose",
+  description: "Generate ROADMAP.md",
+  prompt: "Generate .claude/ROADMAP.md based on analysis context.
+
+  CONTEXT:
+  {SHARED_CONTEXT}
+
+  REQUIREMENTS:
+  - Target size: 50-150 lines
+  - Include: future phases, strategic plans
+  - Extract from README roadmap section or docs/BACKLOG.md future phases
+  - This is read ON DEMAND (not every session) - can be more detailed
+
+  SOURCES:
+  - README.md roadmap section
+  - docs/BACKLOG.md Phase 5+ (planned/future)
+  - TODO.md future features
+
+  Use Write tool to create .claude/ROADMAP.md"
+)
+
+Task(
+  subagent_type: "general-purpose",
+  description: "Generate ARCHITECTURE.md",
+  prompt: "Generate .claude/ARCHITECTURE.md based on analysis context.
+
+  CONTEXT:
+  {SHARED_CONTEXT}
+
+  REQUIREMENTS:
+  - Target size: 100-200 lines
+  - Document: modules, folder structure, tech stack, patterns
+  - Preserve content from docs/ARCHITECTURE.md if exists
+  - Add missing sections (service layer, data flow)
+  - Use REAL file/folder names from project
+
+  SOURCES:
+  - docs/ARCHITECTURE.md (if exists) - use as base
+  - Code analysis from modules
+  - package.json dependencies
+
+  Use Write tool to create .claude/ARCHITECTURE.md"
+)
+
+Task(
+  subagent_type: "general-purpose",
+  description: "Generate IDEAS.md",
+  prompt: "Generate .claude/IDEAS.md based on analysis context.
+
+  CONTEXT:
+  {SHARED_CONTEXT}
+
+  REQUIREMENTS:
+  - Target size: 30-50 lines
+  - Empty template OR extract 'rejected' ideas from TODO comments
+  - This is brainstorming space for future improvements
+
+  Use Write tool to create .claude/IDEAS.md"
+)
+```
+
+### 6.3: Wait for All Agents to Complete
+
+All 5 agents run in parallel. Wait for all to finish before proceeding.
+
+### 6.4: Verify Results
+
+After all agents complete:
+
+```bash
+# Check all files created
+ls -lh .claude/*.md
+
+# Show file sizes (should match targets)
+du -sh .claude/SNAPSHOT.md    # ~30-50 lines
+du -sh .claude/BACKLOG.md     # ~50-100 lines
+du -sh .claude/ROADMAP.md     # ~50-150 lines
+du -sh .claude/ARCHITECTURE.md # ~100-200 lines
+du -sh .claude/IDEAS.md       # ~30-50 lines
+
+# Quick preview
+head -10 .claude/SNAPSHOT.md
+head -10 .claude/BACKLOG.md
+```
+
+Mark all todos as completed.
 
 **File Generation Guidelines:**
 

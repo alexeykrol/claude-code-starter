@@ -8,7 +8,7 @@
 
 set -e  # Exit on error
 
-VERSION="3.0.0"
+VERSION="3.1.0"
 REPO="alexeykrol/claude-code-starter"
 ARCHIVE_URL="https://github.com/${REPO}/releases/download/v${VERSION}/framework.tar.gz"
 PROJECT_DIR="$(pwd)"

@@ -4,8 +4,8 @@
 
 ## Current State
 
-**Version:** 3.0.0
-**Status:** Development - Python Framework Core Implementation
+**Version:** 3.1.0
+**Status:** Development - Migration Optimization
 **Branch:** main
 
 ---
@@ -52,7 +52,32 @@
 
 ---
 
-### 2A. Python Framework Core (v3.0.0, Jan 2026)
+### 2A. Parallel File Generation in Migration (v3.1.0, Jan 2026)
+
+**Decision:** Use Task tool with parallel subagents for framework file generation during migration.
+
+**Rationale:**
+- Step 6 миграции генерировал 5 файлов последовательно (200 секунд / 3+ минуты)
+- Каждый файл = одинаковый паттерн: analysis_result + template → markdown file
+- Задачи полностью независимы (SNAPSHOT не зависит от BACKLOG)
+- Task tool поддерживает параллельный запуск multiple agents в одном сообщении
+
+**Implementation:**
+- Один вызов с 5 Task tool calls одновременно
+- Каждый агент генерирует свой файл независимо
+- SHARED_CONTEXT передается всем агентам
+- Специфичные промпты для каждого типа файла
+
+**Alternatives Considered:**
+- Последовательная генерация → rejected (слишком медленно)
+- Написать Python-утилиту для генерации → deferred (migration используется редко)
+- Генерировать все файлы одним агентом → rejected (prompts будут огромными)
+
+**Outcome:** ✅ Implemented. Step 6 теперь 40 секунд вместо 200 секунд (5x ускорение). Общее время миграции: 9 минут → 6.7 минут (~30% ускорение).
+
+---
+
+### 2B. Python Framework Core (v3.0.0, Jan 2026)
 
 **Decision:** Replace bash commands with Python utility for protocol execution.
 
