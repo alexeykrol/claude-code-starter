@@ -376,4 +376,4 @@ fi
    - Use normal Cold Start Protocol
 
 ---
-*Framework: Claude Code Starter v2.7.0 | Updated: 2026-01-20*
+*Framework: Claude Code Starter v3.1.1 | Updated: 2026-01-21*
