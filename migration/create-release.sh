@@ -120,33 +120,22 @@ fi
 echo -e "${GREEN}✅ Distribution built successfully${NC}"
 echo ""
 
-# Step 6: Create framework-commands.tar.gz
-echo -e "${BLUE}Step 6:${NC} Creating framework-commands.tar.gz..."
-cd .claude/commands
-
-if [ -d "framework-commands" ]; then
-  tar -czf "$PROJECT_ROOT/dist-release/framework-commands.tar.gz" framework-commands/
-  echo -e "${GREEN}✅ framework-commands.tar.gz created${NC}"
-else
-  echo -e "${RED}Error: framework-commands directory not found${NC}"
-  exit 1
-fi
-
-cd "$PROJECT_ROOT"
-echo ""
-
-# Step 7: Copy CLAUDE.md to distribution
-echo -e "${BLUE}Step 7:${NC} Copying CLAUDE.md to distribution..."
+# Step 6: Copy entry files to distribution
+echo -e "${BLUE}Step 6:${NC} Copying entry files to distribution..."
 cp CLAUDE.md dist-release/CLAUDE.md
-echo -e "${GREEN}✅ CLAUDE.md copied${NC}"
+cp AGENTS.md dist-release/AGENTS.md
+echo -e "${GREEN}✅ CLAUDE.md and AGENTS.md copied${NC}"
 echo ""
 
-# Step 8: Verify distribution artifacts
-echo -e "${BLUE}Step 8:${NC} Verifying distribution artifacts..."
+# Step 7: Verify distribution artifacts
+echo -e "${BLUE}Step 7:${NC} Verifying distribution artifacts..."
 REQUIRED_FILES=(
   "dist-release/init-project.sh"
+  "dist-release/framework.tar.gz"
   "dist-release/framework-commands.tar.gz"
+  "dist-release/quick-update.sh"
   "dist-release/CLAUDE.md"
+  "dist-release/AGENTS.md"
 )
 
 MISSING=false
@@ -166,20 +155,20 @@ if [ "$MISSING" = true ]; then
 fi
 echo ""
 
-# Step 9: Create git tag
-echo -e "${BLUE}Step 9:${NC} Creating git tag v$VERSION..."
+# Step 8: Create git tag
+echo -e "${BLUE}Step 8:${NC} Creating git tag v$VERSION..."
 git tag -a "v$VERSION" -m "Release v$VERSION"
 echo -e "${GREEN}✅ Tag created${NC}"
 echo ""
 
-# Step 10: Push tag to remote
-echo -e "${BLUE}Step 10:${NC} Pushing tag to remote..."
+# Step 9: Push tag to remote
+echo -e "${BLUE}Step 9:${NC} Pushing tag to remote..."
 git push origin "v$VERSION"
 echo -e "${GREEN}✅ Tag pushed${NC}"
 echo ""
 
-# Step 11: Create GitHub release
-echo -e "${BLUE}Step 11:${NC} Creating GitHub release..."
+# Step 10: Create GitHub release
+echo -e "${BLUE}Step 10:${NC} Creating GitHub release..."
 
 # Check if CHANGELOG has release notes
 if grep -q "## \[v$VERSION\]" CHANGELOG.md; then
@@ -198,8 +187,11 @@ gh release create "v$VERSION" \
   --title "Claude Code Starter v$VERSION" \
   --notes-file "$NOTES_FILE" \
   dist-release/init-project.sh \
+  dist-release/framework.tar.gz \
   dist-release/framework-commands.tar.gz \
-  dist-release/CLAUDE.md
+  dist-release/quick-update.sh \
+  dist-release/CLAUDE.md \
+  dist-release/AGENTS.md
 
 echo -e "${GREEN}✅ GitHub release created${NC}"
 echo ""
@@ -216,8 +208,11 @@ echo "Release URL: https://github.com/alexeykrol/claude-code-starter/releases/ta
 echo ""
 echo "Distribution artifacts:"
 echo "  • init-project.sh"
+echo "  • framework.tar.gz"
 echo "  • framework-commands.tar.gz"
+echo "  • quick-update.sh"
 echo "  • CLAUDE.md"
+echo "  • AGENTS.md"
 echo ""
 echo "Next steps:"
 echo "  1. Verify release on GitHub"

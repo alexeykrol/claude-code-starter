@@ -8,9 +8,9 @@
 
 set -e  # Exit on error
 
-VERSION="3.1.1"
-REPO="alexeykrol/claude-code-starter"
-ARCHIVE_URL="https://github.com/${REPO}/releases/download/v${VERSION}/framework.tar.gz"
+VERSION="${FRAMEWORK_VERSION:-3.1.1}"
+REPO="${FRAMEWORK_REPO:-alexeykrol/claude-code-starter}"
+ARCHIVE_URL="${FRAMEWORK_ARCHIVE_URL:-https://github.com/${REPO}/releases/download/v${VERSION}/framework.tar.gz}"
 PROJECT_DIR="$(pwd)"
 TEMP_DIR="/tmp/claude-framework-$$"
 
@@ -34,6 +34,43 @@ log_info() { echo -e "${BLUE}ℹ${NC} $1"; }
 log_success() { echo -e "${GREEN}✓${NC} $1"; }
 log_warning() { echo -e "${YELLOW}⚠${NC} $1"; }
 log_error() { echo -e "${RED}✗${NC} $1"; }
+
+install_codex_adapter() {
+    if [ -d "$TEMP_DIR/framework/.codex" ]; then
+        mkdir -p .codex
+        cp -r "$TEMP_DIR/framework/.codex/"* .codex/ 2>/dev/null || true
+        log_success "Installed .codex/ directory"
+    else
+        log_warning "Codex adapter directory (.codex) not found in framework archive"
+    fi
+
+    if [ -f "$TEMP_DIR/framework/AGENTS.md" ]; then
+        cp "$TEMP_DIR/framework/AGENTS.md" AGENTS.md
+        log_success "Installed AGENTS.md (Codex adapter entry)"
+    else
+        log_warning "AGENTS.md not found in framework archive"
+    fi
+}
+
+install_shared_runtime() {
+    if [ -d "$TEMP_DIR/framework/src/framework-core" ]; then
+        mkdir -p src/framework-core
+        cp -r "$TEMP_DIR/framework/src/framework-core/"* src/framework-core/ 2>/dev/null || true
+        chmod +x src/framework-core/main.py 2>/dev/null || true
+        log_success "Installed shared core runtime (src/framework-core)"
+    else
+        log_warning "Shared core runtime (src/framework-core) not found in framework archive"
+    fi
+
+    if [ -d "$TEMP_DIR/framework/security" ]; then
+        mkdir -p security
+        cp -r "$TEMP_DIR/framework/security/"* security/ 2>/dev/null || true
+        chmod +x security/*.sh 2>/dev/null || true
+        log_success "Installed security scripts"
+    else
+        log_warning "Security scripts directory not found in framework archive"
+    fi
+}
 
 # Header
 echo ""
@@ -256,12 +293,31 @@ case $PROJECT_TYPE in
         ;;
 
     "framework-current:v2.1")
-        log_success "✅ Framework v2.1+ already installed"
+        if [ -f "AGENTS.md" ] && [ -d ".codex" ]; then
+            log_success "✅ Framework v2.1+ already installed"
+            echo ""
+            echo "Claude and Codex adapters are already present."
+            echo "No installation needed."
+            echo ""
+            exit 0
+        fi
+
+        log_warning "🧩 Framework is current, but Codex adapter is missing"
         echo ""
-        echo "Your project already has the latest Framework structure."
-        echo "No installation needed."
+        echo "This run will add Codex adapter files (AGENTS.md + .codex/)."
+        echo "Existing Claude adapter files will be preserved."
         echo ""
-        exit 0
+
+        read -p "Proceed with Codex adapter installation? (y/N) " -n 1 -r
+        echo
+
+        if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+            log_info "Installation cancelled"
+            exit 0
+        fi
+
+        MIGRATION_MODE="upgrade"
+        OLD_FW_VERSION="v2.1"
         ;;
 esac
 
@@ -280,6 +336,12 @@ if [ "$MIGRATION_MODE" = "new" ]; then
         cp -r "$TEMP_DIR/framework/.claude/"* .claude/ 2>/dev/null || true
         log_success "Installed .claude/ directory"
     fi
+
+    # Install Codex adapter files
+    install_codex_adapter
+
+    # Install shared runtime utilities used by both adapters
+    install_shared_runtime
 
     # Install npm dependencies for framework CLI
     if [ -f ".claude/dist/claude-export/package.json" ]; then
@@ -364,6 +426,12 @@ else
         log_success "Installed .claude/ directory"
     fi
 
+    # Install Codex adapter files
+    install_codex_adapter
+
+    # Install shared runtime utilities used by both adapters
+    install_shared_runtime
+
     # Install npm dependencies for framework CLI
     if [ -f ".claude/dist/claude-export/package.json" ]; then
         log_info "Installing framework dependencies..."
@@ -413,7 +481,11 @@ echo ""
 
 echo "🚀 Next steps:"
 echo ""
-echo "  1. Run: claude"
-echo "  2. Type: start"
+echo "  Option A (Codex):"
+echo "    1. Run: codex"
+echo "    2. Type: start"
 echo ""
-
+echo "  Option B (Claude Code):"
+echo "    1. Run: claude"
+echo "    2. Type: start"
+echo ""

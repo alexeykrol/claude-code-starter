@@ -80,6 +80,8 @@ update_file() {
 
 # Update all files
 update_file "CLAUDE.md" "CLAUDE.md"
+update_file "init-project.sh" "Installer (init-project.sh)"
+update_file "quick-update.sh" "Quick updater"
 update_file ".claude/protocols/cold-start.md" "Cold Start Protocol"
 update_file ".claude/protocols/completion.md" "Completion Protocol"
 update_file "migration/build-distribution.sh" "Build Distribution Script"

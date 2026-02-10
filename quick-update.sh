@@ -215,6 +215,14 @@ if [ -f "CLAUDE.md" ]; then
     cp "CLAUDE.md" "$BACKUP_DIR/"
 fi
 
+# Backup Codex adapter files
+if [ -f "AGENTS.md" ]; then
+    cp "AGENTS.md" "$BACKUP_DIR/"
+fi
+if [ -d ".codex" ]; then
+    cp -r ".codex" "$BACKUP_DIR/"
+fi
+
 echo -e "${GREEN}✓${NC} Backup saved to: $BACKUP_DIR"
 
 # ============================================
@@ -223,12 +231,18 @@ echo -e "${GREEN}✓${NC} Backup saved to: $BACKUP_DIR"
 
 echo -e "${BLUE}ℹ${NC} Applying update..."
 
-# Update commands
+# Update Claude commands
 if [ -d "$FRAMEWORK_DIR" ]; then
     mkdir -p ".claude/commands"
+    COMMANDS_SOURCE=""
 
-    # Copy framework commands (fi.md, ui.md, watch.md, etc.)
-    for cmd in "$FRAMEWORK_DIR"/*.md; do
+    if [ -d "$FRAMEWORK_DIR/.claude/commands" ]; then
+        COMMANDS_SOURCE="$FRAMEWORK_DIR/.claude/commands"
+    else
+        COMMANDS_SOURCE="$FRAMEWORK_DIR"
+    fi
+
+    for cmd in "$COMMANDS_SOURCE"/*.md; do
         if [ -f "$cmd" ]; then
             filename=$(basename "$cmd")
             cp "$cmd" ".claude/commands/"
@@ -241,6 +255,28 @@ fi
 if [ -f "$TEMP_DIR/CLAUDE.md" ]; then
     cp "$TEMP_DIR/CLAUDE.md" "CLAUDE.md"
     echo -e "${GREEN}  ✓${NC} Updated: CLAUDE.md"
+fi
+
+# Update Codex adapter if payload exists
+CODEX_SOURCE=""
+if [ -d "$FRAMEWORK_DIR/codex-adapter" ]; then
+    CODEX_SOURCE="$FRAMEWORK_DIR/codex-adapter"
+elif [ -f "$FRAMEWORK_DIR/AGENTS.md" ] || [ -d "$FRAMEWORK_DIR/.codex" ]; then
+    CODEX_SOURCE="$FRAMEWORK_DIR"
+fi
+
+if [ -n "$CODEX_SOURCE" ]; then
+    if [ -f "$CODEX_SOURCE/AGENTS.md" ]; then
+        cp "$CODEX_SOURCE/AGENTS.md" "AGENTS.md"
+        echo -e "${GREEN}  ✓${NC} Updated: AGENTS.md"
+    fi
+
+    if [ -d "$CODEX_SOURCE/.codex" ]; then
+        mkdir -p ".codex"
+        cp -r "$CODEX_SOURCE/.codex/"* ".codex/" 2>/dev/null || true
+        chmod +x ".codex/commands/"*.sh 2>/dev/null || true
+        echo -e "${GREEN}  ✓${NC} Updated: .codex/"
+    fi
 fi
 
 # Update version in .claude/SNAPSHOT.md
@@ -275,6 +311,6 @@ echo ""
 echo -e "${GREEN}🚀 Framework updated successfully!${NC}"
 echo ""
 echo "Next steps:"
-echo "  1. Review changes in CLAUDE.md"
-echo "  2. Run 'claude' and type 'start' to use updated framework"
+echo "  1. Review changes in CLAUDE.md and AGENTS.md"
+echo "  2. Run your preferred agent and type 'start'"
 echo ""

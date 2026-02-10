@@ -163,24 +163,37 @@ if [ ! -f "CLAUDE.md" ]; then
   MISSING_FILES=$((MISSING_FILES + 1))
 fi
 
-if [ ! -f ".claude/commands/framework-commands/migrate-legacy.md" ]; then
-  warning "Framework command missing: migrate-legacy.md"
+if [ ! -f "AGENTS.md" ]; then
+  error "Distribution file missing: AGENTS.md"
+  MISSING_FILES=$((MISSING_FILES + 1))
 fi
 
-if [ ! -f ".claude/commands/framework-commands/upgrade-framework.md" ]; then
-  warning "Framework command missing: upgrade-framework.md"
+if [ ! -d ".codex" ]; then
+  error "Distribution directory missing: .codex/"
+  MISSING_FILES=$((MISSING_FILES + 1))
 fi
 
-if [ ! -f ".claude/commands/framework-commands/fi.md" ]; then
-  warning "Framework command missing: fi.md"
+if [ ! -f ".codex/commands/start.sh" ]; then
+  error "Codex command missing: .codex/commands/start.sh"
+  MISSING_FILES=$((MISSING_FILES + 1))
 fi
 
-if [ ! -f ".claude/commands/framework-commands/ui.md" ]; then
-  warning "Framework command missing: ui.md"
+if [ ! -f ".codex/commands/finish.sh" ]; then
+  error "Codex command missing: .codex/commands/finish.sh"
+  MISSING_FILES=$((MISSING_FILES + 1))
 fi
 
-if [ ! -f ".claude/commands/framework-commands/watch.md" ]; then
-  warning "Framework command missing: watch.md"
+if [ ! -f ".codex/commands/migration-router.sh" ]; then
+  error "Codex command missing: .codex/commands/migration-router.sh"
+  MISSING_FILES=$((MISSING_FILES + 1))
+fi
+
+if [ ! -f "security/initial-scan.sh" ]; then
+  warning "Security script missing: security/initial-scan.sh"
+fi
+
+if [ ! -f "security/cleanup-dialogs.sh" ]; then
+  warning "Security script missing: security/cleanup-dialogs.sh"
 fi
 
 if [ $MISSING_FILES -eq 0 ]; then
