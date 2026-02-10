@@ -67,6 +67,11 @@ echo -e "${GREEN}✓${NC} Copied AGENTS.md"
 cp "$SCRIPT_DIR/FRAMEWORK_GUIDE.template.md" "$TEMP_DIR/framework/FRAMEWORK_GUIDE.md"
 echo -e "${GREEN}✓${NC} Copied FRAMEWORK_GUIDE.md"
 
+# 3.5 quick-update utility (used by automatic update flow)
+cp "$PROJECT_ROOT/quick-update.sh" "$TEMP_DIR/framework/quick-update.sh"
+chmod +x "$TEMP_DIR/framework/quick-update.sh"
+echo -e "${GREEN}✓${NC} Copied quick-update.sh into framework archive"
+
 # 4. .claude/commands/ (slash commands, excluding dev-only commands)
 mkdir -p "$TEMP_DIR/framework/.claude/commands"
 for cmd in "$PROJECT_ROOT/.claude/commands/"*.md; do

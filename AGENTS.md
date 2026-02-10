@@ -21,9 +21,9 @@ Codex and Claude use the same state contract.
 Run:
 - `bash .codex/commands/start.sh`
 
-### `finish` / `/fi`
+### `/fi`
 Run:
-- `bash .codex/commands/finish.sh`
+- `bash .codex/commands/fi.sh`
 
 ### migration detection
 Run:

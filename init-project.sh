@@ -72,6 +72,16 @@ install_shared_runtime() {
     fi
 }
 
+install_update_utility() {
+    if [ -f "$TEMP_DIR/framework/quick-update.sh" ]; then
+        cp "$TEMP_DIR/framework/quick-update.sh" quick-update.sh
+        chmod +x quick-update.sh
+        log_success "Installed quick-update.sh"
+    else
+        log_warning "quick-update.sh not found in framework archive"
+    fi
+}
+
 # Header
 echo ""
 echo "════════════════════════════════════════════════════════════"
@@ -152,12 +162,36 @@ detect_project_type() {
     # Check for legacy v1.x structure (Init/ folder)
     elif [ -d "Init" ] && [ -f "Init/PROJECT_SNAPSHOT.md" ]; then
         echo "framework-upgrade:v1.x"
-    # Check for project code (legacy without Framework)
-    elif [ -d "src" ] || [ -d "lib" ] || [ -f "package.json" ] || [ -f "pom.xml" ] || [ -f "Cargo.toml" ]; then
+    # Check for explicit code markers (legacy without Framework)
+    elif [ -d "src" ] || [ -d "lib" ] || [ -f "package.json" ] || [ -f "pom.xml" ] || [ -f "Cargo.toml" ] || [ -f "go.mod" ] || [ -f "pyproject.toml" ]; then
         echo "legacy-migration"
     else
-        # New empty project
-        echo "new-project"
+        # Heuristic: if project already has meaningful user files, treat as legacy.
+        NON_FRAMEWORK_CONTENT=$(find . -mindepth 1 -maxdepth 2 \
+            ! -path "./.git*" \
+            ! -path "./.claude*" \
+            ! -path "./.codex*" \
+            ! -path "./node_modules*" \
+            ! -path "./dist*" \
+            ! -path "./build*" \
+            ! -path "./archive*" \
+            ! -path "./reports*" \
+            ! -path "./.DS_Store" \
+            ! -name "init-project.sh" \
+            ! -name "quick-update.sh" \
+            ! -name "framework.tar.gz" \
+            ! -name "framework-commands.tar.gz" \
+            ! -name "CLAUDE.md" \
+            ! -name "AGENTS.md" \
+            ! -name "FRAMEWORK_GUIDE.md" \
+            -print -quit 2>/dev/null || true)
+
+        if [ -n "$NON_FRAMEWORK_CONTENT" ]; then
+            echo "legacy-migration"
+        else
+            # New empty project
+            echo "new-project"
+        fi
     fi
 }
 
@@ -343,6 +377,9 @@ if [ "$MIGRATION_MODE" = "new" ]; then
     # Install shared runtime utilities used by both adapters
     install_shared_runtime
 
+    # Install updater utility used by automatic update flow
+    install_update_utility
+
     # Install npm dependencies for framework CLI
     if [ -f ".claude/dist/claude-export/package.json" ]; then
         log_info "Installing framework dependencies..."
@@ -431,6 +468,9 @@ else
 
     # Install shared runtime utilities used by both adapters
     install_shared_runtime
+
+    # Install updater utility used by automatic update flow
+    install_update_utility
 
     # Install npm dependencies for framework CLI
     if [ -f ".claude/dist/claude-export/package.json" ]; then

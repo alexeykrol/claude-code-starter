@@ -221,6 +221,359 @@ ensure_text_file_if_missing() {
   CREATED_FILES+=("$target_path")
 }
 
+track_state_file() {
+  local target_path="$1"
+  local existed_before="$2"
+
+  if [ "$existed_before" -eq 1 ]; then
+    SKIPPED_FILES+=("$target_path")
+    return
+  fi
+
+  if [ -f "$target_path" ]; then
+    CREATED_FILES+=("$target_path")
+  else
+    WARNINGS+=("failed to generate: $target_path")
+  fi
+}
+
+generate_legacy_memory_files() {
+  local snapshot_exists=0
+  local backlog_exists=0
+  local architecture_exists=0
+  local roadmap_exists=0
+  local ideas_exists=0
+
+  [ -f ".claude/SNAPSHOT.md" ] && snapshot_exists=1
+  [ -f ".claude/BACKLOG.md" ] && backlog_exists=1
+  [ -f ".claude/ARCHITECTURE.md" ] && architecture_exists=1
+  [ -f ".claude/ROADMAP.md" ] && roadmap_exists=1
+  [ -f ".claude/IDEAS.md" ] && ideas_exists=1
+
+  python3 - "$ROOT_DIR" <<'PY'
+import os
+import sys
+import re
+import subprocess
+import json
+from datetime import datetime
+from pathlib import Path
+
+root = Path(sys.argv[1])
+state_dir = root / ".claude"
+state_dir.mkdir(parents=True, exist_ok=True)
+
+skip_root_dirs = {
+    ".git",
+    ".claude",
+    ".codex",
+    "node_modules",
+    "dist",
+    "build",
+    "archive",
+    "reports",
+    "security",
+    ".venv",
+    "venv",
+    "__pycache__",
+}
+
+text_suffixes = {".md", ".txt", ".rst"}
+skip_names = {"CLAUDE.md", "AGENTS.md", "FRAMEWORK_GUIDE.md", "COMMIT_POLICY.md"}
+
+def safe_read(path: Path, max_chars: int = 120000) -> str:
+    try:
+        if path.stat().st_size > 2_000_000:
+            return ""
+        data = path.read_bytes()
+        return data.decode("utf-8", errors="ignore")[:max_chars]
+    except Exception:
+        return ""
+
+def candidate_docs() -> list[Path]:
+    docs = []
+    roots = [root, root / "docs", root / "documentation", root / "notes", root / "wiki"]
+    seen = set()
+    for base in roots:
+        if not base.exists():
+            continue
+        for path in base.rglob("*"):
+            if not path.is_file():
+                continue
+            rel = path.relative_to(root)
+            if rel.parts and rel.parts[0] in skip_root_dirs:
+                continue
+            if rel.as_posix().startswith("src/framework-core/"):
+                continue
+            if path.name in skip_names:
+                continue
+            if path.suffix.lower() in text_suffixes or path.name.lower().startswith("readme"):
+                if rel.as_posix() not in seen:
+                    seen.add(rel.as_posix())
+                    docs.append(path)
+    def priority(p: Path) -> tuple[int, int]:
+        n = p.name.lower()
+        score = 9
+        if n.startswith("readme"):
+            score = 0
+        elif "snapshot" in n or "status" in n:
+            score = 1
+        elif "backlog" in n or "todo" in n or "task" in n:
+            score = 2
+        elif "architecture" in n or "design" in n:
+            score = 3
+        elif "roadmap" in n or "plan" in n:
+            score = 4
+        try:
+            size = p.stat().st_size
+        except Exception:
+            size = 0
+        return (score, -size)
+    docs.sort(key=priority)
+    return docs[:12]
+
+docs = candidate_docs()
+doc_snippets = []
+for doc in docs:
+    text = safe_read(doc)
+    if text.strip():
+        doc_snippets.append((doc, text))
+
+def first_paragraph(text: str) -> str:
+    blocks = [b.strip() for b in re.split(r"\n\s*\n", text) if b.strip()]
+    for b in blocks:
+        if b.startswith("#"):
+            continue
+        b = " ".join(line.strip() for line in b.splitlines())
+        if len(b) >= 30:
+            return b
+    return ""
+
+overview = ""
+for _, text in doc_snippets:
+    overview = first_paragraph(text)
+    if overview:
+        break
+if not overview:
+    overview = "Legacy project imported into the framework. This summary was generated from available repository files."
+
+task_items: list[str] = []
+roadmap_items: list[str] = []
+idea_items: list[str] = []
+heading_notes: list[str] = []
+
+checkbox_re = re.compile(r"^\s*[-*]\s+\[\s\]\s+(.+?)\s*$")
+todo_re = re.compile(r"\b(TODO|NEXT|FIXME|MVP|PHASE|MILESTONE)\b", re.IGNORECASE)
+roadmap_re = re.compile(r"\b(roadmap|phase|milestone|release|v\d+\.\d+)\b", re.IGNORECASE)
+ideas_re = re.compile(r"\b(idea|future|later|could|maybe|wish)\b", re.IGNORECASE)
+
+def normalize_item(value: str) -> str:
+    value = re.sub(r"^\s*[-*]\s*", "", value).strip()
+    value = re.sub(r"\s+", " ", value)
+    return value[:160]
+
+for doc, text in doc_snippets:
+    for raw in text.splitlines()[:1200]:
+        line = raw.strip()
+        if not line:
+            continue
+        if line.startswith("#"):
+            heading = line.lstrip("#").strip()
+            if heading and heading not in heading_notes:
+                heading_notes.append(heading)
+            continue
+        m = checkbox_re.match(line)
+        if m:
+            val = normalize_item(m.group(1))
+            if val and val not in task_items:
+                task_items.append(val)
+            continue
+        if todo_re.search(line):
+            cleaned = normalize_item(line)
+            if cleaned not in task_items:
+                task_items.append(cleaned)
+        if roadmap_re.search(line):
+            cleaned = normalize_item(line)
+            if cleaned not in roadmap_items:
+                roadmap_items.append(cleaned)
+        if ideas_re.search(line):
+            cleaned = normalize_item(line)
+            if cleaned not in idea_items:
+                idea_items.append(cleaned)
+
+task_items = task_items[:18]
+roadmap_items = roadmap_items[:18]
+idea_items = idea_items[:18]
+heading_notes = heading_notes[:18]
+
+def detect_branch() -> str:
+    try:
+        result = subprocess.run(
+            ["git", "rev-parse", "--abbrev-ref", "HEAD"],
+            cwd=root,
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+        value = result.stdout.strip()
+        if value:
+            return value
+    except Exception:
+        pass
+    return "main"
+
+def detect_stack() -> list[str]:
+    found = []
+    if (root / "package.json").exists():
+        found.append("Node.js / npm")
+    if (root / "pyproject.toml").exists() or (root / "requirements.txt").exists():
+        found.append("Python")
+    if (root / "Cargo.toml").exists():
+        found.append("Rust")
+    if (root / "go.mod").exists():
+        found.append("Go")
+    if any((root / p).exists() for p in ("Fast-bank_2.md", "Google Gemini.md")):
+        found.append("Product notes / narrative documents")
+    if not found:
+        found.append("Stack requires manual confirmation")
+    return found
+
+def top_level_structure() -> list[str]:
+    rows = []
+    for item in sorted(root.iterdir(), key=lambda p: p.name.lower()):
+        name = item.name
+        if name in skip_root_dirs or name.startswith(".DS_Store"):
+            continue
+        suffix = "/" if item.is_dir() else ""
+        rows.append(f"- `{name}{suffix}`")
+        if len(rows) >= 20:
+            break
+    if not rows:
+        rows.append("- `<project files>`")
+    return rows
+
+def write_if_missing(path: Path, content: str) -> None:
+    if not path.exists():
+        path.write_text(content.strip() + "\n", encoding="utf-8")
+
+project = root.name
+today = datetime.now().strftime("%Y-%m-%d")
+branch = detect_branch()
+docs_list = [f"- `{doc.relative_to(root).as_posix()}`" for doc, _ in doc_snippets[:8]]
+if not docs_list:
+    docs_list = ["- `<no legacy docs detected>`"]
+
+tasks_block = "\n".join(f"- [ ] {item}" for item in task_items) if task_items else "- [ ] Validate project goals with owner\n- [ ] Define first working sprint"
+roadmap_block = "\n".join(f"- {item}" for item in roadmap_items) if roadmap_items else "- Define phased roadmap from legacy materials."
+ideas_block = "\n".join(f"- {item}" for item in idea_items) if idea_items else "- Capture hypotheses and experiments discovered during migration."
+headings_block = "\n".join(f"- {item}" for item in heading_notes) if heading_notes else "- No explicit section headings detected in legacy docs."
+stack_block = "\n".join(f"- {item}" for item in detect_stack())
+structure_block = "\n".join(top_level_structure())
+
+snapshot = f"""
+# SNAPSHOT — {project}
+
+*Last updated: {today}*
+
+## Current State
+
+- Framework mode: legacy migration
+- Active branch: `{branch}`
+- Legacy sources analyzed: {len(doc_snippets)}
+
+## Project Overview
+
+{overview}
+
+## Source Documents
+
+{os.linesep.join(docs_list)}
+
+## Current Focus (Inferred)
+
+{tasks_block.splitlines()[0] if tasks_block else "- Define immediate priorities"}
+{tasks_block.splitlines()[1] if len(tasks_block.splitlines()) > 1 else ""}
+{tasks_block.splitlines()[2] if len(tasks_block.splitlines()) > 2 else ""}
+"""
+
+backlog = f"""
+# BACKLOG — {project}
+
+*Inferred from legacy materials on {today}*
+
+## Active Tasks
+
+{tasks_block}
+
+## Migration Follow-Ups
+
+- [ ] Review generated memory files and adjust priorities.
+- [ ] Confirm security scan report and remove false positives.
+- [ ] Start first implementation cycle in the chosen coding agent.
+"""
+
+architecture = f"""
+# ARCHITECTURE — {project}
+
+*Generated from detected project artifacts*
+
+## Detected Stack
+
+{stack_block}
+
+## Top-Level Structure
+
+{structure_block}
+
+## Key Topics Found in Legacy Docs
+
+{headings_block}
+
+## Data / Workflow Notes
+
+- Project memory lives in `.claude/` files.
+- Execution adapters run from `.claude/` (Claude) and `.codex/` (Codex).
+- Shared runtime is implemented in `src/framework-core/`.
+"""
+
+roadmap = f"""
+# ROADMAP — {project}
+
+*Draft roadmap inferred from legacy project materials*
+
+## Candidate Milestones
+
+{roadmap_block}
+"""
+
+ideas = f"""
+# IDEAS — {project}
+
+*Captured from legacy notes and inferred opportunities*
+
+## Candidate Ideas
+
+{ideas_block}
+"""
+
+write_if_missing(state_dir / "SNAPSHOT.md", snapshot)
+write_if_missing(state_dir / "BACKLOG.md", backlog)
+write_if_missing(state_dir / "ARCHITECTURE.md", architecture)
+write_if_missing(state_dir / "ROADMAP.md", roadmap)
+write_if_missing(state_dir / "IDEAS.md", ideas)
+PY
+
+  if [ $? -ne 0 ]; then
+    WARNINGS+=("legacy analysis generation failed")
+  fi
+
+  track_state_file ".claude/SNAPSHOT.md" "$snapshot_exists"
+  track_state_file ".claude/BACKLOG.md" "$backlog_exists"
+  track_state_file ".claude/ARCHITECTURE.md" "$architecture_exists"
+  track_state_file ".claude/ROADMAP.md" "$roadmap_exists"
+  track_state_file ".claude/IDEAS.md" "$ideas_exists"
+}
+
 archive_log() {
   mkdir -p "$REPORTS_DIR"
   ARCHIVED_LOG="$REPORTS_DIR/${PROJECT_NAME}-migration-log.json"
@@ -329,9 +682,8 @@ append_step "security-scan"
 log "step 3/5: generating missing framework state files"
 write_log "in_progress" 3 "state-generation"
 
-render_template_if_missing "migration/templates/SNAPSHOT.template.md" ".claude/SNAPSHOT.md"
-render_template_if_missing "migration/templates/BACKLOG.template.md" ".claude/BACKLOG.md"
-render_template_if_missing "migration/templates/ARCHITECTURE.template.md" ".claude/ARCHITECTURE.md"
+generate_legacy_memory_files
+
 render_template_if_missing "migration/templates/.framework-config.template.json" ".claude/.framework-config"
 render_template_if_missing "migration/templates/COMMIT_POLICY.template.md" ".claude/COMMIT_POLICY.md"
 
@@ -353,18 +705,6 @@ ensure_text_file_if_missing ".claude/COMMIT_POLICY.md" "# Commit Policy
 ## Always review before commit
 - New configuration files
 - Files with potential secrets"
-
-ensure_text_file_if_missing ".claude/ROADMAP.md" "# ROADMAP
-
-## Next Milestones
-- [ ] Define medium-term milestones for the project.
-- [ ] Link roadmap items to backlog tasks."
-
-ensure_text_file_if_missing ".claude/IDEAS.md" "# IDEAS
-
-## Brainstorm
-- Capture future ideas here.
-- Move validated ideas to ROADMAP.md."
 
 append_step "state-generation"
 
