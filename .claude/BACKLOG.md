@@ -138,6 +138,42 @@
 
 ## 📚 Архив (завершённые фазы)
 
+### Phase 19.2: Security Audit Fixes ✅ (2026-02-10)
+
+**Завершено:** 7 багов найдены внешним security audit, все исправлены
+
+**Проблема:**
+- Security advisory chain полностью нерабочая (set -e, parser mismatch, wrong glob)
+- Path traversal в API server.ts (3 эндпоинта)
+- Синтаксические ошибки в initial-scan.sh
+- Испорченная строка в .gitignore
+
+**Задачи:**
+- [x] auto-invoke-agent.sh: убрать set -e (убивало скрипт при non-zero от check-triggers)
+- [x] cleanup-dialogs.sh: исправить опечатку REDACTED_COUNT → REDACTION_COUNT
+- [x] security.py: синхронизировать Python parser с реальным bash output
+- [x] check-triggers.sh: исправить glob *cleanup-report* → cleanup-*.txt
+- [x] server.ts: добавить safePath() для защиты от path traversal (3 эндпоинта)
+- [x] initial-scan.sh: экранировать \) в find-группах
+- [x] .gitignore: разделить склеенную строку (newline)
+
+**Files:**
+- `security/auto-invoke-agent.sh` — removed set -e
+- `security/cleanup-dialogs.sh` — fixed variable typo
+- `src/framework-core/tasks/security.py` — synced parser strings
+- `security/check-triggers.sh` — fixed glob pattern + removed dead nesting
+- `src/claude-export/server.ts` — added safePath() function
+- `security/initial-scan.sh` — escaped find group \)
+- `.gitignore` — split concatenated line
+
+**Impact:**
+- ✅ Security advisory chain восстановлена (была полностью мертва)
+- ✅ Path traversal закрыт в API
+- ✅ Все bash скрипты проходят bash -n
+- ✅ Build и py_compile — чисто
+
+---
+
 ### Phase 19: Migration Optimization v3.1.0 ✅ (2026-01-21)
 
 **Завершено:** Parallel file generation в миграции legacy проектов — 5x ускорение Step 6
