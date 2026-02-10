@@ -684,8 +684,8 @@ write_log "in_progress" 3 "state-generation"
 
 generate_legacy_memory_files
 
-render_template_if_missing "migration/templates/.framework-config.template.json" ".claude/.framework-config"
-render_template_if_missing "migration/templates/COMMIT_POLICY.template.md" ".claude/COMMIT_POLICY.md"
+render_template_if_missing ".claude/templates/.framework-config.template.json" ".claude/.framework-config"
+render_template_if_missing ".claude/templates/COMMIT_POLICY.template.md" ".claude/COMMIT_POLICY.md"
 
 ensure_text_file_if_missing ".claude/.framework-config" "{
   \"bug_reporting_enabled\": false,
