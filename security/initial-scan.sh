@@ -55,7 +55,7 @@ ENV_FILES=$(find . -type f \( \
   -name ".env.local" -o \
   -name ".env.production" -o \
   -name ".env.development" \
-) ! -path "*/node_modules/*" ! -path "*/.git/*" 2>/dev/null)
+\) ! -path "*/node_modules/*" ! -path "*/.git/*" 2>/dev/null)
 
 if [ -n "$ENV_FILES" ]; then
   CRITICAL_ISSUES=$((CRITICAL_ISSUES + 1))
@@ -94,7 +94,7 @@ CRED_FILES=$(find . -type f \( \
   -name "*.pem" -o \
   -name "*.key" -o \
   -name "*token*" \
-) ! -path "*/node_modules/*" ! -path "*/.git/*" ! -path "*/dist/*" ! -path "*/build/*" 2>/dev/null)
+\) ! -path "*/node_modules/*" ! -path "*/.git/*" ! -path "*/dist/*" ! -path "*/build/*" 2>/dev/null)
 
 if [ -n "$CRED_FILES" ]; then
   # Filter out likely false positives

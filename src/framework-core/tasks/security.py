@@ -40,10 +40,10 @@ def cleanup_dialogs():
             text=True
         )
 
-        if "credentials redacted" in result.stdout:
-            # Extract count
+        if "Credentials detected and redacted" in result.stdout or "credential pattern(s) redacted" in result.stdout:
+            # Extract count from "Total redactions: N" in summary
             import re
-            match = re.search(r'(\d+) credentials', result.stdout)
+            match = re.search(r'Total redactions:\s*(\d+)', result.stdout)
             count = match.group(1) if match else "unknown"
             return create_task_result("security_cleanup", "success", f"SECURITY:redacted:{count}")
 

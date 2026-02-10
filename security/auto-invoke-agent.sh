@@ -9,7 +9,8 @@
 # It checks triggers and outputs advisory info for Claude to decide
 # Claude will ask user if deep scan needed (except release mode)
 
-set -e
+# NOTE: Do NOT use set -e here — check-triggers.sh returns non-zero exit codes
+# by design (1=CRITICAL, 2=HIGH, 3=MEDIUM, 4=LOW) to indicate trigger levels.
 
 # Colors
 RED='\033[0;31m'

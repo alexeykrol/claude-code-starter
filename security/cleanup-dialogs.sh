@@ -154,7 +154,7 @@ for FILE in $DIALOG_FILES; do
   # Example: -p 2222, --port 22000
   if grep -qE "(\-p|--port)[[:space:]]+[0-9]{4,5}" "$TEMP_FILE" 2>/dev/null; then
     sed -i.bak -E 's/(\-p|--port)[[:space:]]+[0-9]{4,5}/\1 [REDACTED_PORT]/g' "$TEMP_FILE"
-    REDACTION_COUNT=$((REDACTED_COUNT + 1))
+    REDACTION_COUNT=$((REDACTION_COUNT + 1))
   fi
 
   # 10. Private key content (PEM format)

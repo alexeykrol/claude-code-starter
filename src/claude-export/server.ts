@@ -34,6 +34,18 @@ import {
 
 let currentProjectPath: string = process.cwd();
 
+/**
+ * Resolve filename within a base directory safely, rejecting path traversal.
+ * Returns the resolved path or null if the filename escapes the base.
+ */
+function safePath(base: string, filename: string): string | null {
+  const resolved = path.resolve(base, filename);
+  if (!resolved.startsWith(base + path.sep) && resolved !== base) {
+    return null;
+  }
+  return resolved;
+}
+
 const app: Application = express();
 
 app.use(express.json());
@@ -284,7 +296,11 @@ app.post('/api/dialog/toggle/:filename', (req: Request, res: Response) => {
   try {
     const { filename } = req.params;
     const dialogFolder = getDialogFolder(currentProjectPath);
-    const filePath = path.join(dialogFolder, filename);
+    const filePath = safePath(dialogFolder, filename);
+
+    if (!filePath) {
+      return res.status(400).json({ error: 'Invalid filename' });
+    }
 
     if (!fs.existsSync(filePath)) {
       return res.status(404).json({ error: 'Dialog not found' });
@@ -309,7 +325,11 @@ app.post('/api/dialog/visibility/:filename', (req: Request, res: Response) => {
     const { isPublic: makePublic } = req.body;
 
     const dialogFolder = getDialogFolder(currentProjectPath);
-    const filePath = path.join(dialogFolder, filename);
+    const filePath = safePath(dialogFolder, filename);
+
+    if (!filePath) {
+      return res.status(400).json({ error: 'Invalid filename' });
+    }
 
     if (!fs.existsSync(filePath)) {
       return res.status(404).json({ error: 'Dialog not found' });
@@ -363,7 +383,11 @@ app.get('/api/dialog/:filename', (req: Request, res: Response) => {
   try {
     const { filename } = req.params;
     const dialogFolder = getDialogFolder(currentProjectPath);
-    const filePath = path.join(dialogFolder, filename);
+    const filePath = safePath(dialogFolder, filename);
+
+    if (!filePath) {
+      return res.status(400).json({ error: 'Invalid filename' });
+    }
 
     if (!fs.existsSync(filePath)) {
       return res.status(404).json({ error: 'Dialog not found' });

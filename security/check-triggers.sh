@@ -50,17 +50,16 @@ fi
 # ============================================================================
 
 # 4. Regex cleanup found credentials
-if [ -f "security/reports/"*"cleanup-report"* ]; then
-  LATEST_REPORT=$(ls -t security/reports/*cleanup-report* 2>/dev/null | head -1)
-  if [ -f "$LATEST_REPORT" ]; then
-    FILES_WITH_SECRETS=$(grep "Files with secrets:" "$LATEST_REPORT" | awk '{print $NF}')
-    if [ -n "$FILES_WITH_SECRETS" ] && [ "$FILES_WITH_SECRETS" -gt 0 ]; then
-      if [ "$TRIGGER_LEVEL" != "CRITICAL" ]; then
-        TRIGGER_LEVEL="HIGH"
-      fi
-      TRIGGER_REASONS+=("Regex cleanup found $FILES_WITH_SECRETS file(s) with credentials")
-      TRIGGER_SCORE=$((TRIGGER_SCORE + 50))
+# Note: cleanup reports are named cleanup-YYYYMMDD-HHMMSS.txt
+LATEST_REPORT=$(ls -t security/reports/cleanup-*.txt 2>/dev/null | head -1)
+if [ -n "$LATEST_REPORT" ] && [ -f "$LATEST_REPORT" ]; then
+  FILES_WITH_SECRETS=$(grep "Files with secrets:" "$LATEST_REPORT" | awk '{print $NF}')
+  if [ -n "$FILES_WITH_SECRETS" ] && [ "$FILES_WITH_SECRETS" -gt 0 ]; then
+    if [ "$TRIGGER_LEVEL" != "CRITICAL" ]; then
+      TRIGGER_LEVEL="HIGH"
     fi
+    TRIGGER_REASONS+=("Regex cleanup found $FILES_WITH_SECRETS file(s) with credentials")
+    TRIGGER_SCORE=$((TRIGGER_SCORE + 50))
   fi
 fi
 
