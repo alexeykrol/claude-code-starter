@@ -1,7 +1,7 @@
 # Cold Start Protocol (True Silent Mode)
 
-**Version:** 3.1.1
-**Last updated:** 2026-01-21
+**Version:** 4.0.0
+**Last updated:** 2026-02-10
 
 **Purpose:** Invisible session initialization. Show ONLY critical issues.
 
@@ -9,6 +9,7 @@
 
 **NEW in v3.0.0:** Python utility replaces bash commands. Zero terminal noise, faster execution.
 **NEW in v3.1.1:** Restored framework auto-update (Phase 2.5). Aggressive strategy - automatic updates without confirmation.
+**NEW in v4.0.0:** Dual-agent runtime support (Codex adapter packaged and updated alongside Claude files).
 
 ---
 
@@ -145,7 +146,7 @@ elif status == "success":
 
 ### Phase 2.5: Framework Auto-Update (Aggressive Strategy)
 
-**Purpose:** Automatically update framework if newer version available. Restored in v3.1.1.
+**Purpose:** Automatically update framework if newer version available. Restored in v3.1.1 and extended for dual-agent runtime in v4.0.0.
 
 **When:** After Phase 1 completes successfully and version_check task detected update.
 

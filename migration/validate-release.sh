@@ -53,10 +53,10 @@ fi
 success "Expected version: v$EXPECTED_VERSION"
 echo ""
 
-# 2. Check all occurrences in CLAUDE.md
-echo "Step 2: Checking all version occurrences in CLAUDE.md..."
-# Exclude historical references like "NEW in vX.Y.Z"
-CLAUDE_VERSIONS=$(grep -v "NEW in v" CLAUDE.md | grep -o "v[0-9]\+\.[0-9]\+\.[0-9]\+" | sort -u)
+# 2. Check active framework markers in CLAUDE.md
+echo "Step 2: Checking active framework version markers in CLAUDE.md..."
+# Validate only active markers, not historical references.
+CLAUDE_VERSIONS=$(grep "Framework: Claude Code Starter v" CLAUDE.md | grep -o "v[0-9]\+\.[0-9]\+\.[0-9]\+" | sort -u)
 
 INCONSISTENT=false
 while IFS= read -r version; do
@@ -72,36 +72,36 @@ if [ "$INCONSISTENT" = false ]; then
 fi
 echo ""
 
-# 3. Check cold-start.md protocol
-echo "Step 3: Checking .claude/protocols/cold-start.md..."
-if [ ! -f ".claude/protocols/cold-start.md" ]; then
-  warning ".claude/protocols/cold-start.md not found (optional)"
+# 3. Check cold-start-silent.md protocol
+echo "Step 3: Checking .claude/protocols/cold-start-silent.md..."
+if [ ! -f ".claude/protocols/cold-start-silent.md" ]; then
+  warning ".claude/protocols/cold-start-silent.md not found (optional)"
 else
-  COLD_START_VERSION=$(grep "^\*\*Version:\*\*" .claude/protocols/cold-start.md | head -1 | sed 's/.*Version:\*\* \([0-9.]*\).*/\1/')
+  COLD_START_VERSION=$(grep "^\*\*Version:\*\*" .claude/protocols/cold-start-silent.md | head -1 | sed 's/.*Version:\*\* \([0-9.]*\).*/\1/')
 
   if [ -z "$COLD_START_VERSION" ]; then
-    warning "Could not extract version from cold-start.md"
+    warning "Could not extract version from cold-start-silent.md"
   elif [ "$COLD_START_VERSION" != "$EXPECTED_VERSION" ]; then
-    error "cold-start.md version mismatch: $COLD_START_VERSION (expected: $EXPECTED_VERSION)"
+    error "cold-start-silent.md version mismatch: $COLD_START_VERSION (expected: $EXPECTED_VERSION)"
   else
-    success "cold-start.md version matches: v$COLD_START_VERSION"
+    success "cold-start-silent.md version matches: v$COLD_START_VERSION"
   fi
 fi
 echo ""
 
-# 4. Check completion.md protocol
-echo "Step 4: Checking .claude/protocols/completion.md..."
-if [ ! -f ".claude/protocols/completion.md" ]; then
-  warning ".claude/protocols/completion.md not found (optional)"
+# 4. Check completion-silent.md protocol
+echo "Step 4: Checking .claude/protocols/completion-silent.md..."
+if [ ! -f ".claude/protocols/completion-silent.md" ]; then
+  warning ".claude/protocols/completion-silent.md not found (optional)"
 else
-  COMPLETION_VERSION=$(grep "^\*\*Version:\*\*" .claude/protocols/completion.md | head -1 | sed 's/.*Version:\*\* \([0-9.]*\).*/\1/')
+  COMPLETION_VERSION=$(grep "^\*\*Version:\*\*" .claude/protocols/completion-silent.md | head -1 | sed 's/.*Version:\*\* \([0-9.]*\).*/\1/')
 
   if [ -z "$COMPLETION_VERSION" ]; then
-    warning "Could not extract version from completion.md"
+    warning "Could not extract version from completion-silent.md"
   elif [ "$COMPLETION_VERSION" != "$EXPECTED_VERSION" ]; then
-    error "completion.md version mismatch: $COMPLETION_VERSION (expected: $EXPECTED_VERSION)"
+    error "completion-silent.md version mismatch: $COMPLETION_VERSION (expected: $EXPECTED_VERSION)"
   else
-    success "completion.md version matches: v$COMPLETION_VERSION"
+    success "completion-silent.md version matches: v$COMPLETION_VERSION"
   fi
 fi
 echo ""

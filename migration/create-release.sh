@@ -171,9 +171,9 @@ echo ""
 echo -e "${BLUE}Step 10:${NC} Creating GitHub release..."
 
 # Check if CHANGELOG has release notes
-if grep -q "## \[v$VERSION\]" CHANGELOG.md; then
+if grep -q "## \[$VERSION\]" CHANGELOG.md; then
   # Extract release notes from CHANGELOG
-  RELEASE_NOTES=$(awk "/## \[v$VERSION\]/,/## \[v[0-9]/" CHANGELOG.md | sed '1d;$d')
+  RELEASE_NOTES=$(awk "/## \[$VERSION\]/,/## \[[0-9]/" CHANGELOG.md | sed '1d;$d')
   echo "$RELEASE_NOTES" > /tmp/release-notes-$VERSION.md
   NOTES_FILE="/tmp/release-notes-$VERSION.md"
 else

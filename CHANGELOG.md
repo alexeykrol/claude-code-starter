@@ -7,6 +7,57 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [4.0.0] - 2026-02-11
+
+### Added
+
+- **🤝 Dual-Agent Runtime Contract (Claude + Codex)**
+  - Added first-class Codex adapter packaging alongside Claude adapter.
+  - Introduced additive dual-entry model for host projects:
+    - `CLAUDE.md` / `.claude/*`
+    - `AGENTS.md` / `.codex/*`
+  - Shared state contract remains agent-agnostic (`SNAPSHOT`, `BACKLOG`, `ARCHITECTURE`).
+
+- **🚀 Codex Auto-Update + Start Orchestration**
+  - Codex `start` flow now supports:
+    - migration/upgrade auto-routing on first run,
+    - automatic update apply when `version_check` reports newer framework,
+    - cold-start re-run after successful update.
+
+- **🧠 Deep Migration Analysis for Legacy and Upgrade Paths**
+  - Added analysis-based generation for state files from project materials.
+  - Upgrade flow can now update template-like memory files instead of leaving placeholders.
+  - Migration report now distinguishes created vs updated state files.
+
+### Changed
+
+- **Major version bump to 4.0.0**
+  - Framework moved from single-agent orientation to a stable dual-agent model.
+  - Installer/distribution/runtime versions updated to `4.0.0`:
+    - `init-project.sh`
+    - `migration/build-distribution.sh`
+    - `src/framework-core/main.py`
+    - `package.json`
+
+- **Documentation synchronized for dual-agent usage**
+  - Reworked `README.md` and `README_RU.md` around Claude/Codex parity.
+  - Updated `migration/FRAMEWORK_GUIDE.template.md` for host projects.
+
+### Fixed
+
+- **State generation quality in upgrade mode**
+  - Fixed issue where upgrade scenarios could preserve placeholder-heavy files.
+  - Runtime template lookup corrected to `.claude/templates/*` paths.
+
+- **Codex shared state note**
+  - `AGENTS.md` now marks `CHANGELOG.md` as optional in host projects.
+
+### Breaking Changes
+
+- **Operational model change (SemVer major)**
+  - Documentation and lifecycle expectations now assume dual-agent compatibility by default.
+  - Release/install flow is standardized around combined adapter payloads.
+
 ## [3.1.1] - 2026-01-21
 
 ### Fixed

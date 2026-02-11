@@ -11,7 +11,7 @@ Primary memory files:
 - `.claude/SNAPSHOT.md`
 - `.claude/BACKLOG.md`
 - `.claude/ARCHITECTURE.md`
-- `CHANGELOG.md`
+- `CHANGELOG.md` (optional, if project tracks release notes)
 
 Codex and Claude use the same state contract.
 

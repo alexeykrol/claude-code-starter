@@ -1,7 +1,7 @@
 {
   "name": "claude-code-starter",
-  "version": "3.1.1",
-  "description": "Meta-documentation framework for AI-assisted development with Claude Code",
+  "version": "4.0.0",
+  "description": "Dual-agent meta-framework for AI-assisted development with Claude Code and Codex",
   "main": "dist/claude-export/cli.js",
   "scripts": {
     "build": "cd src/claude-export && npm run build",
