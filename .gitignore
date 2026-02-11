@@ -215,6 +215,7 @@ storybook-static/
 # Framework logs and bug reports (privacy-sensitive, gitignored)
 .claude/logs/
 .claude/.framework-config
+.claude/.last_session
 
 # Bug fix reports and summaries (framework internal development, not for public repo)
 BUGS_FIXED_*.md
@@ -258,6 +259,11 @@ HOST_PROJECT_E2E_REPORT_*.md
 PARITY_SMOKE_REPORT_*.md
 PHASE*_INVENTORY_MAP*.md
 PHASE*_PARITY_REPORT_*.md
+MULTI_AGENT_PORTING_CONCEPT.md
+FRAMEWORK_IMPROVEMENTS.md
+
+# Local-only internal workspace (not for public repo)
+.internal/
 MULTI_AGENT_PORTING_CONCEPT.md
 
 # Archived historical files (old development docs)
