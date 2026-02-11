@@ -1,6 +1,6 @@
 # Working with Claude Code Starter Framework
 
-> This project uses **Claude Code Starter Framework v4.0.0**.
+> This project uses **Claude Code Starter Framework v4.0.1**.
 
 ## Quick Start
 
@@ -63,7 +63,8 @@ AGENTS.md                    # Codex adapter entry
 .codex/                      # Codex workflows
 src/framework-core/          # Shared runtime
 security/                    # Security scripts
-quick-update.sh              # Runtime updater
+.claude/scripts/quick-update.sh  # Claude updater entry
+.codex/commands/quick-update.sh  # Codex updater entry
 ```
 
 ## Notes
@@ -75,5 +76,5 @@ quick-update.sh              # Runtime updater
 ## Troubleshooting
 
 - If protocol reports crash recovery needed: resolve in `start` flow and re-run `start`.
-- If update issues occur: run `bash quick-update.sh` manually.
+- If update issues occur: run `bash .codex/commands/quick-update.sh` manually.
 - If migration was interrupted: check `reports/*MIGRATION_REPORT.md` and rerun `start`.

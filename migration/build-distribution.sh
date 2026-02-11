@@ -67,11 +67,6 @@ echo -e "${GREEN}✓${NC} Copied AGENTS.md"
 cp "$SCRIPT_DIR/FRAMEWORK_GUIDE.template.md" "$TEMP_DIR/framework/FRAMEWORK_GUIDE.md"
 echo -e "${GREEN}✓${NC} Copied FRAMEWORK_GUIDE.md"
 
-# 3.5 quick-update utility (used by automatic update flow)
-cp "$PROJECT_ROOT/quick-update.sh" "$TEMP_DIR/framework/quick-update.sh"
-chmod +x "$TEMP_DIR/framework/quick-update.sh"
-echo -e "${GREEN}✓${NC} Copied quick-update.sh into framework archive"
-
 # 4. .claude/commands/ (slash commands, excluding dev-only commands)
 mkdir -p "$TEMP_DIR/framework/.claude/commands"
 for cmd in "$PROJECT_ROOT/.claude/commands/"*.md; do
@@ -102,12 +97,14 @@ cp "$PROJECT_ROOT/.claude/scripts/submit-bug-report.sh" "$TEMP_DIR/framework/.cl
 cp "$PROJECT_ROOT/.claude/scripts/analyze-bug-patterns.sh" "$TEMP_DIR/framework/.claude/scripts/"
 cp "$PROJECT_ROOT/.claude/scripts/pre-commit-hook.sh" "$TEMP_DIR/framework/.claude/scripts/"
 cp "$PROJECT_ROOT/.claude/scripts/install-git-hooks.sh" "$TEMP_DIR/framework/.claude/scripts/"
+cp "$PROJECT_ROOT/.claude/scripts/quick-update.sh" "$TEMP_DIR/framework/.claude/scripts/"
 chmod +x "$TEMP_DIR/framework/.claude/scripts/anonymize-report.sh"
 chmod +x "$TEMP_DIR/framework/.claude/scripts/submit-bug-report.sh"
 chmod +x "$TEMP_DIR/framework/.claude/scripts/analyze-bug-patterns.sh"
 chmod +x "$TEMP_DIR/framework/.claude/scripts/pre-commit-hook.sh"
 chmod +x "$TEMP_DIR/framework/.claude/scripts/install-git-hooks.sh"
-echo -e "${GREEN}✓${NC} Copied scripts (bug reporting + git hooks)"
+chmod +x "$TEMP_DIR/framework/.claude/scripts/quick-update.sh"
+echo -e "${GREEN}✓${NC} Copied scripts (bug reporting + hooks + updater)"
 
 # 7.5. .claude/protocols/ (protocol files)
 mkdir -p "$TEMP_DIR/framework/.claude/protocols"
@@ -178,11 +175,6 @@ echo -e "${GREEN}✓${NC} Copied init-project.sh loader"
 cp framework.tar.gz "$DIST_DIR/framework.tar.gz"
 echo -e "${GREEN}✓${NC} Copied framework.tar.gz"
 
-# Copy quick-update.sh utility
-cp "$PROJECT_ROOT/quick-update.sh" "$DIST_DIR/quick-update.sh"
-chmod +x "$DIST_DIR/quick-update.sh"
-echo -e "${GREEN}✓${NC} Copied quick-update.sh utility"
-
 # ============================================================================
 # Create Framework Commands Archive (for auto-update)
 # ============================================================================
@@ -222,6 +214,11 @@ if [ -d "$PROJECT_ROOT/.codex" ]; then
     find "$TEMP_DIR/framework-commands/codex-adapter/.codex" -name ".DS_Store" -delete 2>/dev/null || true
 fi
 
+mkdir -p "$TEMP_DIR/framework-commands/claude-adapter/.claude/scripts"
+if [ -f "$PROJECT_ROOT/.claude/scripts/quick-update.sh" ]; then
+    cp "$PROJECT_ROOT/.claude/scripts/quick-update.sh" "$TEMP_DIR/framework-commands/claude-adapter/.claude/scripts/"
+fi
+
 # Create commands archive
 cd "$TEMP_DIR"
 tar -czf framework-commands.tar.gz framework-commands/
@@ -237,7 +234,6 @@ echo -e "${GREEN}✓${NC} Created framework-commands.tar.gz (${COMMANDS_SIZE})"
 INSTALLER_SIZE=$(du -h "$DIST_DIR/init-project.sh" | awk '{print $1}')
 ARCHIVE_SIZE=$(du -h "$DIST_DIR/framework.tar.gz" | awk '{print $1}')
 COMMANDS_SIZE=$(du -h "$DIST_DIR/framework-commands.tar.gz" | awk '{print $1}')
-UPDATER_SIZE=$(du -h "$DIST_DIR/quick-update.sh" | awk '{print $1}')
 
 cat > "$DIST_DIR/README.txt" <<EOF
 Claude Code Starter Framework v${VERSION}
@@ -246,8 +242,7 @@ Distribution Package
 Files:
   - init-project.sh (${INSTALLER_SIZE}) - Installer script
   - framework.tar.gz (${ARCHIVE_SIZE}) - Full framework archive (Claude + Codex adapters)
-  - framework-commands.tar.gz (${COMMANDS_SIZE}) - Update payload (commands + Codex adapter)
-  - quick-update.sh (${UPDATER_SIZE}) - Quick updater utility
+  - framework-commands.tar.gz (${COMMANDS_SIZE}) - Update payload (commands + adapter runtime)
 
 Installation:
 
@@ -290,8 +285,7 @@ echo ""
 echo "Files created:"
 echo "  - init-project.sh (${INSTALLER_SIZE}) - Installer script (small loader)"
 echo "  - framework.tar.gz (${ARCHIVE_SIZE}) - Framework files archive"
-echo "  - framework-commands.tar.gz (${COMMANDS_SIZE}) - Update payload (commands + Codex adapter)"
-echo "  - quick-update.sh (${UPDATER_SIZE}) - Quick updater utility"
+echo "  - framework-commands.tar.gz (${COMMANDS_SIZE}) - Update payload (commands + adapter runtime)"
 echo "  - README.txt - Usage instructions"
 echo ""
 echo "Next steps:"
@@ -300,7 +294,6 @@ echo "  2. Upload files to GitHub Releases:"
 echo "     - init-project.sh (for installation)"
 echo "     - framework.tar.gz (for installation)"
 echo "     - framework-commands.tar.gz (for auto-update)"
-echo "     - quick-update.sh (for quick updates)"
 echo "     - CLAUDE.md (for Claude adapter updates)"
 echo "     - AGENTS.md (for Codex adapter updates)"
 echo "  3. Update documentation with download URLs"

@@ -252,6 +252,10 @@ def migration_cleanup():
             shutil.copy2(cleanup_file, "CLAUDE.md")
             cleanup_file.unlink(missing_ok=True)
             Path(".claude/migration-context.json").unlink(missing_ok=True)
+            Path(".claude/migration-log.json").unlink(missing_ok=True)
+            # Installer/updater are one-shot root helpers and should not persist.
+            Path("init-project.sh").unlink(missing_ok=True)
+            Path("quick-update.sh").unlink(missing_ok=True)
             return create_task_result("migration_cleanup", "success", "CLEANUP:performed")
         return create_task_result("migration_cleanup", "success", "CLEANUP:done")
     except Exception as e:

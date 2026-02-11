@@ -90,16 +90,6 @@ install_shared_runtime() {
     fi
 }
 
-install_update_utility() {
-    if [ -f "$TEMP_DIR/framework/quick-update.sh" ]; then
-        cp "$TEMP_DIR/framework/quick-update.sh" quick-update.sh
-        chmod +x quick-update.sh
-        log_success "Installed quick-update.sh"
-    else
-        log_warning "quick-update.sh not found in framework archive"
-    fi
-}
-
 # Header
 echo ""
 echo "════════════════════════════════════════════════════════════"
@@ -394,9 +384,6 @@ if [ "$MIGRATION_MODE" = "new" ]; then
     # Install shared runtime utilities used by both adapters
     install_shared_runtime
 
-    # Install updater utility used by automatic update flow
-    install_update_utility
-
     # Install npm dependencies for framework CLI
     if [ -f ".claude/dist/claude-export/package.json" ]; then
         log_info "Installing framework dependencies..."
@@ -485,9 +472,6 @@ else
 
     # Install shared runtime utilities used by both adapters
     install_shared_runtime
-
-    # Install updater utility used by automatic update flow
-    install_update_utility
 
     # Install npm dependencies for framework CLI
     if [ -f ".claude/dist/claude-export/package.json" ]; then

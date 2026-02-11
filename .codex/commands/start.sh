@@ -31,13 +31,13 @@ fi
 
 run_cold_start
 
-if [ "$EXIT_CODE" -eq 0 ] && [ "${CODEX_AUTO_UPDATE:-1}" != "0" ] && [ -f "quick-update.sh" ]; then
+if [ "$EXIT_CODE" -eq 0 ] && [ "${CODEX_AUTO_UPDATE:-1}" != "0" ] && [ -f ".codex/commands/quick-update.sh" ]; then
   UPDATE_RESULT="$(python3 .codex/utils/parse-update-result.py "$OUTPUT")"
 
   if [[ "$UPDATE_RESULT" == UPDATE:available:* ]]; then
     echo "[codex] update detected ($UPDATE_RESULT). applying framework update automatically."
     set +e
-    UPDATE_OUTPUT="$(bash quick-update.sh 2>&1)"
+    UPDATE_OUTPUT="$(bash .codex/commands/quick-update.sh 2>&1)"
     UPDATE_EXIT=$?
     set -e
     printf "%s\n" "$UPDATE_OUTPUT"

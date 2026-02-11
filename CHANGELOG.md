@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [Unreleased]
+
+### Changed
+
+- **Updater runtime moved out of project root**
+  - Removed root-level `quick-update.sh` from framework distribution.
+  - Added adapter-local updater entries:
+    - `.codex/commands/quick-update.sh` (canonical runtime updater)
+    - `.claude/scripts/quick-update.sh` (Claude wrapper entry)
+  - Codex `start` now applies updates via `.codex/commands/quick-update.sh`.
+
+### Fixed
+
+- **Post-migration root cleanup**
+  - Successful migration/upgrade now removes one-shot installer/updater leftovers from root:
+    - `init-project.sh`
+    - legacy `quick-update.sh` (if present from older installs)
+  - Cleanup is enforced in both Codex migration scripts and shared core `migration_cleanup`.
+
 ## [4.0.1] - 2026-02-11
 
 ### Fixed

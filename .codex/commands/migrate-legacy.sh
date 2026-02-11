@@ -759,6 +759,8 @@ archive_log
 
 rm -f "$CONTEXT_FILE"
 rm -f "$LOG_FILE"
+rm -f "init-project.sh"
+rm -f "quick-update.sh"
 
 log "migration completed successfully"
 log "created: ${#CREATED_FILES[@]}, skipped existing: ${#SKIPPED_FILES[@]}"

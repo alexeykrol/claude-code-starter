@@ -133,7 +133,6 @@ REQUIRED_FILES=(
   "dist-release/init-project.sh"
   "dist-release/framework.tar.gz"
   "dist-release/framework-commands.tar.gz"
-  "dist-release/quick-update.sh"
   "dist-release/CLAUDE.md"
   "dist-release/AGENTS.md"
 )
@@ -189,7 +188,6 @@ gh release create "v$VERSION" \
   dist-release/init-project.sh \
   dist-release/framework.tar.gz \
   dist-release/framework-commands.tar.gz \
-  dist-release/quick-update.sh \
   dist-release/CLAUDE.md \
   dist-release/AGENTS.md
 
@@ -210,7 +208,6 @@ echo "Distribution artifacts:"
 echo "  • init-project.sh"
 echo "  • framework.tar.gz"
 echo "  • framework-commands.tar.gz"
-echo "  • quick-update.sh"
 echo "  • CLAUDE.md"
 echo "  • AGENTS.md"
 echo ""

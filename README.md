@@ -79,16 +79,17 @@ claude-code-starter/
 ├── CLAUDE.md                    # Claude adapter entry
 ├── AGENTS.md                    # Codex adapter entry
 ├── init-project.sh              # Installer for host projects
-├── quick-update.sh              # Runtime updater for host projects
 ├── CHANGELOG.md
 ├── README.md
 ├── README_RU.md
 ├── .claude/
 │   ├── commands/                # Claude workflows/prompts
 │   ├── protocols/               # Silent protocol specs
+│   ├── scripts/quick-update.sh  # Claude updater entry
 │   └── templates/               # State/config templates
 ├── .codex/
 │   ├── commands/                # Executable Codex workflows
+│   │   └── quick-update.sh      # Codex updater entry
 │   └── contracts/
 ├── src/framework-core/          # Shared Python runtime (cold-start/completion)
 ├── security/                    # Security scan and cleanup scripts
@@ -133,7 +134,6 @@ Artifacts are created in `dist-release/`:
 - `init-project.sh`
 - `framework.tar.gz`
 - `framework-commands.tar.gz`
-- `quick-update.sh`
 
 ## Versioning
 

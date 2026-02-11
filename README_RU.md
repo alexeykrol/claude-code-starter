@@ -79,16 +79,17 @@ claude-code-starter/
 ├── CLAUDE.md                    # Точка входа для Claude
 ├── AGENTS.md                    # Точка входа для Codex
 ├── init-project.sh              # Установщик для host-проектов
-├── quick-update.sh              # Апдейтер в host-проектах
 ├── CHANGELOG.md
 ├── README.md
 ├── README_RU.md
 ├── .claude/
 │   ├── commands/                # Claude workflows/prompts
 │   ├── protocols/               # Silent protocol specs
+│   ├── scripts/quick-update.sh  # Вход обновления для Claude
 │   └── templates/               # Шаблоны состояния/конфига
 ├── .codex/
 │   ├── commands/                # Исполняемые Codex workflows
+│   │   └── quick-update.sh      # Вход обновления для Codex
 │   └── contracts/
 ├── src/framework-core/          # Общий Python runtime (cold-start/completion)
 ├── security/                    # Security scan/cleanup скрипты
@@ -133,7 +134,6 @@ bash migration/build-distribution.sh
 - `init-project.sh`
 - `framework.tar.gz`
 - `framework-commands.tar.gz`
-- `quick-update.sh`
 
 ## Версионирование
 

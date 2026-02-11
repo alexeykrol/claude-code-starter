@@ -883,6 +883,8 @@ archive_log
 
 rm -f "$CONTEXT_FILE"
 rm -f "$LOG_FILE"
+rm -f "init-project.sh"
+rm -f "quick-update.sh"
 
 log "upgrade completed successfully"
 log "previous version: ${OLD_VERSION:-unknown}"

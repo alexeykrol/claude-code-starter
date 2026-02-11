@@ -1,15 +1,18 @@
 #!/bin/bash
 #
-# Claude Code Starter Framework — Quick Updater
+# Claude Code Starter Framework — Runtime Updater
 #
-# Drop this file into any project and run to update the framework.
-# Usage: bash quick-update.sh
+# Canonical updater entry for Codex adapter.
+# Usage: bash .codex/commands/quick-update.sh
 #
 
-set -e
+set -euo pipefail
 
 REPO="alexeykrol/claude-code-starter"
 TEMP_DIR="/tmp/claude-quick-update-$$"
+ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+
+cd "$ROOT_DIR"
 
 # Colors
 RED='\033[0;31m'
@@ -41,12 +44,12 @@ CURRENT_VERSION=""
 
 # Try .claude/SNAPSHOT.md first
 if [ -f ".claude/SNAPSHOT.md" ]; then
-    CURRENT_VERSION=$(grep "^\*\*Version:\*\*" .claude/SNAPSHOT.md 2>/dev/null | awk '{print $2}' | tr -d '\n')
+    CURRENT_VERSION=$( (grep "^\*\*Version:\*\*" .claude/SNAPSHOT.md 2>/dev/null || true) | awk '{print $2}' | tr -d '\n')
 fi
 
 # Fallback to CLAUDE.md footer
 if [ -z "$CURRENT_VERSION" ] && [ -f "CLAUDE.md" ]; then
-    CURRENT_VERSION=$(grep "Framework: Claude Code Starter" CLAUDE.md 2>/dev/null | tail -1 | sed 's/.*v\([0-9.]*\).*/\1/' | tr -d '\n')
+    CURRENT_VERSION=$( (grep -E "Claude Code Starter v[0-9]+\\.[0-9]+\\.[0-9]+" CLAUDE.md 2>/dev/null || true) | tail -1 | sed -E 's/.*v([0-9]+\.[0-9]+\.[0-9]+).*/\1/' | tr -d '\n')
 fi
 
 # Check if framework is installed
@@ -126,7 +129,7 @@ if [ $? -ne 0 ]; then
 fi
 
 # Extract version from tag_name
-LATEST_VERSION=$(echo "$LATEST_JSON" | grep '"tag_name"' | sed 's/.*"v\([0-9.]*\)".*/\1/' | tr -d '\n')
+LATEST_VERSION=$( (echo "$LATEST_JSON" | grep '"tag_name"' || true) | sed 's/.*"v\([0-9.]*\)".*/\1/' | tr -d '\n')
 
 if [ -z "$LATEST_VERSION" ]; then
     echo -e "${RED}✗${NC} Failed to parse latest version"
@@ -277,6 +280,21 @@ if [ -n "$CODEX_SOURCE" ]; then
         chmod +x ".codex/commands/"*.sh 2>/dev/null || true
         echo -e "${GREEN}  ✓${NC} Updated: .codex/"
     fi
+fi
+
+# Update Claude adapter runtime scripts if payload exists
+CLAUDE_SOURCE=""
+if [ -d "$FRAMEWORK_DIR/claude-adapter" ]; then
+    CLAUDE_SOURCE="$FRAMEWORK_DIR/claude-adapter"
+elif [ -d "$FRAMEWORK_DIR/.claude/scripts" ]; then
+    CLAUDE_SOURCE="$FRAMEWORK_DIR"
+fi
+
+if [ -n "$CLAUDE_SOURCE" ] && [ -f "$CLAUDE_SOURCE/.claude/scripts/quick-update.sh" ]; then
+    mkdir -p ".claude/scripts"
+    cp "$CLAUDE_SOURCE/.claude/scripts/quick-update.sh" ".claude/scripts/quick-update.sh"
+    chmod +x ".claude/scripts/quick-update.sh"
+    echo -e "${GREEN}  ✓${NC} Updated: .claude/scripts/quick-update.sh"
 fi
 
 # Update version in .claude/SNAPSHOT.md

@@ -1580,6 +1580,8 @@ done
 rm .claude/migration-log.json 2>/dev/null
 rm .claude/migration-context.json 2>/dev/null
 rm .claude/framework-pending.tar.gz 2>/dev/null
+rm init-project.sh 2>/dev/null
+rm quick-update.sh 2>/dev/null
 echo "✅ Migration cleanup complete"
 ```
 
