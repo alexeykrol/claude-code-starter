@@ -18,10 +18,11 @@ def run_completion():
     """
     start_time = time.time()
 
-    # Normalize config and baseline files before running completion checks.
+    # Normalize config and refresh only existing baseline files.
+    # Missing baseline files must be created during migration/upgrade flows.
     bootstrap_results = [
         init_config(),
-        ensure_project_baseline(),
+        ensure_project_baseline(create_missing=False),
     ]
 
     # Define tasks to run in parallel

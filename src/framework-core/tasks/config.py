@@ -349,8 +349,12 @@ def ensure_commit_policy():
 
 
 @time_task
-def ensure_project_baseline():
-    """Ensure baseline project files exist and refresh template-like state files."""
+def ensure_project_baseline(create_missing: bool = True):
+    """Refresh project baseline files.
+
+    Args:
+        create_missing: If False, only updates existing files and never creates new files.
+    """
     try:
         root = Path.cwd()
         state_dir = root / ".claude"
@@ -371,8 +375,9 @@ def ensure_project_baseline():
             "reports/",
         ]
         if not gitignore.exists():
-            gitignore.write_text("\n".join(required_patterns) + "\n", encoding="utf-8")
-            created.append(".gitignore")
+            if create_missing:
+                gitignore.write_text("\n".join(required_patterns) + "\n", encoding="utf-8")
+                created.append(".gitignore")
         else:
             current = gitignore.read_text(encoding="utf-8", errors="ignore").splitlines()
             missing = [line for line in required_patterns if line not in current]
@@ -383,7 +388,7 @@ def ensure_project_baseline():
                 updated.append(".gitignore")
 
         changelog = root / "CHANGELOG.md"
-        if not changelog.exists():
+        if create_missing and not changelog.exists():
             changelog.write_text(
                 "# Changelog\n\n"
                 "All notable changes to this project will be documented in this file.\n\n"
@@ -494,8 +499,9 @@ def ensure_project_baseline():
         for path, content in targets.items():
             rel = path.relative_to(root).as_posix()
             if not path.exists():
-                path.write_text(content, encoding="utf-8")
-                created.append(rel)
+                if create_missing:
+                    path.write_text(content, encoding="utf-8")
+                    created.append(rel)
                 continue
             existing = _read_text(path)
             if _state_needs_refresh(existing):
