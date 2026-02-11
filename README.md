@@ -43,6 +43,12 @@ python3 --version
 ./init-project.sh
 ```
 
+Installer now asks for **project profile**:
+- `software` — for application/service/source-code projects.
+- `content` — for course/book/article/research/script projects.
+
+Each profile gets its own memory layout and generation logic.
+
 3. Launch your preferred agent in that project:
 - `codex`
 - `claude`
@@ -63,6 +69,10 @@ python3 --version
 - crash/session checks,
 - shared context load,
 - framework version check (auto-update path when available).
+
+Context files are resolved by profile:
+- software: `.claude/SNAPSHOT.md`, `.claude/BACKLOG.md`, `.claude/ARCHITECTURE.md`
+- content: `.claude/content/SNAPSHOT.md`, `.claude/content/BACKLOG.md`, `.claude/content/ARCHITECTURE.md`
 
 ### Finish
 
@@ -103,6 +113,8 @@ Installer auto-detects host project type:
 - `new` — clean project bootstrap,
 - `legacy` — framework migration into existing project,
 - `upgrade` — upgrade from previous framework generation.
+
+In every mode, installer also sets project profile (`software` or `content`) in `.claude/.framework-config`.
 
 All modes are designed to be non-destructive to host business code.
 

@@ -30,6 +30,19 @@
 
 ---
 
+## Profile-Aware State Paths
+
+Before updating memory files, resolve project profile from `.claude/.framework-config`:
+
+- `project_type = "software"` → state files are in `.claude/`
+- `project_type = "content"` → state files are in `.claude/content/`
+
+All references in this protocol to `SNAPSHOT.md`, `BACKLOG.md`, and `ARCHITECTURE.md` must use the resolved state directory.
+
+For content profile, also keep `.claude/content/EDITORIAL_CALENDAR.md` and `.claude/content/SOURCES.md` synchronized during completion when relevant.
+
+---
+
 ## Auto-Trigger Detection
 
 **Framework can auto-detect when to run Completion:**

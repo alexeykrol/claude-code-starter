@@ -34,11 +34,16 @@ This framework supports both agents in one project:
 - `CLAUDE.md` + `.claude/` for Claude Code
 - `AGENTS.md` + `.codex/` for Codex
 
-Both agents share the same memory files:
+Both agents share the same state contract with profile-specific files:
 
-- `.claude/SNAPSHOT.md`
-- `.claude/BACKLOG.md`
-- `.claude/ARCHITECTURE.md`
+- software profile:
+  - `.claude/SNAPSHOT.md`
+  - `.claude/BACKLOG.md`
+  - `.claude/ARCHITECTURE.md`
+- content profile:
+  - `.claude/content/SNAPSHOT.md`
+  - `.claude/content/BACKLOG.md`
+  - `.claude/content/ARCHITECTURE.md`
 
 ## What `start` Does
 
@@ -71,7 +76,7 @@ security/                    # Security scripts
 
 - Framework files and project business code are separate concerns.
 - Migration and upgrade flows are additive by design.
-- Keep `.claude/SNAPSHOT.md`, `.claude/BACKLOG.md`, `.claude/ARCHITECTURE.md` current as work progresses.
+- Keep profile memory files current as work progresses.
 
 ## Troubleshooting
 

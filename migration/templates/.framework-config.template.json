@@ -2,6 +2,7 @@
   "bug_reporting_enabled": false,
   "dialog_export_enabled": false,
   "project_name": "{{PROJECT_NAME}}",
+  "project_type": "{{PROJECT_TYPE}}",
   "first_run_completed": false,
   "consent_version": "1.0",
   "cold_start": {

@@ -33,6 +33,19 @@
 
 ---
 
+## Profile-Aware State Paths
+
+Before reading or updating memory files, resolve project profile from `.claude/.framework-config`:
+
+- `project_type = "software"` → use `.claude/`
+- `project_type = "content"` → use `.claude/content/`
+
+When this protocol refers to `SNAPSHOT`, `BACKLOG`, or `ARCHITECTURE`, it means files in the resolved state directory.
+
+For cold start, prefer context paths returned by `python3 src/framework-core/main.py cold-start` (`context_files` task), since they are profile-aware.
+
+---
+
 ## Implementation
 
 ### Phase 1: Execute Python Utility

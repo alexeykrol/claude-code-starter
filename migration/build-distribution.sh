@@ -88,6 +88,10 @@ echo -e "${GREEN}✓${NC} Copied compiled framework code"
 mkdir -p "$TEMP_DIR/framework/.claude/templates"
 cp "$SCRIPT_DIR/templates/"*.md "$TEMP_DIR/framework/.claude/templates/"
 cp "$SCRIPT_DIR/templates/.framework-config.template.json" "$TEMP_DIR/framework/.claude/templates/"
+if [ -d "$SCRIPT_DIR/templates/content" ]; then
+    mkdir -p "$TEMP_DIR/framework/.claude/templates/content"
+    cp "$SCRIPT_DIR/templates/content/"*.md "$TEMP_DIR/framework/.claude/templates/content/"
+fi
 echo -e "${GREEN}✓${NC} Copied meta file templates and config template"
 
 # 7. .claude/scripts/ (bug reporting + git hooks scripts)

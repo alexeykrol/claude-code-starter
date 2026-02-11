@@ -39,6 +39,237 @@ is_interactive_mode() {
     [ "${FRAMEWORK_INTERACTIVE:-0}" = "1" ]
 }
 
+normalize_project_profile() {
+    local raw="${1:-}"
+    raw="$(printf "%s" "$raw" | tr '[:upper:]' '[:lower:]' | tr -d '[:space:]')"
+    case "$raw" in
+        "content"|"software")
+            echo "$raw"
+            ;;
+        *)
+            echo ""
+            ;;
+    esac
+}
+
+detect_existing_project_profile() {
+    local config_file=".claude/.framework-config"
+    if [ ! -f "$config_file" ]; then
+        echo ""
+        return
+    fi
+
+    python3 - "$config_file" <<'PY' 2>/dev/null || true
+import json
+import sys
+from pathlib import Path
+
+path = Path(sys.argv[1])
+try:
+    data = json.loads(path.read_text(encoding="utf-8"))
+except Exception:
+    print("")
+    raise SystemExit(0)
+
+profile = str(data.get("project_type", "")).strip().lower()
+if profile in {"software", "content"}:
+    print(profile)
+else:
+    print("")
+PY
+}
+
+detect_project_profile_guess() {
+    local text_count code_count
+
+    text_count=$(find . -maxdepth 3 -type f \
+        \( -name "*.md" -o -name "*.txt" -o -name "*.rst" -o -name "*.docx" \) \
+        ! -path "./.git/*" \
+        ! -path "./.claude/*" \
+        ! -path "./.codex/*" \
+        ! -path "./node_modules/*" \
+        ! -path "./dist/*" \
+        ! -path "./build/*" \
+        ! -path "./archive/*" \
+        ! -path "./reports/*" \
+        2>/dev/null | wc -l | tr -d '[:space:]')
+    code_count=$(find . -maxdepth 3 -type f \
+        \( -name "*.js" -o -name "*.ts" -o -name "*.tsx" -o -name "*.jsx" -o -name "*.py" -o -name "*.go" -o -name "*.rs" -o -name "*.java" -o -name "*.c" -o -name "*.cpp" -o -name "*.h" -o -name "*.php" -o -name "*.rb" \) \
+        ! -path "./.git/*" \
+        ! -path "./.claude/*" \
+        ! -path "./.codex/*" \
+        ! -path "./node_modules/*" \
+        ! -path "./dist/*" \
+        ! -path "./build/*" \
+        ! -path "./archive/*" \
+        ! -path "./reports/*" \
+        2>/dev/null | wc -l | tr -d '[:space:]')
+
+    if [ -z "$text_count" ]; then
+        text_count=0
+    fi
+    if [ -z "$code_count" ]; then
+        code_count=0
+    fi
+
+    if [ "$text_count" -ge 8 ] && [ "$text_count" -gt "$((code_count * 2 + 3))" ]; then
+        echo "content"
+    else
+        echo "software"
+    fi
+}
+
+select_project_profile() {
+    local scenario="${1:-}"
+    local existing_profile env_profile guessed_profile input selected
+    local require_profile_prompt=0
+
+    existing_profile="$(detect_existing_project_profile)"
+    if [ -n "$existing_profile" ]; then
+        PROJECT_PROFILE="$existing_profile"
+        log_info "Using existing project profile from .framework-config: $PROJECT_PROFILE"
+        return
+    fi
+
+    env_profile="$(normalize_project_profile "${FRAMEWORK_PROJECT_TYPE:-}")"
+    if [ -n "$env_profile" ]; then
+        PROJECT_PROFILE="$env_profile"
+        log_info "Using project profile from FRAMEWORK_PROJECT_TYPE: $PROJECT_PROFILE"
+        return
+    fi
+
+    guessed_profile="$(detect_project_profile_guess)"
+    PROJECT_PROFILE="$guessed_profile"
+
+    case "$scenario" in
+        framework-upgrade:*|framework-current:*)
+            require_profile_prompt=1
+            ;;
+    esac
+
+    if [ "$require_profile_prompt" -eq 1 ]; then
+        if [ -t 0 ]; then
+            echo ""
+            echo "Project profile is required for upgrade from older framework versions."
+            echo "Select project profile:"
+            echo "  1) software (application/service development)"
+            echo "  2) content  (course/book/article/research production)"
+            echo ""
+            if [ "$guessed_profile" = "content" ]; then
+                read -r -p "Choose profile [1/2] (default: 2): " input
+            else
+                read -r -p "Choose profile [1/2] (default: 1): " input
+            fi
+
+            case "$(printf "%s" "$input" | tr -d '[:space:]')" in
+                "2"|"content")
+                    selected="content"
+                    ;;
+                "1"|"software"|"")
+                    if [ "$guessed_profile" = "content" ] && [ -z "$(printf "%s" "$input" | tr -d '[:space:]')" ]; then
+                        selected="content"
+                    else
+                        selected="software"
+                    fi
+                    ;;
+                *)
+                    selected="$guessed_profile"
+                    ;;
+            esac
+            PROJECT_PROFILE="$selected"
+            log_info "Selected project profile: $PROJECT_PROFILE"
+            return
+        fi
+
+        log_warning "Cannot prompt for project profile in non-interactive mode."
+        log_warning "Using auto-detected profile: $PROJECT_PROFILE (override with FRAMEWORK_PROJECT_TYPE=software|content)"
+        return
+    fi
+
+    if is_interactive_mode; then
+        echo ""
+        echo "Select project profile:"
+        echo "  1) software (application/service development)"
+        echo "  2) content  (course/book/article/research production)"
+        echo ""
+        if [ "$guessed_profile" = "content" ]; then
+            read -r -p "Choose profile [1/2] (default: 2): " input
+        else
+            read -r -p "Choose profile [1/2] (default: 1): " input
+        fi
+
+        case "$(printf "%s" "$input" | tr -d '[:space:]')" in
+            "2"|"content")
+                selected="content"
+                ;;
+            "1"|"software"|"")
+                if [ "$guessed_profile" = "content" ] && [ -z "$(printf "%s" "$input" | tr -d '[:space:]')" ]; then
+                    selected="content"
+                else
+                    selected="software"
+                fi
+                ;;
+            *)
+                selected="$guessed_profile"
+                ;;
+        esac
+        PROJECT_PROFILE="$selected"
+        log_info "Selected project profile: $PROJECT_PROFILE"
+    else
+        log_info "Auto-selected project profile: $PROJECT_PROFILE (set FRAMEWORK_PROJECT_TYPE to override)"
+    fi
+}
+
+get_state_dir_for_profile() {
+    local profile="$1"
+    if [ "$profile" = "content" ]; then
+        echo ".claude/content"
+    else
+        echo ".claude"
+    fi
+}
+
+render_template_file() {
+    local template_path="$1"
+    local target_path="$2"
+    local project_name="$3"
+    local date_value="$4"
+    local branch_value="$5"
+    local profile="$6"
+    local project_description="$7"
+    local project_structure="$8"
+
+    python3 - "$template_path" "$target_path" "$project_name" "$date_value" "$branch_value" "$profile" "$project_description" "$project_structure" <<'PY'
+import sys
+from pathlib import Path
+
+template_path = Path(sys.argv[1])
+target_path = Path(sys.argv[2])
+project_name = sys.argv[3]
+date_value = sys.argv[4]
+branch_value = sys.argv[5]
+project_type = sys.argv[6]
+project_description = sys.argv[7]
+project_structure = sys.argv[8]
+
+replacements = {
+    "PROJECT_NAME": project_name,
+    "DATE": date_value,
+    "CURRENT_BRANCH": branch_value,
+    "PROJECT_TYPE": project_type,
+    "PROJECT_DESCRIPTION": project_description,
+    "PROJECT_STRUCTURE": project_structure,
+}
+
+content = template_path.read_text(encoding="utf-8")
+for key, value in replacements.items():
+    content = content.replace("{{" + key + "}}", value)
+
+target_path.parent.mkdir(parents=True, exist_ok=True)
+target_path.write_text(content, encoding="utf-8")
+PY
+}
+
 confirm_step() {
     local prompt="$1"
 
@@ -256,6 +487,7 @@ estimate_analysis_cost() {
 
 # Detect project type
 PROJECT_TYPE=$(detect_project_type)
+select_project_profile "$PROJECT_TYPE"
 
 # ============================================
 # Route to Appropriate Scenario
@@ -265,6 +497,7 @@ case $PROJECT_TYPE in
     "new-project")
         log_info "📦 Scenario: New Project"
         log_info "Simple installation with template files"
+        log_info "Project profile: $PROJECT_PROFILE"
         echo ""
 
         # Mark as new project mode
@@ -274,6 +507,7 @@ case $PROJECT_TYPE in
 
     "legacy-migration")
         log_warning "🔍 Scenario: Legacy Project (No Framework)"
+        log_info "Project profile: $PROJECT_PROFILE"
         echo ""
         echo "This project has code but no Framework installed."
         echo "Deep analysis is recommended to generate accurate Framework files."
@@ -303,6 +537,7 @@ case $PROJECT_TYPE in
     framework-upgrade:*)
         OLD_VERSION=$(echo "$PROJECT_TYPE" | cut -d: -f2)
         log_warning "🔄 Scenario: Framework Upgrade (from $OLD_VERSION)"
+        log_info "Project profile: $PROJECT_PROFILE"
         echo ""
         echo "This project has Framework $OLD_VERSION installed."
         echo "Migration to v$VERSION will preserve all your data."
@@ -347,6 +582,7 @@ case $PROJECT_TYPE in
         fi
 
         log_warning "🧩 Framework is current, but Codex adapter is missing"
+        log_info "Project profile: $PROJECT_PROFILE"
         echo ""
         echo "This run will add Codex adapter files (AGENTS.md + .codex/)."
         echo "Existing Claude adapter files will be preserved."
@@ -411,47 +647,100 @@ if [ "$MIGRATION_MODE" = "new" ]; then
         log_success "Installed FRAMEWORK_GUIDE.md"
     fi
 
-    # Generate meta files from templates
+    # Generate memory and config files from templates
     if [ -d ".claude/templates" ]; then
-        log_info "Generating meta files from templates..."
+        log_info "Generating framework files from templates..."
 
         PROJECT_NAME=$(basename "$PROJECT_DIR")
         DATE=$(date +%Y-%m-%d)
         BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null | tr -d '\n' || echo "main")
         [ -z "$BRANCH" ] && BRANCH="main"
-
-        if [ -f ".claude/templates/SNAPSHOT.template.md" ]; then
-            sed -e "s/{{PROJECT_NAME}}/$PROJECT_NAME/g" \
-                -e "s/{{DATE}}/$DATE/g" \
-                -e "s/{{CURRENT_BRANCH}}/$BRANCH/g" \
-                .claude/templates/SNAPSHOT.template.md > .claude/SNAPSHOT.md
-            log_success "Generated .claude/SNAPSHOT.md"
+        STATE_DIR="$(get_state_dir_for_profile "$PROJECT_PROFILE")"
+        TEMPLATE_DIR=".claude/templates"
+        if [ "$PROJECT_PROFILE" = "content" ]; then
+            if [ -d ".claude/templates/content" ]; then
+                TEMPLATE_DIR=".claude/templates/content"
+            else
+                log_warning "Content templates not found in archive, falling back to software templates"
+            fi
         fi
 
-        if [ -f ".claude/templates/BACKLOG.template.md" ]; then
-            sed -e "s/{{PROJECT_NAME}}/$PROJECT_NAME/g" \
-                -e "s/{{DATE}}/$DATE/g" \
-                .claude/templates/BACKLOG.template.md > .claude/BACKLOG.md
-            log_success "Generated .claude/BACKLOG.md"
+        if [ "$PROJECT_PROFILE" = "content" ]; then
+            PROJECT_DESCRIPTION="Content project focused on producing high-quality textual assets."
+        else
+            PROJECT_DESCRIPTION="Software project initialized with dual-agent framework lifecycle."
         fi
 
-        if [ -f ".claude/templates/ARCHITECTURE.template.md" ]; then
-            sed -e "s/{{PROJECT_NAME}}/$PROJECT_NAME/g" \
-                .claude/templates/ARCHITECTURE.template.md > .claude/ARCHITECTURE.md
-            log_success "Generated .claude/ARCHITECTURE.md"
+        PROJECT_STRUCTURE=$(find . -mindepth 1 -maxdepth 2 \
+            ! -path "./.git*" \
+            ! -path "./.claude*" \
+            ! -path "./.codex*" \
+            ! -path "./node_modules*" \
+            ! -path "./dist*" \
+            ! -path "./build*" \
+            ! -path "./archive*" \
+            ! -path "./reports*" \
+            -print 2>/dev/null | sed 's|^\./||' | head -10 | paste -sd ', ' -)
+        [ -z "$PROJECT_STRUCTURE" ] && PROJECT_STRUCTURE="<project files>"
+
+        mkdir -p "$STATE_DIR"
+
+        if [ -f "$TEMPLATE_DIR/SNAPSHOT.template.md" ]; then
+            render_template_file "$TEMPLATE_DIR/SNAPSHOT.template.md" "$STATE_DIR/SNAPSHOT.md" "$PROJECT_NAME" "$DATE" "$BRANCH" "$PROJECT_PROFILE" "$PROJECT_DESCRIPTION" "$PROJECT_STRUCTURE"
+            log_success "Generated $STATE_DIR/SNAPSHOT.md"
+        fi
+
+        if [ -f "$TEMPLATE_DIR/BACKLOG.template.md" ]; then
+            render_template_file "$TEMPLATE_DIR/BACKLOG.template.md" "$STATE_DIR/BACKLOG.md" "$PROJECT_NAME" "$DATE" "$BRANCH" "$PROJECT_PROFILE" "$PROJECT_DESCRIPTION" "$PROJECT_STRUCTURE"
+            log_success "Generated $STATE_DIR/BACKLOG.md"
+        fi
+
+        if [ -f "$TEMPLATE_DIR/ARCHITECTURE.template.md" ]; then
+            render_template_file "$TEMPLATE_DIR/ARCHITECTURE.template.md" "$STATE_DIR/ARCHITECTURE.md" "$PROJECT_NAME" "$DATE" "$BRANCH" "$PROJECT_PROFILE" "$PROJECT_DESCRIPTION" "$PROJECT_STRUCTURE"
+            log_success "Generated $STATE_DIR/ARCHITECTURE.md"
+        fi
+
+        if [ "$PROJECT_PROFILE" = "content" ] && [ -f "$TEMPLATE_DIR/EDITORIAL_CALENDAR.template.md" ]; then
+            render_template_file "$TEMPLATE_DIR/EDITORIAL_CALENDAR.template.md" "$STATE_DIR/EDITORIAL_CALENDAR.md" "$PROJECT_NAME" "$DATE" "$BRANCH" "$PROJECT_PROFILE" "$PROJECT_DESCRIPTION" "$PROJECT_STRUCTURE"
+            log_success "Generated $STATE_DIR/EDITORIAL_CALENDAR.md"
+        fi
+
+        if [ "$PROJECT_PROFILE" = "content" ] && [ -f "$TEMPLATE_DIR/SOURCES.template.md" ]; then
+            render_template_file "$TEMPLATE_DIR/SOURCES.template.md" "$STATE_DIR/SOURCES.md" "$PROJECT_NAME" "$DATE" "$BRANCH" "$PROJECT_PROFILE" "$PROJECT_DESCRIPTION" "$PROJECT_STRUCTURE"
+            log_success "Generated $STATE_DIR/SOURCES.md"
         fi
 
         # Generate .framework-config from template
         if [ -f ".claude/templates/.framework-config.template.json" ]; then
-            sed -e "s/{{PROJECT_NAME}}/$PROJECT_NAME/g" \
-                .claude/templates/.framework-config.template.json > .claude/.framework-config
+            render_template_file ".claude/templates/.framework-config.template.json" ".claude/.framework-config" "$PROJECT_NAME" "$DATE" "$BRANCH" "$PROJECT_PROFILE" "$PROJECT_DESCRIPTION" "$PROJECT_STRUCTURE"
             log_success "Generated .claude/.framework-config"
+        elif [ ! -f ".claude/.framework-config" ]; then
+            cat > .claude/.framework-config <<EOF
+{
+  "bug_reporting_enabled": false,
+  "dialog_export_enabled": false,
+  "project_name": "$PROJECT_NAME",
+  "project_type": "$PROJECT_PROFILE",
+  "first_run_completed": false,
+  "consent_version": "1.0",
+  "cold_start": {
+    "silent_mode": true,
+    "show_ready": false,
+    "auto_update": true
+  },
+  "completion": {
+    "silent_mode": true,
+    "auto_commit": false,
+    "show_commit_message": true
+  }
+}
+EOF
+            log_success "Generated .claude/.framework-config (fallback)"
         fi
 
         # Generate COMMIT_POLICY.md from template (NEW in v2.5.0)
         if [ -f ".claude/templates/COMMIT_POLICY.template.md" ]; then
-            sed -e "s/{{PROJECT_NAME}}/$PROJECT_NAME/g" \
-                .claude/templates/COMMIT_POLICY.template.md > .claude/COMMIT_POLICY.md
+            render_template_file ".claude/templates/COMMIT_POLICY.template.md" ".claude/COMMIT_POLICY.md" "$PROJECT_NAME" "$DATE" "$BRANCH" "$PROJECT_PROFILE" "$PROJECT_DESCRIPTION" "$PROJECT_STRUCTURE"
             log_success "Generated .claude/COMMIT_POLICY.md"
         fi
     fi
@@ -503,13 +792,13 @@ fi
 
 # Create migration context for all scenarios
 if [ "$MIGRATION_MODE" = "legacy" ]; then
-    echo "{\"mode\": \"legacy\", \"timestamp\": \"$(date -Iseconds)\"}" > .claude/migration-context.json
+    echo "{\"mode\": \"legacy\", \"project_type\": \"$PROJECT_PROFILE\", \"timestamp\": \"$(date -Iseconds)\"}" > .claude/migration-context.json
     log_success "Created migration context"
 elif [ "$MIGRATION_MODE" = "upgrade" ]; then
-    echo "{\"mode\": \"upgrade\", \"old_version\": \"$OLD_FW_VERSION\", \"timestamp\": \"$(date -Iseconds)\"}" > .claude/migration-context.json
+    echo "{\"mode\": \"upgrade\", \"old_version\": \"$OLD_FW_VERSION\", \"project_type\": \"$PROJECT_PROFILE\", \"timestamp\": \"$(date -Iseconds)\"}" > .claude/migration-context.json
     log_success "Created migration context"
 elif [ "$MIGRATION_MODE" = "new" ]; then
-    echo "{\"mode\": \"new\", \"timestamp\": \"$(date -Iseconds)\"}" > .claude/migration-context.json
+    echo "{\"mode\": \"new\", \"project_type\": \"$PROJECT_PROFILE\", \"timestamp\": \"$(date -Iseconds)\"}" > .claude/migration-context.json
     log_success "Created migration context"
 fi
 
@@ -518,6 +807,13 @@ echo ""
 echo "════════════════════════════════════════════════════════════"
 log_success "Installation complete!"
 echo "════════════════════════════════════════════════════════════"
+echo ""
+log_info "Project profile configured: $PROJECT_PROFILE"
+if [ "$PROJECT_PROFILE" = "content" ]; then
+    log_info "Primary memory files: .claude/content/{SNAPSHOT,BACKLOG,ARCHITECTURE}.md"
+else
+    log_info "Primary memory files: .claude/{SNAPSHOT,BACKLOG,ARCHITECTURE}.md"
+fi
 echo ""
 
 echo "🚀 Next steps:"

@@ -1,6 +1,7 @@
 """Configuration management and baseline file tasks."""
 
 import json
+import os
 import subprocess
 from datetime import datetime
 from pathlib import Path
@@ -8,11 +9,74 @@ from utils.parallel import time_task
 from utils.result import create_task_result
 
 
-def _default_config(project_name: str) -> dict:
+def _normalize_project_type(raw: str) -> str:
+    value = (raw or "").strip().lower()
+    return value if value in {"software", "content"} else ""
+
+
+def _guess_project_type(root: Path) -> str:
+    code_suffixes = {".py", ".js", ".ts", ".tsx", ".jsx", ".go", ".rs", ".java", ".c", ".cpp", ".h", ".php", ".rb"}
+    text_suffixes = {".md", ".txt", ".rst", ".docx"}
+    skip_roots = {".git", ".claude", ".codex", "node_modules", "dist", "build", "archive", "reports", ".venv", "venv", "__pycache__"}
+
+    code_count = 0
+    text_count = 0
+    try:
+        for path in root.rglob("*"):
+            if not path.is_file():
+                continue
+            rel = path.relative_to(root)
+            if rel.parts and rel.parts[0] in skip_roots:
+                continue
+            suffix = path.suffix.lower()
+            if suffix in code_suffixes:
+                code_count += 1
+            elif suffix in text_suffixes:
+                text_count += 1
+    except Exception:
+        return "software"
+
+    if text_count >= 8 and text_count > (code_count * 2 + 3):
+        return "content"
+    return "software"
+
+
+def _read_framework_config(root: Path) -> dict:
+    config_file = root / ".claude/.framework-config"
+    if not config_file.exists():
+        return {}
+    try:
+        data = json.loads(config_file.read_text(encoding="utf-8"))
+        if isinstance(data, dict):
+            return data
+    except Exception:
+        pass
+    return {}
+
+
+def _resolve_project_type(root: Path, config=None) -> str:
+    requested = _normalize_project_type(os.environ.get("FRAMEWORK_PROJECT_TYPE", ""))
+    if requested:
+        return requested
+    if config and isinstance(config, dict):
+        from_config = _normalize_project_type(str(config.get("project_type", "")))
+        if from_config:
+            return from_config
+    return _guess_project_type(root)
+
+
+def _state_directory(root: Path, project_type: str) -> Path:
+    if project_type == "content":
+        return root / ".claude/content"
+    return root / ".claude"
+
+
+def _default_config(project_name: str, project_type: str = "software") -> dict:
     return {
         "bug_reporting_enabled": False,
         "dialog_export_enabled": False,
         "project_name": project_name,
+        "project_type": project_type,
         "first_run_completed": False,
         "consent_version": "1.0",
         "cold_start": {
@@ -266,9 +330,11 @@ def migration_cleanup():
 def init_config():
     """Initialize or normalize .framework-config."""
     try:
-        config_file = Path(".claude/.framework-config")
-        project_name = Path.cwd().name
-        defaults = _default_config(project_name)
+        root = Path.cwd()
+        config_file = root / ".claude/.framework-config"
+        project_name = root.name
+        project_type = _resolve_project_type(root, _read_framework_config(root))
+        defaults = _default_config(project_name, project_type)
 
         config_file.parent.mkdir(parents=True, exist_ok=True)
 
@@ -293,6 +359,14 @@ def init_config():
 
         if current.get("project_name") in (None, "", "unknown"):
             current["project_name"] = project_name
+            changed = True
+
+        normalized_type = _normalize_project_type(str(current.get("project_type", "")))
+        if not normalized_type:
+            current["project_type"] = project_type
+            changed = True
+        elif normalized_type != current.get("project_type"):
+            current["project_type"] = normalized_type
             changed = True
 
         if changed:
@@ -361,7 +435,9 @@ def ensure_project_baseline(create_missing: bool = True):
     """
     try:
         root = Path.cwd()
-        state_dir = root / ".claude"
+        config = _read_framework_config(root)
+        project_type = _resolve_project_type(root, config)
+        state_dir = _state_directory(root, project_type)
         state_dir.mkdir(parents=True, exist_ok=True)
 
         created = []
@@ -439,67 +515,163 @@ def ensure_project_baseline(create_missing: bool = True):
         idea_lines = [f"- {item}" for item in idea_items]
         heading_lines = [f"- {item}" for item in headings]
 
-        snapshot_content = (
-            f"# SNAPSHOT — {root.name}\n\n"
-            f"*Last updated: {today}*\n\n"
-            "## Current State\n\n"
-            "- Framework mode: active\n"
-            f"- Active branch: `{branch}`\n"
-            f"- Source documents analyzed: {len(docs)}\n\n"
-            "## Project Overview\n\n"
-            f"{overview}\n\n"
-            "## Source Documents\n\n"
-            f"{chr(10).join(docs_list)}\n\n"
-            "## Current Focus\n\n"
-            f"{chr(10).join(task_lines[:3])}\n"
-        )
+        if project_type == "content":
+            snapshot_content = (
+                f"# CONTENT SNAPSHOT — {root.name}\n\n"
+                f"*Last updated: {today}*\n\n"
+                "## Current State\n\n"
+                "- Project type: content\n"
+                "- Framework mode: active\n"
+                f"- Active branch: `{branch}`\n"
+                f"- Source documents analyzed: {len(docs)}\n\n"
+                "## Content Objective\n\n"
+                f"{overview}\n\n"
+                "## Source Documents\n\n"
+                f"{chr(10).join(docs_list)}\n\n"
+                "## Current Deliverables\n\n"
+                f"{chr(10).join(task_lines[:3])}\n"
+            )
 
-        backlog_content = (
-            f"# BACKLOG — {root.name}\n\n"
-            f"*Refreshed on {today}*\n\n"
-            "## Active Tasks\n\n"
-            f"{chr(10).join(task_lines)}\n\n"
-            "## Framework Follow-Ups\n\n"
-            "- [ ] Review generated state files and adjust priorities.\n"
-            "- [ ] Continue work cycle via start/finish protocol.\n"
-        )
+            backlog_content = (
+                f"# CONTENT BACKLOG — {root.name}\n\n"
+                f"*Refreshed on {today}*\n\n"
+                "## Research\n\n"
+                f"{chr(10).join(task_lines[:6])}\n\n"
+                "## Drafting and Editing\n\n"
+                f"{chr(10).join(task_lines[6:12] or task_lines[:3])}\n\n"
+                "## Framework Follow-Ups\n\n"
+                "- [ ] Keep editorial calendar synchronized with active sprint.\n"
+                "- [ ] Keep SOURCES.md updated for every critical claim.\n"
+            )
 
-        architecture_content = (
-            f"# ARCHITECTURE — {root.name}\n\n"
-            "*Generated from detected project artifacts*\n\n"
-            "## Detected Stack\n\n"
-            f"{chr(10).join(stack_lines)}\n\n"
-            "## Top-Level Structure\n\n"
-            f"{chr(10).join(structure_lines)}\n\n"
-            "## Key Topics\n\n"
-            f"{chr(10).join(heading_lines)}\n\n"
-            "## Notes\n\n"
-            "- Shared memory is stored in `.claude/`.\n"
-            "- Runtime entry points are in `CLAUDE.md` and `AGENTS.md`.\n"
-            "- Shared execution core is `src/framework-core/`.\n"
-        )
+            architecture_content = (
+                f"# CONTENT ARCHITECTURE — {root.name}\n\n"
+                "*Generated from detected project artifacts*\n\n"
+                "## Content System Overview\n\n"
+                f"{overview}\n\n"
+                "## Working Structure\n\n"
+                f"{chr(10).join(structure_lines)}\n\n"
+                "## Key Topics\n\n"
+                f"{chr(10).join(heading_lines)}\n\n"
+                "## Notes\n\n"
+                "- Content state is stored under `.claude/content/`.\n"
+                "- Runtime entry points are in `CLAUDE.md` and `AGENTS.md`.\n"
+                "- Shared execution core is `src/framework-core/`.\n"
+            )
 
-        roadmap_content = (
-            f"# ROADMAP — {root.name}\n\n"
-            "*Draft roadmap*\n\n"
-            "## Candidate Milestones\n\n"
-            f"{chr(10).join(roadmap_lines)}\n"
-        )
+            roadmap_content = (
+                f"# ROADMAP — {root.name}\n\n"
+                "*Content delivery roadmap*\n\n"
+                "## Candidate Milestones\n\n"
+                f"{chr(10).join(roadmap_lines)}\n"
+            )
 
-        ideas_content = (
-            f"# IDEAS — {root.name}\n\n"
-            "*Captured ideas*\n\n"
-            "## Candidate Ideas\n\n"
-            f"{chr(10).join(idea_lines)}\n"
-        )
+            ideas_content = (
+                f"# IDEAS — {root.name}\n\n"
+                "*Captured content directions*\n\n"
+                "## Candidate Ideas\n\n"
+                f"{chr(10).join(idea_lines)}\n"
+            )
 
-        targets = {
-            state_dir / "SNAPSHOT.md": snapshot_content,
-            state_dir / "BACKLOG.md": backlog_content,
-            state_dir / "ARCHITECTURE.md": architecture_content,
-            state_dir / "ROADMAP.md": roadmap_content,
-            state_dir / "IDEAS.md": ideas_content,
-        }
+            editorial_calendar_content = (
+                f"# EDITORIAL CALENDAR — {root.name}\n\n"
+                f"*Generated on {today}*\n\n"
+                "## Current Cycle\n\n"
+                "- Goal: define and complete the next content increment.\n"
+                "- Deadline: add target publish date.\n"
+                "- Owner: add owner/editor.\n\n"
+                "## Milestones\n\n"
+                "- [ ] Research lock\n"
+                "- [ ] Draft complete\n"
+                "- [ ] Editorial review complete\n"
+                "- [ ] Final approval\n"
+            )
+
+            sources_content = (
+                f"# SOURCES — {root.name}\n\n"
+                "*Reference registry for project claims*\n\n"
+                "## Primary Sources\n\n"
+                "- Source:\n"
+                "  - Type:\n"
+                "  - Link/Location:\n"
+                "  - Notes:\n\n"
+                "## Claims to Verify\n\n"
+                "- [ ] Claim:\n"
+                "  - Evidence:\n"
+                "  - Verification status:\n"
+            )
+
+            targets = {
+                state_dir / "SNAPSHOT.md": snapshot_content,
+                state_dir / "BACKLOG.md": backlog_content,
+                state_dir / "ARCHITECTURE.md": architecture_content,
+                state_dir / "ROADMAP.md": roadmap_content,
+                state_dir / "IDEAS.md": ideas_content,
+                state_dir / "EDITORIAL_CALENDAR.md": editorial_calendar_content,
+                state_dir / "SOURCES.md": sources_content,
+            }
+        else:
+            snapshot_content = (
+                f"# SNAPSHOT — {root.name}\n\n"
+                f"*Last updated: {today}*\n\n"
+                "## Current State\n\n"
+                "- Framework mode: active\n"
+                f"- Active branch: `{branch}`\n"
+                f"- Source documents analyzed: {len(docs)}\n\n"
+                "## Project Overview\n\n"
+                f"{overview}\n\n"
+                "## Source Documents\n\n"
+                f"{chr(10).join(docs_list)}\n\n"
+                "## Current Focus\n\n"
+                f"{chr(10).join(task_lines[:3])}\n"
+            )
+
+            backlog_content = (
+                f"# BACKLOG — {root.name}\n\n"
+                f"*Refreshed on {today}*\n\n"
+                "## Active Tasks\n\n"
+                f"{chr(10).join(task_lines)}\n\n"
+                "## Framework Follow-Ups\n\n"
+                "- [ ] Review generated state files and adjust priorities.\n"
+                "- [ ] Continue work cycle via start/finish protocol.\n"
+            )
+
+            architecture_content = (
+                f"# ARCHITECTURE — {root.name}\n\n"
+                "*Generated from detected project artifacts*\n\n"
+                "## Detected Stack\n\n"
+                f"{chr(10).join(stack_lines)}\n\n"
+                "## Top-Level Structure\n\n"
+                f"{chr(10).join(structure_lines)}\n\n"
+                "## Key Topics\n\n"
+                f"{chr(10).join(heading_lines)}\n\n"
+                "## Notes\n\n"
+                "- Shared memory is stored in `.claude/`.\n"
+                "- Runtime entry points are in `CLAUDE.md` and `AGENTS.md`.\n"
+                "- Shared execution core is `src/framework-core/`.\n"
+            )
+
+            roadmap_content = (
+                f"# ROADMAP — {root.name}\n\n"
+                "*Draft roadmap*\n\n"
+                "## Candidate Milestones\n\n"
+                f"{chr(10).join(roadmap_lines)}\n"
+            )
+
+            ideas_content = (
+                f"# IDEAS — {root.name}\n\n"
+                "*Captured ideas*\n\n"
+                "## Candidate Ideas\n\n"
+                f"{chr(10).join(idea_lines)}\n"
+            )
+
+            targets = {
+                state_dir / "SNAPSHOT.md": snapshot_content,
+                state_dir / "BACKLOG.md": backlog_content,
+                state_dir / "ARCHITECTURE.md": architecture_content,
+                state_dir / "ROADMAP.md": roadmap_content,
+                state_dir / "IDEAS.md": ideas_content,
+            }
 
         for path, content in targets.items():
             rel = path.relative_to(root).as_posix()
@@ -524,8 +696,12 @@ def ensure_project_baseline(create_missing: bool = True):
 
 def get_context_files():
     """Get list of context files to load."""
+    root = Path.cwd()
+    config = _read_framework_config(root)
+    project_type = _resolve_project_type(root, config)
+    state_dir = _state_directory(root, project_type).relative_to(root).as_posix()
     return [
-        ".claude/SNAPSHOT.md",
-        ".claude/BACKLOG.md",
-        ".claude/ARCHITECTURE.md"
+        f"{state_dir}/SNAPSHOT.md",
+        f"{state_dir}/BACKLOG.md",
+        f"{state_dir}/ARCHITECTURE.md"
     ]

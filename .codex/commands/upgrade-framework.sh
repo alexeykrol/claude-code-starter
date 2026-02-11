@@ -12,6 +12,8 @@ STARTED_AT="$(date -Iseconds)"
 END_AT="$STARTED_AT"
 BACKUP_DIR=""
 OLD_VERSION=""
+PROJECT_TYPE="software"
+STATE_DIR=".claude"
 
 CREATED_FILES=()
 UPDATED_FILES=()
@@ -42,7 +44,7 @@ write_log() {
   local step_name="$3"
   local last_error="${4:-}"
 
-  python3 - "$LOG_FILE" "$STARTED_AT" "$status" "$step_num" "$step_name" "$STEPS_COMPLETED" "$last_error" "$OLD_VERSION" <<'PY'
+  python3 - "$LOG_FILE" "$STARTED_AT" "$status" "$step_num" "$step_name" "$STEPS_COMPLETED" "$last_error" "$OLD_VERSION" "$PROJECT_TYPE" <<'PY'
 import json
 import sys
 from pathlib import Path
@@ -55,12 +57,14 @@ step_name = sys.argv[5]
 steps_csv = sys.argv[6]
 last_error = sys.argv[7] if len(sys.argv) > 7 else ""
 old_version = sys.argv[8] if len(sys.argv) > 8 else ""
+project_type = sys.argv[9] if len(sys.argv) > 9 else "software"
 
 steps_completed = [s for s in steps_csv.split(",") if s]
 payload = {
     "status": status,
     "mode": "upgrade",
     "old_version": old_version or "unknown",
+    "project_type": project_type,
     "started": started,
     "updated": __import__("datetime").datetime.now().astimezone().isoformat(timespec="seconds"),
     "current_step": step_num,
@@ -88,7 +92,7 @@ render_template_if_missing() {
     return 0
   fi
 
-  python3 - "$template_path" "$target_path" "$ROOT_DIR" <<'PY'
+  python3 - "$template_path" "$target_path" "$ROOT_DIR" "$PROJECT_TYPE" <<'PY'
 import json
 import subprocess
 import sys
@@ -98,6 +102,7 @@ from pathlib import Path
 template_path = Path(sys.argv[1])
 target_path = Path(sys.argv[2])
 root = Path(sys.argv[3])
+project_type = (sys.argv[4] if len(sys.argv) > 4 else "software").strip().lower()
 
 package = {}
 package_json = root / "package.json"
@@ -180,6 +185,7 @@ replacements = {
     "PROJECT_NAME": root.name,
     "DATE": datetime.now().strftime("%Y-%m-%d"),
     "CURRENT_BRANCH": detect_branch(),
+    "PROJECT_TYPE": project_type if project_type in {"software", "content"} else "software",
     "PROJECT_VERSION": str(package.get("version", "0.1.0")),
     "PROJECT_DESCRIPTION": str(package.get("description", "Project integrated with framework migration flow.")),
     "TECH_STACK": detect_tech_stack(),
@@ -272,30 +278,40 @@ track_generated_state_file() {
 
 generate_upgrade_memory_files() {
   local snapshot_exists=0 backlog_exists=0 architecture_exists=0 roadmap_exists=0 ideas_exists=0
+  local editorial_calendar_exists=0 sources_exists=0
   local snapshot_hash="" backlog_hash="" architecture_hash="" roadmap_hash="" ideas_hash=""
+  local editorial_calendar_hash="" sources_hash=""
 
-  if [ -f ".claude/SNAPSHOT.md" ]; then
+  if [ -f "$STATE_DIR/SNAPSHOT.md" ]; then
     snapshot_exists=1
-    snapshot_hash="$(file_sha256 ".claude/SNAPSHOT.md")"
+    snapshot_hash="$(file_sha256 "$STATE_DIR/SNAPSHOT.md")"
   fi
-  if [ -f ".claude/BACKLOG.md" ]; then
+  if [ -f "$STATE_DIR/BACKLOG.md" ]; then
     backlog_exists=1
-    backlog_hash="$(file_sha256 ".claude/BACKLOG.md")"
+    backlog_hash="$(file_sha256 "$STATE_DIR/BACKLOG.md")"
   fi
-  if [ -f ".claude/ARCHITECTURE.md" ]; then
+  if [ -f "$STATE_DIR/ARCHITECTURE.md" ]; then
     architecture_exists=1
-    architecture_hash="$(file_sha256 ".claude/ARCHITECTURE.md")"
+    architecture_hash="$(file_sha256 "$STATE_DIR/ARCHITECTURE.md")"
   fi
-  if [ -f ".claude/ROADMAP.md" ]; then
+  if [ -f "$STATE_DIR/ROADMAP.md" ]; then
     roadmap_exists=1
-    roadmap_hash="$(file_sha256 ".claude/ROADMAP.md")"
+    roadmap_hash="$(file_sha256 "$STATE_DIR/ROADMAP.md")"
   fi
-  if [ -f ".claude/IDEAS.md" ]; then
+  if [ -f "$STATE_DIR/IDEAS.md" ]; then
     ideas_exists=1
-    ideas_hash="$(file_sha256 ".claude/IDEAS.md")"
+    ideas_hash="$(file_sha256 "$STATE_DIR/IDEAS.md")"
+  fi
+  if [ -f "$STATE_DIR/EDITORIAL_CALENDAR.md" ]; then
+    editorial_calendar_exists=1
+    editorial_calendar_hash="$(file_sha256 "$STATE_DIR/EDITORIAL_CALENDAR.md")"
+  fi
+  if [ -f "$STATE_DIR/SOURCES.md" ]; then
+    sources_exists=1
+    sources_hash="$(file_sha256 "$STATE_DIR/SOURCES.md")"
   fi
 
-  python3 - "$ROOT_DIR" "$OLD_VERSION" <<'PY'
+  python3 - "$ROOT_DIR" "$OLD_VERSION" "$PROJECT_TYPE" <<'PY'
 import os
 import re
 import sys
@@ -306,7 +322,10 @@ from pathlib import Path
 
 root = Path(sys.argv[1])
 old_version = (sys.argv[2] or "").strip() if len(sys.argv) > 2 else ""
+project_type = (sys.argv[3] if len(sys.argv) > 3 else "software").strip().lower()
 state_dir = root / ".claude"
+if project_type == "content":
+    state_dir = state_dir / "content"
 state_dir.mkdir(parents=True, exist_ok=True)
 
 skip_root_dirs = {
@@ -561,7 +580,134 @@ headings_block = "\n".join(f"- {item}" for item in heading_notes) if heading_not
 stack_block = "\n".join(f"- {item}" for item in detect_stack())
 structure_block = "\n".join(top_level_structure())
 
-snapshot = f"""
+if project_type == "content":
+    snapshot = f"""
+# CONTENT SNAPSHOT — {project}
+
+*Last updated: {today}*
+
+## Current State
+
+- Project type: content
+- Framework mode: framework upgrade
+- Previous framework version: `{old_version or "unknown"}`
+- Active branch: `{branch}`
+- Repository sources analyzed: {len(doc_snippets)}
+
+## Content Objective
+
+{overview}
+
+## Source Documents
+
+{os.linesep.join(docs_list)}
+
+## Current Deliverables (Inferred)
+
+{tasks_block.splitlines()[0] if tasks_block else "- Define immediate priorities"}
+{tasks_block.splitlines()[1] if len(tasks_block.splitlines()) > 1 else ""}
+{tasks_block.splitlines()[2] if len(tasks_block.splitlines()) > 2 else ""}
+"""
+
+    backlog = f"""
+# CONTENT BACKLOG — {project}
+
+*Inferred from repository materials on {today}*
+
+## Research and Drafting
+
+{tasks_block}
+
+## Upgrade Follow-Ups
+
+- [ ] Validate generated priorities with the project owner.
+- [ ] Confirm editorial workflow and milestone cadence.
+- [ ] Continue work cycles via start/finish protocol.
+"""
+
+    architecture = f"""
+# CONTENT ARCHITECTURE — {project}
+
+*Generated from detected project artifacts*
+
+## Content System Overview
+
+{overview}
+
+## Top-Level Structure
+
+{structure_block}
+
+## Key Topics Found in Project Docs
+
+{headings_block}
+
+## Data / Workflow Notes
+
+- Content memory is stored in `.claude/content/`.
+- Agent adapters execute from `.claude/` (Claude) and `.codex/` (Codex).
+- Shared runtime scripts live in `src/framework-core/`.
+"""
+
+    roadmap = f"""
+# ROADMAP — {project}
+
+*Content roadmap inferred during framework upgrade*
+
+## Candidate Milestones
+
+{roadmap_block}
+"""
+
+    ideas = f"""
+# IDEAS — {project}
+
+*Candidate ideas captured during framework upgrade*
+
+## Candidate Ideas
+
+{ideas_block}
+"""
+
+    editorial_calendar = f"""
+# EDITORIAL CALENDAR — {project}
+
+*Generated on {today}*
+
+## Current Cycle
+
+- Goal: define next content increment.
+- Deadline: add target publish date.
+- Owner: assign author/editor.
+
+## Milestones
+
+- [ ] Research lock
+- [ ] Draft complete
+- [ ] Review complete
+- [ ] Final approval
+"""
+
+    sources = f"""
+# SOURCES — {project}
+
+*Reference registry for content claims*
+
+## Primary Sources
+
+- Source:
+  - Type:
+  - Link/Location:
+  - Notes:
+
+## Claims to Verify
+
+- [ ] Claim:
+  - Evidence:
+  - Verification status:
+"""
+else:
+    snapshot = f"""
 # SNAPSHOT — {project}
 
 *Last updated: {today}*
@@ -588,7 +734,7 @@ snapshot = f"""
 {tasks_block.splitlines()[2] if len(tasks_block.splitlines()) > 2 else ""}
 """
 
-backlog = f"""
+    backlog = f"""
 # BACKLOG — {project}
 
 *Inferred from repository materials on {today}*
@@ -604,7 +750,7 @@ backlog = f"""
 - [ ] Continue work cycles via start/finish protocol.
 """
 
-architecture = f"""
+    architecture = f"""
 # ARCHITECTURE — {project}
 
 *Generated from detected project artifacts*
@@ -628,7 +774,7 @@ architecture = f"""
 - Shared runtime scripts live in `src/framework-core/`.
 """
 
-roadmap = f"""
+    roadmap = f"""
 # ROADMAP — {project}
 
 *Draft roadmap inferred during framework upgrade*
@@ -638,7 +784,7 @@ roadmap = f"""
 {roadmap_block}
 """
 
-ideas = f"""
+    ideas = f"""
 # IDEAS — {project}
 
 *Candidate ideas captured during framework upgrade*
@@ -653,17 +799,24 @@ write_if_needed(state_dir / "BACKLOG.md", backlog)
 write_if_needed(state_dir / "ARCHITECTURE.md", architecture)
 write_if_needed(state_dir / "ROADMAP.md", roadmap)
 write_if_needed(state_dir / "IDEAS.md", ideas)
+if project_type == "content":
+    write_if_needed(state_dir / "EDITORIAL_CALENDAR.md", editorial_calendar)
+    write_if_needed(state_dir / "SOURCES.md", sources)
 PY
 
   if [ $? -ne 0 ]; then
     WARNINGS+=("upgrade analysis generation failed")
   fi
 
-  track_generated_state_file ".claude/SNAPSHOT.md" "$snapshot_exists" "$snapshot_hash"
-  track_generated_state_file ".claude/BACKLOG.md" "$backlog_exists" "$backlog_hash"
-  track_generated_state_file ".claude/ARCHITECTURE.md" "$architecture_exists" "$architecture_hash"
-  track_generated_state_file ".claude/ROADMAP.md" "$roadmap_exists" "$roadmap_hash"
-  track_generated_state_file ".claude/IDEAS.md" "$ideas_exists" "$ideas_hash"
+  track_generated_state_file "$STATE_DIR/SNAPSHOT.md" "$snapshot_exists" "$snapshot_hash"
+  track_generated_state_file "$STATE_DIR/BACKLOG.md" "$backlog_exists" "$backlog_hash"
+  track_generated_state_file "$STATE_DIR/ARCHITECTURE.md" "$architecture_exists" "$architecture_hash"
+  track_generated_state_file "$STATE_DIR/ROADMAP.md" "$roadmap_exists" "$roadmap_hash"
+  track_generated_state_file "$STATE_DIR/IDEAS.md" "$ideas_exists" "$ideas_hash"
+  if [ "$PROJECT_TYPE" = "content" ]; then
+    track_generated_state_file "$STATE_DIR/EDITORIAL_CALENDAR.md" "$editorial_calendar_exists" "$editorial_calendar_hash"
+    track_generated_state_file "$STATE_DIR/SOURCES.md" "$sources_exists" "$sources_hash"
+  fi
 }
 
 backup_if_exists() {
@@ -693,6 +846,7 @@ write_migration_report() {
     echo ""
     echo "- Project: \`$PROJECT_NAME\`"
     echo "- Mode: \`upgrade\`"
+    echo "- Project type: \`$PROJECT_TYPE\`"
     echo "- Status: \`success\`"
     echo "- Previous version: \`${OLD_VERSION:-unknown}\`"
     echo "- Started: \`$STARTED_AT\`"
@@ -755,7 +909,7 @@ if [ ! -f "$CONTEXT_FILE" ]; then
   exit 2
 fi
 
-MODE_AND_VERSION="$(python3 - "$CONTEXT_FILE" <<'PY'
+MODE_VERSION_AND_TYPE="$(python3 - "$CONTEXT_FILE" <<'PY'
 import json
 import sys
 from pathlib import Path
@@ -764,13 +918,23 @@ path = Path(sys.argv[1])
 data = json.loads(path.read_text(encoding="utf-8"))
 mode = data.get("mode", "")
 old_version = data.get("old_version", "")
+project_type = data.get("project_type", "software")
 print(mode)
 print(old_version)
+print(project_type)
 PY
 )"
 
-MODE="$(printf "%s\n" "$MODE_AND_VERSION" | sed -n '1p')"
-OLD_VERSION="$(printf "%s\n" "$MODE_AND_VERSION" | sed -n '2p')"
+MODE="$(printf "%s\n" "$MODE_VERSION_AND_TYPE" | sed -n '1p')"
+OLD_VERSION="$(printf "%s\n" "$MODE_VERSION_AND_TYPE" | sed -n '2p')"
+PROJECT_TYPE_RAW="$(printf "%s\n" "$MODE_VERSION_AND_TYPE" | sed -n '3p' | tr '[:upper:]' '[:lower:]' | tr -d '[:space:]')"
+if [ "$PROJECT_TYPE_RAW" = "content" ]; then
+  PROJECT_TYPE="content"
+  STATE_DIR=".claude/content"
+else
+  PROJECT_TYPE="software"
+  STATE_DIR=".claude"
+fi
 
 if [ "$MODE" != "upgrade" ]; then
   log "unexpected migration mode '$MODE' (expected 'upgrade')"
@@ -788,11 +952,15 @@ BACKUP_DIR=".claude/backups/upgrade-$(date +%Y%m%d-%H%M%S)"
 mkdir -p "$BACKUP_DIR"
 
 backup_if_exists "CLAUDE.md"
-backup_if_exists ".claude/SNAPSHOT.md"
-backup_if_exists ".claude/BACKLOG.md"
-backup_if_exists ".claude/ARCHITECTURE.md"
-backup_if_exists ".claude/ROADMAP.md"
-backup_if_exists ".claude/IDEAS.md"
+backup_if_exists "$STATE_DIR/SNAPSHOT.md"
+backup_if_exists "$STATE_DIR/BACKLOG.md"
+backup_if_exists "$STATE_DIR/ARCHITECTURE.md"
+backup_if_exists "$STATE_DIR/ROADMAP.md"
+backup_if_exists "$STATE_DIR/IDEAS.md"
+if [ "$PROJECT_TYPE" = "content" ]; then
+  backup_if_exists "$STATE_DIR/EDITORIAL_CALENDAR.md"
+  backup_if_exists "$STATE_DIR/SOURCES.md"
+fi
 backup_if_exists ".claude/.framework-config"
 backup_if_exists ".claude/COMMIT_POLICY.md"
 
@@ -811,6 +979,7 @@ if [ ! -f ".claude/.framework-config" ]; then
   \"bug_reporting_enabled\": false,
   \"dialog_export_enabled\": false,
   \"project_name\": \"$PROJECT_NAME\",
+  \"project_type\": \"$PROJECT_TYPE\",
   \"first_run_completed\": false,
   \"consent_version\": \"1.0\",
   \"cold_start\": {
@@ -824,6 +993,38 @@ if [ ! -f ".claude/.framework-config" ]; then
     \"show_commit_message\": true
   }
 }"
+fi
+
+if [ "$PROJECT_TYPE" = "content" ]; then
+  ensure_text_file_if_missing "$STATE_DIR/EDITORIAL_CALENDAR.md" "# EDITORIAL CALENDAR — $PROJECT_NAME
+
+## Current Cycle
+
+- Goal:
+- Deadline:
+- Owner:
+
+## Milestones
+
+- [ ] Research lock
+- [ ] Draft complete
+- [ ] Review complete
+- [ ] Final approval"
+
+  ensure_text_file_if_missing "$STATE_DIR/SOURCES.md" "# SOURCES — $PROJECT_NAME
+
+## Primary Sources
+
+- Source:
+  - Type:
+  - Link/Location:
+  - Notes:
+
+## Claims to Verify
+
+- [ ] Claim:
+  - Evidence:
+  - Verification status:"
 fi
 
 if [ ! -f ".claude/COMMIT_POLICY.md" ]; then

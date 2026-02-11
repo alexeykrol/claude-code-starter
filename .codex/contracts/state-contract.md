@@ -1,9 +1,14 @@
 # Shared State Contract (Agent-Agnostic)
 
 Primary shared memory files:
-- `.claude/SNAPSHOT.md`
-- `.claude/BACKLOG.md`
-- `.claude/ARCHITECTURE.md`
+- Software profile:
+  - `.claude/SNAPSHOT.md`
+  - `.claude/BACKLOG.md`
+  - `.claude/ARCHITECTURE.md`
+- Content profile:
+  - `.claude/content/SNAPSHOT.md`
+  - `.claude/content/BACKLOG.md`
+  - `.claude/content/ARCHITECTURE.md`
 - `CHANGELOG.md` (when release-level changes occur)
 
 Contract rules:
