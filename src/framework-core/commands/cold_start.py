@@ -20,7 +20,10 @@ def run_cold_start():
     """
     start_time = time.time()
 
-    # Define all tasks to run in parallel
+    # Init/normalize config first so downstream tasks read consistent defaults.
+    config_result = init_config()
+
+    # Define tasks to run in parallel
     tasks = [
         migration_cleanup,      # Task 1
         check_crash,           # Task 2
@@ -29,13 +32,11 @@ def run_cold_start():
         export_dialogs,        # Task 5
         ensure_commit_policy,  # Task 6
         install_git_hooks,     # Task 7
-        init_config,           # Task 8
-        # Task 9 (load context) - returns file paths, not a task
-        mark_active            # Task 10
+        mark_active            # Task 8
     ]
 
-    # Run all tasks in parallel
-    task_results = run_tasks_parallel(tasks)
+    # Run tasks in parallel and prepend config result.
+    task_results = [config_result] + run_tasks_parallel(tasks)
 
     # Check for crash that needs user input
     crash_result = next(

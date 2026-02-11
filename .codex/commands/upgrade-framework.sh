@@ -20,7 +20,7 @@ WARNINGS=()
 BACKED_UP_FILES=()
 STEPS_COMPLETED=""
 CLAUDE_SWAPPED="false"
-ARCHIVED_LOG=""
+ARCHIVED_LOG="$REPORTS_DIR/${PROJECT_NAME}-migration-log.json"
 MIGRATION_REPORT=""
 
 log() {
@@ -680,7 +680,6 @@ backup_if_exists() {
 
 archive_log() {
   mkdir -p "$REPORTS_DIR"
-  ARCHIVED_LOG="$REPORTS_DIR/${PROJECT_NAME}-migration-log.json"
   cp "$LOG_FILE" "$ARCHIVED_LOG"
 }
 
@@ -804,14 +803,26 @@ write_log "in_progress" 3 "state-upgrade"
 
 generate_upgrade_memory_files
 
-render_template_if_missing ".claude/templates/.framework-config.template.json" ".claude/.framework-config"
-render_template_if_missing ".claude/templates/COMMIT_POLICY.template.md" ".claude/COMMIT_POLICY.md"
+render_template_if_missing "migration/templates/.framework-config.template.json" ".claude/.framework-config"
+render_template_if_missing "migration/templates/COMMIT_POLICY.template.md" ".claude/COMMIT_POLICY.md"
 
 if [ ! -f ".claude/.framework-config" ]; then
   ensure_text_file_if_missing ".claude/.framework-config" "{
   \"bug_reporting_enabled\": false,
+  \"dialog_export_enabled\": false,
   \"project_name\": \"$PROJECT_NAME\",
-  \"first_run_completed\": false
+  \"first_run_completed\": false,
+  \"consent_version\": \"1.0\",
+  \"cold_start\": {
+    \"silent_mode\": true,
+    \"show_ready\": false,
+    \"auto_update\": true
+  },
+  \"completion\": {
+    \"silent_mode\": true,
+    \"auto_commit\": false,
+    \"show_commit_message\": true
+  }
 }"
 fi
 
@@ -830,12 +841,28 @@ if [ ! -f ".claude/COMMIT_POLICY.md" ]; then
 - Files with potential secrets"
 fi
 
+ensure_text_file_if_missing "CHANGELOG.md" "# Changelog
+
+All notable changes to this project will be documented in this file.
+
+## [Unreleased]
+
+- Initial framework baseline created."
+
+ensure_text_file_if_missing ".gitignore" ".env
+.env.*
+*credentials*
+*.pem
+*.key
+.claude/.last_session
+.claude/logs/
+reports/"
+
 append_step "state-upgrade"
 
 log "step 4/5: writing migration artifacts"
 write_log "in_progress" 4 "reporting"
 
-archive_log
 write_migration_report
 
 append_step "reporting"
@@ -851,6 +878,7 @@ fi
 
 append_step "cleanup"
 write_log "success" 5 "cleanup"
+archive_log
 
 rm -f "$CONTEXT_FILE"
 rm -f "$LOG_FILE"

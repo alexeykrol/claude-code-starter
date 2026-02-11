@@ -5,6 +5,7 @@ from utils.result import create_result
 from utils.parallel import run_tasks_parallel
 from tasks.git import check_git_status, get_git_diff
 from tasks.security import cleanup_dialogs, export_dialogs
+from tasks.config import init_config, ensure_project_baseline
 
 
 def run_completion():
@@ -17,6 +18,12 @@ def run_completion():
     """
     start_time = time.time()
 
+    # Normalize config and baseline files before running completion checks.
+    bootstrap_results = [
+        init_config(),
+        ensure_project_baseline(),
+    ]
+
     # Define tasks to run in parallel
     tasks = [
         cleanup_dialogs,     # Security cleanup
@@ -26,7 +33,7 @@ def run_completion():
     ]
 
     # Run all tasks in parallel
-    task_results = run_tasks_parallel(tasks)
+    task_results = bootstrap_results + run_tasks_parallel(tasks)
 
     # Check for errors
     errors = [
