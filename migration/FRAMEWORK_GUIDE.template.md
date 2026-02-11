@@ -1,6 +1,6 @@
 # Working with Claude Code Starter Framework
 
-> This project uses **Claude Code Starter Framework v4.0.1**.
+> This project uses **Claude Code Starter Framework v4.0.2**.
 
 ## Quick Start
 

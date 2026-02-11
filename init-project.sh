@@ -1,14 +1,14 @@
 #!/bin/bash
 #
 # Claude Code Starter Framework — Installer
-# Version: 4.0.1
+# Version: 4.0.2
 #
 # Downloads and installs the framework from GitHub Releases
 #
 
 set -e  # Exit on error
 
-VERSION="${FRAMEWORK_VERSION:-4.0.1}"
+VERSION="${FRAMEWORK_VERSION:-4.0.2}"
 REPO="${FRAMEWORK_REPO:-alexeykrol/claude-code-starter}"
 ARCHIVE_URL="${FRAMEWORK_ARCHIVE_URL:-https://github.com/${REPO}/releases/download/v${VERSION}/framework.tar.gz}"
 PROJECT_DIR="$(pwd)"
