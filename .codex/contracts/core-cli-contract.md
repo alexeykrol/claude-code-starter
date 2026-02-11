@@ -13,6 +13,10 @@ JSON envelope:
 - `data`: optional payload (e.g., crash reason)
 - `duration_total_ms`: optional duration
 
+`needs_input` reasons currently used:
+- `crash_detected`
+- `session_locked`
+
 Exit codes:
 - `0`: success
 - `1`: error

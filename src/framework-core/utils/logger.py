@@ -32,7 +32,7 @@ def setup_logging(command):
         ]
     )
 
-    logging.info(f"Framework Core v3.1.1 - {command}")
+    logging.info(f"Framework Core v4.0.0 - {command}")
     logging.info(f"Log file: {log_file}")
 
 

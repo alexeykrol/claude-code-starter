@@ -11,3 +11,6 @@ Contract rules:
 2. Writes must preserve semantic structure and section intent.
 3. Agent-specific runtime state must not be stored in business memory files.
 4. Migration/update operations must preserve existing project data.
+5. Concurrent sessions must use `.claude/.session-owner` lock with fields: `agent`, `pid`, `timestamp`.
+6. Lock TTL is 30 minutes; stale lock may be recovered automatically.
+7. Completion flow should release lock and mark session clean.

@@ -371,6 +371,7 @@ def ensure_project_baseline(create_missing: bool = True):
             "*.pem",
             "*.key",
             ".claude/.last_session",
+            ".claude/.session-owner",
             ".claude/logs/",
             "reports/",
         ]

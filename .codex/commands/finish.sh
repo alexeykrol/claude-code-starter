@@ -3,9 +3,10 @@ set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "$ROOT_DIR"
+OWNER_PID="${PPID:-$$}"
 
 set +e
-OUTPUT="$(python3 src/framework-core/main.py completion 2>&1)"
+OUTPUT="$(FRAMEWORK_AGENT_NAME=codex FRAMEWORK_OWNER_PID=$OWNER_PID python3 src/framework-core/main.py completion 2>&1)"
 EXIT_CODE=$?
 set -e
 

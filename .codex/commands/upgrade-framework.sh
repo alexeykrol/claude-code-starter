@@ -855,6 +855,7 @@ ensure_text_file_if_missing ".gitignore" ".env
 *.pem
 *.key
 .claude/.last_session
+.claude/.session-owner
 .claude/logs/
 reports/"
 

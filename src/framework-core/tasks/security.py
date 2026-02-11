@@ -1,5 +1,6 @@
 """Security tasks."""
 
+import logging
 import subprocess
 from pathlib import Path
 from utils.parallel import time_task
@@ -44,7 +45,11 @@ def cleanup_dialogs():
             # Extract count from "Total redactions: N" in summary
             import re
             match = re.search(r'Total redactions:\s*(\d+)', result.stdout)
-            count = match.group(1) if match else "unknown"
+            if not match:
+                logging.warning("Failed to parse redaction count from cleanup output")
+                count = "0"
+            else:
+                count = match.group(1)
             return create_task_result("security_cleanup", "success", f"SECURITY:redacted:{count}")
 
         return create_task_result("security_cleanup", "success", "SECURITY:clean")

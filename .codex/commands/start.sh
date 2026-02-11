@@ -3,10 +3,11 @@ set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "$ROOT_DIR"
+OWNER_PID="${PPID:-$$}"
 
 run_cold_start() {
   set +e
-  OUTPUT="$(python3 src/framework-core/main.py cold-start 2>&1)"
+  OUTPUT="$(FRAMEWORK_AGENT_NAME=codex FRAMEWORK_OWNER_PID=$OWNER_PID python3 src/framework-core/main.py cold-start 2>&1)"
   EXIT_CODE=$?
   set -e
 }
@@ -31,24 +32,7 @@ fi
 run_cold_start
 
 if [ "$EXIT_CODE" -eq 0 ] && [ "${CODEX_AUTO_UPDATE:-1}" != "0" ] && [ -f "quick-update.sh" ]; then
-  UPDATE_RESULT="$(python3 -c '
-import json
-import sys
-
-raw = sys.argv[1]
-try:
-    data = json.loads(raw)
-except Exception:
-    print("")
-    raise SystemExit(0)
-
-for task in data.get("tasks", []):
-    if task.get("name") == "version_check":
-        result = str(task.get("result", ""))
-        if result.startswith("UPDATE:available:"):
-            print(result)
-            break
-' "$OUTPUT")"
+  UPDATE_RESULT="$(python3 .codex/utils/parse-update-result.py "$OUTPUT")"
 
   if [[ "$UPDATE_RESULT" == UPDATE:available:* ]]; then
     echo "[codex] update detected ($UPDATE_RESULT). applying framework update automatically."
@@ -70,7 +54,7 @@ fi
 printf "%s\n" "$OUTPUT"
 
 if [ "$EXIT_CODE" -eq 2 ]; then
-  echo "[codex] action-required: crash recovery decision is needed before continuing."
+  echo "[codex] action-required: input is needed before continuing (crash recovery or active session lock)."
 fi
 
 exit "$EXIT_CODE"

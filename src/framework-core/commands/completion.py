@@ -6,6 +6,7 @@ from utils.parallel import run_tasks_parallel
 from tasks.git import check_git_status, get_git_diff
 from tasks.security import cleanup_dialogs, export_dialogs
 from tasks.config import init_config, ensure_project_baseline
+from tasks.session import mark_clean_task, release_session_lock
 
 
 def run_completion():
@@ -35,6 +36,10 @@ def run_completion():
 
     # Run all tasks in parallel
     task_results = bootstrap_results + run_tasks_parallel(tasks)
+
+    # Finalize session state and release ownership lock.
+    task_results.append(mark_clean_task())
+    task_results.append(release_session_lock())
 
     # Check for errors
     errors = [
