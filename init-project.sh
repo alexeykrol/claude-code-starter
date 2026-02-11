@@ -35,6 +35,24 @@ log_success() { echo -e "${GREEN}✓${NC} $1"; }
 log_warning() { echo -e "${YELLOW}⚠${NC} $1"; }
 log_error() { echo -e "${RED}✗${NC} $1"; }
 
+is_interactive_mode() {
+    [ "${FRAMEWORK_INTERACTIVE:-0}" = "1" ]
+}
+
+confirm_step() {
+    local prompt="$1"
+
+    if is_interactive_mode; then
+        read -p "$prompt (y/N) " -n 1 -r
+        echo
+        [[ $REPLY =~ ^[Yy]$ ]]
+        return
+    fi
+
+    log_info "$prompt -> auto-confirmed (set FRAMEWORK_INTERACTIVE=1 to enable prompts)"
+    return 0
+}
+
 install_codex_adapter() {
     if [ -d "$TEMP_DIR/framework/.codex" ]; then
         mkdir -p .codex
@@ -93,9 +111,7 @@ echo ""
 # Check if running in a project directory
 if [ ! -d ".git" ] && [ ! -f "package.json" ] && [ ! -f "README.md" ]; then
     log_warning "This doesn't look like a project directory"
-    read -p "Continue anyway? (y/N) " -n 1 -r
-    echo
-    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+    if ! confirm_step "Continue anyway?"; then
         log_info "Installation cancelled"
         exit 0
     fi
@@ -272,10 +288,7 @@ case $PROJECT_TYPE in
         echo "  4. ❌ NOT modify your existing files"
         echo ""
 
-        read -p "Proceed with deep analysis? (y/N) " -n 1 -r
-        echo
-
-        if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+        if ! confirm_step "Proceed with deep analysis?"; then
             log_info "Installation cancelled"
             log_info "You can install Framework later with: ./init-project.sh"
             exit 0
@@ -312,10 +325,7 @@ case $PROJECT_TYPE in
         echo "  • 💾 Create backup before changes"
         echo ""
 
-        read -p "Proceed with migration? (y/N) " -n 1 -r
-        echo
-
-        if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+        if ! confirm_step "Proceed with migration?"; then
             log_info "Migration cancelled"
             exit 0
         fi
@@ -342,10 +352,7 @@ case $PROJECT_TYPE in
         echo "Existing Claude adapter files will be preserved."
         echo ""
 
-        read -p "Proceed with Codex adapter installation? (y/N) " -n 1 -r
-        echo
-
-        if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+        if ! confirm_step "Proceed with Codex adapter installation?"; then
             log_info "Installation cancelled"
             exit 0
         fi
