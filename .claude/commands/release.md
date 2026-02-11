@@ -35,7 +35,7 @@ description: Создать релиз фреймворка Claude Code Starter
 grep "badge/version" README.md
 ```
 
-Текущая версия в формате badge: `version-1.2.5`
+Текущая версия в формате badge: `version-<current-version>`
 
 ### Шаг 2: Проанализировать изменения
 
