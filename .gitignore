@@ -252,6 +252,14 @@ html-viewer/
 AGENT_SKILLS_GUIDE.md
 BUG_REPORT_FRAMEWORK.md
 
+# Internal planning/protocol artifacts (not for public distribution)
+GO_NO_GO_PROTOCOL*.md
+HOST_PROJECT_E2E_REPORT_*.md
+PARITY_SMOKE_REPORT_*.md
+PHASE*_INVENTORY_MAP*.md
+PHASE*_PARITY_REPORT_*.md
+MULTI_AGENT_PORTING_CONCEPT.md
+
 # Archived historical files (old development docs)
 archive/
 
