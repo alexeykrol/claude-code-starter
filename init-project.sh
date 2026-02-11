@@ -153,8 +153,18 @@ log_success "Extracted framework files"
 # ============================================
 
 detect_project_type() {
+    # Check for existing Framework markers.
+    # Note: some projects may have a local `.claude/` from Claude app settings
+    # without framework installation. Treat as framework only if real markers exist.
+    FRAMEWORK_MARKERS=0
+    if [ -f "CLAUDE.md" ] || [ -f "AGENTS.md" ] || [ -d ".codex" ]; then
+        FRAMEWORK_MARKERS=1
+    elif [ -d ".claude" ] && { [ -d ".claude/commands" ] || [ -d ".claude/protocols" ] || [ -d ".claude/templates" ] || [ -f ".claude/migration-context.json" ]; }; then
+        FRAMEWORK_MARKERS=1
+    fi
+
     # Check for existing Framework
-    if [ -d ".claude" ]; then
+    if [ "$FRAMEWORK_MARKERS" -eq 1 ]; then
         # Scenario 3: Has Framework - detect version
         if [ -f ".claude/SNAPSHOT.md" ]; then
             VERSION_LINE=$(grep -i "framework:" .claude/SNAPSHOT.md 2>/dev/null | head -1)
