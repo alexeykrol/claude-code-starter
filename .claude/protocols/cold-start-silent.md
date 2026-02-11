@@ -1,6 +1,6 @@
 # Cold Start Protocol (True Silent Mode)
 
-**Version:** 4.0.0
+**Version:** 4.0.1
 **Last updated:** 2026-02-10
 
 **Purpose:** Invisible session initialization. Show ONLY critical issues.

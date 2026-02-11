@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [4.0.1] - 2026-02-11
+
+### Fixed
+
+- **Installer flow is non-interactive by default**
+  - Removed blocking confirmation prompts from `init-project.sh` default path.
+  - Added optional interactive mode via `FRAMEWORK_INTERACTIVE=1`.
+
+- **Framework detection in host projects**
+  - Fixed false-positive upgrade detection when project only had local `.claude/settings.local.json`.
+  - Installer now treats framework as installed only when real framework markers exist.
+
+- **Migration Claude templates synchronized with v4 runtime**
+  - Updated `migration/CLAUDE.migration.md` and `migration/CLAUDE.production.md` to `v4`.
+  - Prevents stale `v2.2` migration router behavior during fresh installs.
+
 ## [4.0.0] - 2026-02-11
 
 ### Added
