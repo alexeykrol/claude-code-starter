@@ -57,6 +57,11 @@ chmod +x init-project.sh
 ./init-project.sh
 ```
 
+Для публичного стабильного сценария целевой путь такой:
+- GitHub Release содержит `init-project.sh` и `framework.tar.gz`;
+- пользователь берёт только `init-project.sh`;
+- launcher сам скачивает `framework.tar.gz` из release.
+
 ### Вариант 2. Запуск из локального checkout framework
 
 Если framework уже скачан локально:
@@ -100,6 +105,22 @@ Download strategy:
 - если и это недоступно, падает назад на repository snapshot.
 
 То есть UX уже один, даже если release pipeline ещё в процессе оформления.
+
+## Release Assets
+
+Каждый нормальный release этого репозитория должен публиковать:
+- `init-project.sh`
+- `framework.tar.gz`
+- `checksums.txt`
+- `RELEASE_NOTES.md`
+
+Смысл такой:
+- `init-project.sh` — единственный публичный installer file;
+- `framework.tar.gz` — payload archive, который installer скачивает в standalone mode;
+- `checksums.txt` — проверка целостности;
+- `RELEASE_NOTES.md` — human-readable release summary.
+
+Подробная release-процедура описана в [RELEASING.md](RELEASING.md).
 
 ## Какие Сценарии Launcher Определяет Сам
 
@@ -216,6 +237,29 @@ manifest.md
 - launcher остаётся одним файлом и простым для пользователя;
 - payload можно эволюционировать отдельно;
 - release asset может содержать только launcher, а остальное он скачает сам.
+
+## Подготовка Release
+
+В репозитории уже есть release tooling:
+- [scripts/validate-release.sh](scripts/validate-release.sh) — проверить release inputs;
+- [scripts/build-release.sh](scripts/build-release.sh) — собрать release assets;
+- [CHANGELOG.md](CHANGELOG.md) — история релизов;
+- [release-notes/v5.0.0.md](release-notes/v5.0.0.md) — versioned release notes.
+
+Базовый flow:
+
+```bash
+scripts/validate-release.sh
+scripts/build-release.sh
+```
+
+После этого артефакты лежат в:
+
+```text
+dist-release/<version>/
+```
+
+Их уже можно прикладывать к GitHub Release.
 
 ## Ограничения И Известные Компромиссы
 

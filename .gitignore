@@ -37,6 +37,7 @@ venv/
 
 # Build
 dist/
+dist-release/
 build/
 *.egg-info/
 
