@@ -1,45 +1,55 @@
 # Changelog
 
-All notable changes to `Claude Code Starter` are documented in this file.
-
-The format is intentionally simple:
-- released versions first;
-- operationally meaningful changes only;
-- release asset expectations called out when distribution changes.
+All notable changes to `Claude Code Starter` are documented here.
 
 ## [5.0.0] - 2026-04-06
 
+### Summary
+
+`v5.0.0` turns `Claude Code Starter` into a Claude Code native operational framework with a single public installer, modular `.claude/` primitives, explicit `repo_access`, and release-ready distribution assets.
+
 ### Added
-- Single public installer entrypoint via [init-project.sh](init-project.sh).
-- Modular Claude Code operating layer:
+
+- One public installer entrypoint: [init-project.sh](init-project.sh)
+- Modular operating layer:
   - `.claude/rules/`
   - `.claude/skills/`
   - `.claude/agents/`
   - `.claude/hooks/`
-- `repo_access` model with helper logic in [scripts/framework-state-mode.sh](scripts/framework-state-mode.sh).
-- Safe mode-switch script in [scripts/switch-repo-access.sh](scripts/switch-repo-access.sh).
-- Release build tooling in [scripts/build-release.sh](scripts/build-release.sh).
-- Release validation tooling in [scripts/validate-release.sh](scripts/validate-release.sh).
-- Versioned release notes in [release-notes/v5.0.0.md](release-notes/v5.0.0.md).
+- Persistent project memory through `.claude/SNAPSHOT.md`
+- `repo_access` handling via [scripts/framework-state-mode.sh](scripts/framework-state-mode.sh)
+- Safe mode switching via [scripts/switch-repo-access.sh](scripts/switch-repo-access.sh)
+- Release tooling:
+  - [scripts/validate-release.sh](scripts/validate-release.sh)
+  - [scripts/build-release.sh](scripts/build-release.sh)
+  - [RELEASING.md](RELEASING.md)
+  - [release-notes/v5.0.0.md](release-notes/v5.0.0.md)
+  - [release-notes/GITHUB_RELEASE_v5.0.0.md](release-notes/GITHUB_RELEASE_v5.0.0.md)
 
 ### Changed
-- Public repository root migrated from `v4` layout to `v5` operational layout.
-- Root branding restored to `Claude Code Starter`.
-- Installer UX returned to the `single file -> run in host project` model.
-- Standalone installer now resolves payload in this order:
+
+- Public repository root now represents `v5`
+- Installer UX returns to the `single file -> run in host project` model
+- Standalone installer resolves payload in this order:
   - GitHub Release archive
-  - `git clone` fallback
+  - `git clone`
   - repository snapshot fallback
+- Documentation is now split by audience:
+  - [README.md](README.md) for users
+  - [CHANGELOG.md](CHANGELOG.md) for version history
+  - [RELEASING.md](RELEASING.md) for maintainers
 
 ### Archived
-- Full `v4` working tree preserved in [archive/v4-working-tree](archive/v4-working-tree).
-- Pre-migration `v4` head preserved as git tag `archive-v4-head-2026-04-06`.
+
+- The old `v4` tree is preserved in [archive/v4-working-tree](archive/v4-working-tree)
+- The pre-migration `v4` head is preserved as git tag `archive-v4-head-2026-04-06`
 
 ### Known Limitations
-- `migrate.sh` still uses a destructive fallback for `.claude/settings.json` if `python3` is unavailable or JSON merge fails.
-- Shared/public mode still requires switching before framework state reaches remote history.
 
-## [4.0.2] - 2025-??-??
+- `migrate.sh` still falls back to replacing `.claude/settings.json` if `python3` is unavailable or JSON merge fails
+- Shared/public mode still requires switching before framework state reaches upstream history
+- GitHub Release creation is still a manual publishing step
 
-Legacy `v4` line preserved in [archive/v4-working-tree](archive/v4-working-tree).
-See the archived repository state for the original runtime, dual-agent adapters, Python core, commands, and protocol files.
+## [4.0.2]
+
+Legacy `v4` state is preserved in [archive/v4-working-tree](archive/v4-working-tree).

@@ -1,66 +1,42 @@
 # Releasing Claude Code Starter
 
-This repository now has a concrete release asset strategy.
+This file is the maintainer playbook for shipping a GitHub Release.
 
 ## Release Assets
 
-Each tagged release should publish:
+Every release should publish:
 - `init-project.sh`
 - `framework.tar.gz`
 - `checksums.txt`
 - `RELEASE_NOTES.md`
 
-## Asset Roles
+## What Is Scripted
 
-### `init-project.sh`
+Already automated:
+- release input validation
+- asset build
+- checksum generation
+- copying versioned release notes into the release bundle
 
-Public single-file installer.
+Still manual:
+- creating the Git tag if needed
+- creating the GitHub Release
+- attaching built assets
+- publishing the release
 
-Use cases:
-- copied directly into a host project
-- downloaded from a GitHub Release
-- run from a local checkout of this repository
-
-### `framework.tar.gz`
-
-Payload archive for standalone installs.
-
-It should contain one top-level folder:
-
-```text
-claude-code-starter/
-  .claude/
-  scripts/
-  CLAUDE.md
-  manifest.md
-  .gitignore
-  README.md
-  CHANGELOG.md
-```
-
-The root installer expects to find:
-- `scripts/init-project.sh`
-- `scripts/migrate.sh`
-
-inside that archive payload.
-
-### `checksums.txt`
-
-SHA-256 checksums for release verification.
-
-### `RELEASE_NOTES.md`
-
-Human-readable notes copied from `release-notes/v<version>.md`.
-
-## Build
-
-Validate release inputs:
+## Validate
 
 ```bash
 scripts/validate-release.sh
 ```
 
-Build release assets:
+This checks:
+- required files exist
+- bash scripts parse
+- `CHANGELOG.md` contains the current version
+- `release-notes/v<version>.md` exists and matches the current version
+
+## Build
 
 ```bash
 scripts/build-release.sh
@@ -72,39 +48,53 @@ Or explicitly:
 scripts/build-release.sh 5.0.0
 ```
 
-Output location:
+Output:
 
 ```text
 dist-release/<version>/
+  init-project.sh
+  framework.tar.gz
+  checksums.txt
+  RELEASE_NOTES.md
 ```
 
 ## Publish Checklist
 
 1. Ensure `main` is clean.
-2. Ensure `CHANGELOG.md` has an entry for the target version.
-3. Ensure `release-notes/v<version>.md` exists.
-4. Run `scripts/validate-release.sh`.
-5. Run `scripts/build-release.sh`.
-6. Create a Git tag `v<version>`.
-7. Create GitHub Release from that tag.
+2. Run `scripts/validate-release.sh`.
+3. Run `scripts/build-release.sh`.
+4. Review `dist-release/<version>/RELEASE_NOTES.md`.
+5. Create tag `v<version>` if it does not already exist.
+6. Create GitHub Release from `v<version>`.
+7. Use [release-notes/GITHUB_RELEASE_v5.0.0.md](release-notes/GITHUB_RELEASE_v5.0.0.md) as the release body template and adjust the version if needed.
 8. Upload:
    - `dist-release/<version>/init-project.sh`
    - `dist-release/<version>/framework.tar.gz`
    - `dist-release/<version>/checksums.txt`
    - `dist-release/<version>/RELEASE_NOTES.md`
-9. Verify that standalone `init-project.sh` can install from the published release assets.
+9. Verify a standalone install from the published release assets.
 
-## Current Manual Part
+## Asset Roles
 
-The GitHub Release creation step is still manual.
+### `init-project.sh`
 
-What is already scripted:
-- validating release inputs
-- building release artifacts
-- generating checksums
-- copying versioned release notes into release assets
+The public single-file installer.
 
-What remains manual:
-- creating the GitHub Release
-- attaching built assets
-- publishing the release
+### `framework.tar.gz`
+
+The payload archive for standalone installs. It must contain one top-level folder named `claude-code-starter/` and include:
+- `.claude/`
+- `scripts/`
+- `CLAUDE.md`
+- `manifest.md`
+- `.gitignore`
+- `README.md`
+- `CHANGELOG.md`
+
+### `checksums.txt`
+
+SHA-256 checksums for release verification.
+
+### `RELEASE_NOTES.md`
+
+The versioned note that ships with the assets.

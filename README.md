@@ -175,6 +175,7 @@ scripts/switch-repo-access.sh private-shared --commit
 - [CHANGELOG.md](CHANGELOG.md) — история версий и изменений
 - [RELEASING.md](RELEASING.md) — как собирать и публиковать релиз
 - [release-notes/v5.0.0.md](release-notes/v5.0.0.md) — notes для текущего release
+- [release-notes/GITHUB_RELEASE_v5.0.0.md](release-notes/GITHUB_RELEASE_v5.0.0.md) — готовый body для GitHub Release
 
 Архив:
 - [archive/V4_ARCHIVE_NOTE.md](archive/V4_ARCHIVE_NOTE.md) — что именно сохранено от `v4`
@@ -193,6 +194,7 @@ scripts/switch-repo-access.sh private-shared --commit
 - Прочитать историю версий: [CHANGELOG.md](CHANGELOG.md)
 - Собрать release: [RELEASING.md](RELEASING.md)
 - Посмотреть notes текущего релиза: [release-notes/v5.0.0.md](release-notes/v5.0.0.md)
+- Взять текст GitHub Release: [release-notes/GITHUB_RELEASE_v5.0.0.md](release-notes/GITHUB_RELEASE_v5.0.0.md)
 
 ## v4 vs v5
 

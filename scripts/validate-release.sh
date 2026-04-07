@@ -30,6 +30,7 @@ required_files=(
     "$REPO_DIR/scripts/framework-state-mode.sh"
     "$REPO_DIR/scripts/build-release.sh"
     "$REPO_DIR/release-notes/v$VERSION.md"
+    "$REPO_DIR/release-notes/GITHUB_RELEASE_v$VERSION.md"
 )
 
 for path in "${required_files[@]}"; do
