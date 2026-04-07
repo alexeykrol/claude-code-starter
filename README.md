@@ -7,159 +7,36 @@
 [![Git](https://img.shields.io/badge/git-required-f05032?logo=git&logoColor=white)](https://git-scm.com/)
 [![Python](https://img.shields.io/badge/python3-recommended-3776ab?logo=python&logoColor=white)](https://www.python.org/)
 [![Claude Code](https://img.shields.io/badge/Claude_Code-rules%2Bskills%2Bagents%2Bhooks-d97706)](https://www.anthropic.com/claude-code)
-[![Repo Access](https://img.shields.io/badge/repo__access-private--solo%20%7C%20private--shared%20%7C%20public-7c3aed)](.claude/rules/commit-policy.md)
 
-Продолжение `Claude Code Starter v4` с новым operational model для Claude Code.
+`Claude Code Starter` — это готовая управляющая среда для проектов, в которых основной рабочий агент — Claude Code.
 
-Главное отличие от промежуточного template-style UX: публичный вход снова один. Пользователь работает с **одним файлом** `init-project.sh`, а не с набором внутренних `scripts/*`.
+Он нужен не для генерации приложения, а для того, чтобы быстро добавить в любой проект:
+- понятный `CLAUDE.md` вместо мегадокумента;
+- модульные `rules`, `skills`, `agents`, `hooks`;
+- устойчивую проектную память через `.claude/SNAPSHOT.md`;
+- единый installer для нового, существующего и legacy-проекта;
+- явный контроль над тем, что framework state делает с git-историей.
 
-## Что Это
+## Зачем Это Нужно
 
-`Claude Code Starter v5` это не web framework и не application starter. Это framework управления проектной средой для Claude Code.
+Обычно при работе с агентом проект быстро расползается:
+- инструкции живут в одном длинном `CLAUDE.md`;
+- правила смешаны с контекстом проекта;
+- старт нового проекта и миграция старого проекта делаются по-разному;
+- агентная память теряется между сессиями;
+- внутренние framework-файлы случайно попадают в shared/public git history.
 
-Старый `v4` не удалён. Он сохранён внутри этого же репозитория в `archive/v4-working-tree/`, а pre-migration `HEAD` дополнительно помечен тегом `archive-v4-head-2026-04-06`.
+`Claude Code Starter` решает эти проблемы:
+- отделяет проектный паспорт от operational logic;
+- даёт стандартную структуру `.claude/`;
+- добавляет reusable workflows через `skills`;
+- добавляет background guardrails через `hooks`;
+- поддерживает single-file installation;
+- вводит `repo_access`, чтобы память агента не утекала туда, где ей не место.
 
-Он добавляет в проект:
-- компактный `CLAUDE.md` как паспорт проекта;
-- модульные `.claude/rules/`, `.claude/skills/`, `.claude/agents/`, `.claude/hooks/`;
-- локальную рабочую память через `.claude/SNAPSHOT.md`;
-- безопасную модель `repo_access`, чтобы framework state не утекал в shared/public git history;
-- bootstrap, migration и mode-switch tooling.
+## Что Устанавливается В Проект
 
-Это прямой преемник `Claude Code Starter v4`, но с другой архитектурой:
-- вместо монолитного `CLAUDE.md` используются native primitives Claude Code;
-- вместо старого dual-runtime UX акцент сделан на автономную работу Claude Code;
-- вместо “клонируй template repo и вызывай внутренний script” снова используется один launcher.
-
-## Что Изменилось По UX
-
-`v4` был удобнее в одном важном месте: там существовал один installer-файл, который можно было просто положить в корень любого проекта и запустить.
-
-В `v5` этот UX возвращён:
-- публичный entrypoint теперь снова `init-project.sh` в корне репозитория;
-- один и тот же launcher работает для нового проекта, существующего проекта, legacy framework и частично установленного `v5`;
-- внутренние `scripts/init-project.sh` и `scripts/migrate.sh` больше считаются implementation detail, а не пользовательским интерфейсом;
-- standalone launcher умеет скачать framework payload сам.
-
-## Быстрый Старт
-
-### Вариант 1. Один файл `init-project.sh`
-
-Возьми root launcher `init-project.sh` из этого репозитория любым удобным способом:
-- скачай его из GitHub Release, когда релиз опубликован;
-- забери из локального checkout этого репозитория;
-- или просто скопируй файл вручную в корень целевого проекта.
-
-После этого:
-
-```bash
-chmod +x init-project.sh
-./init-project.sh
-```
-
-Для публичного стабильного сценария целевой путь такой:
-- GitHub Release содержит `init-project.sh` и `framework.tar.gz`;
-- пользователь берёт только `init-project.sh`;
-- launcher сам скачивает `framework.tar.gz` из release.
-
-### Вариант 2. Запуск из локального checkout framework
-
-Если framework уже скачан локально:
-
-```bash
-cd /path/to/your/project
-bash /absolute/path/to/claude-code-starter/init-project.sh
-```
-
-### Что дальше
-
-После установки:
-1. Заполни [CLAUDE.md](CLAUDE.md) под свой проект.
-2. Проверь `manifest.md`.
-3. Если проект должен быть `public` или `private-shared`, переключи режим **до первого framework commit**:
-
-```bash
-scripts/switch-repo-access.sh public --commit
-```
-
-или
-
-```bash
-scripts/switch-repo-access.sh private-shared --commit
-```
-
-4. Открой проект в Claude Code и запусти `/start`.
-
-## Единый Launcher
-
-Публичный installer это [init-project.sh](init-project.sh) в корне репозитория.
-
-Он умеет работать в двух режимах:
-
-- **source mode**: если запускается из checkout этого репозитория, использует локальный payload;
-- **standalone mode**: если файл скопирован отдельно в целевой проект, скачивает framework payload сам.
-
-Download strategy:
-- сначала пытается взять release archive;
-- если release archive недоступен, пытается сделать `git clone` framework repo;
-- если и это недоступно, падает назад на repository snapshot.
-
-То есть UX уже один, даже если release pipeline ещё в процессе оформления.
-
-## Release Assets
-
-Каждый нормальный release этого репозитория должен публиковать:
-- `init-project.sh`
-- `framework.tar.gz`
-- `checksums.txt`
-- `RELEASE_NOTES.md`
-
-Смысл такой:
-- `init-project.sh` — единственный публичный installer file;
-- `framework.tar.gz` — payload archive, который installer скачивает в standalone mode;
-- `checksums.txt` — проверка целостности;
-- `RELEASE_NOTES.md` — human-readable release summary.
-
-Подробная release-процедура описана в [RELEASING.md](RELEASING.md).
-
-## Какие Сценарии Launcher Определяет Сам
-
-Launcher анализирует текущий каталог и выбирает сценарий:
-
-- `new` — пустой или почти пустой проект, нужен bootstrap;
-- `existing` — обычный существующий проект без framework markers;
-- `legacy` — старый framework (`.claude/commands`, `.claude/protocols`, `.codex`, `.framework-config`);
-- `upgrade` — частично установленный или уже существующий `v5`.
-
-Routing:
-- `new` → internal bootstrap payload;
-- `existing` / `legacy` / `upgrade` → additive migration payload.
-
-При необходимости сценарий можно принудительно задать:
-
-```bash
-./init-project.sh --mode init
-./init-project.sh --mode migrate
-```
-
-## Параметры Launcher
-
-```bash
-./init-project.sh --name "My Project"
-./init-project.sh --mode init
-./init-project.sh --mode migrate
-./init-project.sh --template /path/to/local/framework
-```
-
-Поддерживаются:
-- `--name` — имя проекта для свежего bootstrap;
-- `--mode init` — принудительный bootstrap;
-- `--mode migrate` — принудительная additive migration;
-- `--template` — использовать локальный checkout framework вместо download.
-
-## Что Именно Устанавливается В Проект
-
-Launcher и payload создают:
+После установки в хост-проекте появляется такая база:
 
 ```text
 .claude/
@@ -178,20 +55,19 @@ manifest.md
 .gitignore
 ```
 
-Содержимое:
+Ключевые файлы:
 - `CLAUDE.md` — паспорт проекта;
 - `manifest.md` — `project_name` и `repo_access`;
-- `.claude/rules/` — постоянные operational rules;
-- `.claude/skills/` — повторяемые workflows;
-- `.claude/agents/` — стандартные роли subagents;
-- `.claude/hooks/` — background guardrails;
-- `.claude/SNAPSHOT.md` — проектная память;
-- `scripts/framework-state-mode.sh` — единая логика по `repo_access`;
-- `scripts/switch-repo-access.sh` — безопасный switch между `private-solo`, `private-shared`, `public`.
+- `.claude/SNAPSHOT.md` — текущая память проекта;
+- `.claude/rules/` — постоянные operational правила;
+- `.claude/skills/` — стандартные workflows;
+- `.claude/agents/` — типовые subagent roles;
+- `.claude/hooks/` — фоновые guardrails;
+- `scripts/switch-repo-access.sh` — безопасное переключение между `private-solo`, `private-shared`, `public`.
 
-## Технологический Стек
+## Требования
 
-**Required**
+Обязательно:
 - `bash`
 - `git`
 - Claude Code с поддержкой:
@@ -200,115 +76,132 @@ manifest.md
   - `.claude/agents/`
   - `.claude/hooks/`
 
-**Recommended**
-- `python3` для безопасного JSON merge в migration flow
+Рекомендуется:
+- `python3`
 
-**Optional**
-- `node` / `npm` для JS/TS-проектов и Playwright
-- `pytest` для Python-проектов
-- `sqlite3`, `psql`, `supabase` CLI для DB workflows
+Опционально:
+- `node` / `npm`
+- `pytest`
+- `sqlite3`
+- `psql`
+- `supabase`
 
-## Repo Access И Git История
+`python3` нужен не для bootstrap, а для безопасного merge `settings.json` в migration flow.
 
-`repo_access` определяет, может ли framework state жить в git history.
+## Установка
+
+### Вариант 1. Один файл
+
+Возьми root installer `init-project.sh`, положи его в корень целевого проекта и запусти:
+
+```bash
+chmod +x init-project.sh
+./init-project.sh
+```
+
+Этот launcher сам определит сценарий:
+- `new` — новый проект;
+- `existing` — существующий проект без framework;
+- `legacy` — старый framework;
+- `upgrade` — частично установленный `v5`.
+
+### Вариант 2. Из локального checkout
+
+```bash
+cd /path/to/your/project
+bash /absolute/path/to/claude-code-starter/init-project.sh
+```
+
+### Полезные параметры
+
+```bash
+./init-project.sh --name "My Project"
+./init-project.sh --mode init
+./init-project.sh --mode migrate
+./init-project.sh --template /path/to/local/framework
+```
+
+Поддерживаются:
+- `--name` — имя проекта для свежего bootstrap;
+- `--mode init` — принудительный bootstrap;
+- `--mode migrate` — принудительная migration/integration;
+- `--template` — использовать локальный checkout framework вместо download.
+
+## Что Делать После Установки
+
+1. Заполнить `CLAUDE.md` под конкретный проект.
+2. Проверить `manifest.md`.
+3. Если проект shared/public, переключить режим до первого framework commit:
+
+```bash
+scripts/switch-repo-access.sh public --commit
+```
+
+или
+
+```bash
+scripts/switch-repo-access.sh private-shared --commit
+```
+
+4. Открыть проект в Claude Code и запустить `/start`.
+
+## Repo Access
+
+`repo_access` задаётся в `manifest.md`.
 
 Режимы:
-- `private-solo` — framework files можно коммитить;
+- `private-solo` — framework files можно хранить в git;
 - `private-shared` — framework files должны оставаться локальными;
 - `public` — framework files должны оставаться локальными.
 
-Ключевой принцип:
-- `SNAPSHOT.md` и остальная framework memory не должны попадать в shared/public branch history.
+Практический смысл:
+- если репозиторий личный, можно хранить framework state в истории;
+- если репозиторий общий или публичный, память агента не должна попадать в branch history.
 
-Поэтому:
-- если проект shared/public с самого начала, переключай режим до первого framework commit;
-- если framework state уже попал в git history, одного `.gitignore` недостаточно;
-- для такого случая используй `scripts/switch-repo-access.sh`, а если файлы уже ушли в remote history, нужен history rewrite или новая ветка.
+Если framework state уже успел попасть в remote history, одного `.gitignore` недостаточно. Для таких случаев и существует `scripts/switch-repo-access.sh`.
 
-## Внутреннее Устройство
+## Как Устроен Этот Репозиторий
 
-В репозитории есть два внутренних payload script'а:
-- [scripts/init-project.sh](scripts/init-project.sh) — internal bootstrap payload;
-- [scripts/migrate.sh](scripts/migrate.sh) — internal migration payload.
+Публичный вход:
+- [init-project.sh](init-project.sh) — единственный installer entrypoint
 
-Они не считаются публичным UX. Публичный UX — только root [init-project.sh](init-project.sh).
+Внутренний payload:
+- [scripts/init-project.sh](scripts/init-project.sh) — bootstrap payload
+- [scripts/migrate.sh](scripts/migrate.sh) — migration payload
+- [scripts/framework-state-mode.sh](scripts/framework-state-mode.sh) — логика `repo_access`
+- [scripts/switch-repo-access.sh](scripts/switch-repo-access.sh) — safe mode switch
 
-Зачем такое разделение:
-- launcher остаётся одним файлом и простым для пользователя;
-- payload можно эволюционировать отдельно;
-- release asset может содержать только launcher, а остальное он скачает сам.
+Документация:
+- [CHANGELOG.md](CHANGELOG.md) — история версий и изменений
+- [RELEASING.md](RELEASING.md) — как собирать и публиковать релиз
+- [release-notes/v5.0.0.md](release-notes/v5.0.0.md) — notes для текущего release
 
-## Подготовка Release
+Архив:
+- [archive/V4_ARCHIVE_NOTE.md](archive/V4_ARCHIVE_NOTE.md) — что именно сохранено от `v4`
+- [archive/v4-working-tree](archive/v4-working-tree) — архивное дерево `v4`
 
-В репозитории уже есть release tooling:
-- [scripts/validate-release.sh](scripts/validate-release.sh) — проверить release inputs;
-- [scripts/build-release.sh](scripts/build-release.sh) — собрать release assets;
-- [CHANGELOG.md](CHANGELOG.md) — история релизов;
-- [release-notes/v5.0.0.md](release-notes/v5.0.0.md) — versioned release notes.
-
-Базовый flow:
-
-```bash
-scripts/validate-release.sh
-scripts/build-release.sh
-```
-
-После этого артефакты лежат в:
-
-```text
-dist-release/<version>/
-```
-
-Их уже можно прикладывать к GitHub Release.
-
-## Ограничения И Известные Компромиссы
+## Ограничения
 
 1. `switch-repo-access.sh` не переписывает git history.
-   Если framework files уже успели попасть в upstream branch, скрипт остановится и потребует history rewrite или чистую shared/public branch.
+2. `migrate.sh` зависит от `python3`, если нужен безопасный merge `.claude/settings.json`.
+3. Standalone installer лучше всего работает через GitHub Release assets.
+4. Hooks здесь — это guardrails, а не абсолютный enforcement layer.
 
-2. `migrate.sh` additive по умолчанию, но safe JSON merge для `.claude/settings.json` зависит от `python3`.
-   Если `python3` отсутствует или merge падает, остаётся fallback на replace с warning.
+## Быстрые Ссылки
 
-3. Standalone launcher сейчас сначала пробует release archive, потом `git clone`, и только затем repository snapshot.
-   Это временный компромисс, пока release pipeline не оформлен как единственный distribution channel.
+- Установить framework: [init-project.sh](init-project.sh)
+- Прочитать историю версий: [CHANGELOG.md](CHANGELOG.md)
+- Собрать release: [RELEASING.md](RELEASING.md)
+- Посмотреть notes текущего релиза: [release-notes/v5.0.0.md](release-notes/v5.0.0.md)
 
-4. Хуки в `v5` это guardrails и reminders, а не абсолютный enforcement layer.
-   Они помогают удерживать operational discipline, но не заменяют сознательную работу агента.
+## v4 vs v5
 
-5. `CLAUDE.md` шаблона намеренно короткий.
-   Он должен описывать конкретный проект, а не дублировать весь framework manual.
+| Тема | v4 | v5 |
+|------|----|----|
+| Installer UX | installer + старый runtime слой | один публичный `init-project.sh` |
+| Основная модель | commands + protocols + adapters | rules + skills + agents + hooks |
+| Проектная память | shared state, но тяжёлый operational overhead | компактный `CLAUDE.md` + `SNAPSHOT.md` |
+| Работа с git | менее явная модель framework state | явный `repo_access` и mode switching |
+| Текущий статус | архивирован внутри repo | основная активная версия |
 
-## Проверенные Сценарии
-
-На текущем состоянии репозитория были проверены:
-- bootstrap в новый каталог;
-- additive migration существующего проекта;
-- upgrade missing files в частично установленном `v5`;
-- safe switch `private-solo -> public/private-shared`;
-- blocking case, когда framework files уже попали в upstream history;
-- merge hooks в existing `.claude/settings.json` с сохранением custom keys;
-- корректная подстановка имени проекта с символом `&`.
-
-## Когда Это Подходит
-
-Используй `Claude Code Starter v5`, если тебе нужна:
-- повторяемая operational среда для Claude Code;
-- компактная проектная память без мегадокументов;
-- единая модель bootstrap/migration/upgrade;
-- явный контроль над тем, что framework memory делает с git history;
-- автономная работа агента через rules, skills, agents, hooks.
-
-## Когда Это Не Подходит
-
-Не используй этот framework, если тебе нужен:
-- обычный web framework starter;
-- генератор прикладного кода без operational layer;
-- полностью zero-tooling режим без `git`;
-- shared/public workflow, где уже нельзя контролировать историю, но при этом framework state нужно тащить в основной branch.
-
-## Ближайший Направленный Шаг
-
-Следующий логичный этап после этого репозитория:
-- оформить стабильный GitHub Release c versioned `init-project.sh` и `framework.tar.gz`;
-- зафиксировать публичное имя и legacy-continuity окончательно;
-- дальше уже мигрировать реальные host projects на этот single-entry UX.
+Подробности по эволюции версий смотри в [CHANGELOG.md](CHANGELOG.md).
