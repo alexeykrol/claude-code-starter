@@ -1,0 +1,410 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+bower_components/
+
+# Build outputs
+dist/
+dist-release/
+build/
+.next/
+out/
+.nuxt/
+.vuepress/dist
+.cache/
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# IDE and editors
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+*.sublime-project
+*.sublime-workspace
+.vim/
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Testing
+coverage/
+.nyc_output/
+*.lcov
+.hypothesis/
+.pytest_cache/
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Temporary files
+*.tmp
+*.temp
+.temp/
+tmp/
+
+# Lock files (uncomment if you want to ignore them)
+# package-lock.json
+# yarn.lock
+# pnpm-lock.yaml
+
+# Build info and cache
+*.tsbuildinfo
+.turbo/
+.parcel-cache/
+.cache/
+.vite/
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Secrets and credentials
+*.key
+*.pem
+*.p12
+*.pfx
+secrets/
+credentials/
+
+# Backup files
+*.bak
+*.backup
+*-backup.*
+
+# Documentation builds
+docs/.vitepress/dist
+docs/.vitepress/cache
+
+# Reference materials
+papers/
+
+# Framework specific
+# Next.js
+.next/
+out/
+
+# Nuxt.js
+.nuxt/
+dist/
+
+# Gatsby
+.cache/
+public/
+
+# Vite
+dist/
+dist-ssr/
+*.local
+
+# Svelte
+.svelte-kit/
+__sapper__/
+
+# AWS
+.aws/
+.elasticbeanstalk/
+
+# Serverless
+.serverless/
+
+# Firebase
+.firebase/
+firebase-debug.log
+firestore-debug.log
+
+# Vercel
+.vercel
+
+# Python
+*.pyc
+__pycache__/
+venv/
+env/
+ENV/
+
+# Ruby
+*.gem
+.bundle/
+vendor/bundle
+
+# Java
+*.class
+*.jar
+*.war
+target/
+
+# Go
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Rust
+target/
+Cargo.lock
+
+# Debug files
+debug.log
+*.dmp
+
+# Optional npm cache directory
+.npm
+
+# Optional eslint cache
+.eslintcache
+
+# Optional stylelint cache
+.stylelintcache
+
+# Microbundle cache
+.rpt2_cache/
+.rts2_cache_cjs/
+.rts2_cache_es/
+.rts2_cache_umd/
+
+# Optional REPL history
+.node_repl_history
+
+# Output of 'npm pack'
+*.tgz
+
+# Yarn Integrity file
+.yarn-integrity
+
+# Storybook
+storybook-static/
+
+# Editor directories and files
+.history/
+.ionide/
+
+# End of https://www.toptal.com/developers/gitignore/api/node,react,vue,angular,python,java,go,rust
+
+# ==========================================
+# Claude Code Starter Framework Specific
+# ==========================================
+
+# Framework logs and bug reports (privacy-sensitive, gitignored)
+.claude/logs/
+.claude/.framework-config
+.claude/.last_session
+
+# Bug fix reports and summaries (framework internal development, not for public repo)
+BUGS_FIXED_*.md
+BUG_FIX_SUMMARY.md
+COMMIT_POLICY_FIX_SUMMARY.md
+commit-policy-missing-*.md
+framework-version-*.md
+
+# Development/testing directory - excluded from repo
+dev/
+
+# Test directories - excluded from repo
+test2/
+
+# ==========================================
+# FRAMEWORK INTERNAL DEVELOPMENT (not for public)
+# ==========================================
+
+# NOTE: Core metafiles (SNAPSHOT, BACKLOG, ARCHITECTURE) ARE PUBLIC
+# Framework contributors need these to understand current development state
+# Host projects get their own versions from migration/templates/
+# Only internal brainstorming files remain private:
+.claude/ROADMAP.md
+.claude/IDEAS.md
+.claude/CLAUDE2.md
+
+# NOTE: CLAUDE.md (root) IS PUBLIC - needed for framework contributors and forks
+# It contains AI instructions for framework development (Framework Developer Mode, protocols, etc.)
+# Host projects get their own CLAUDE.md from migration/CLAUDE.production.md template
+
+# Internal UI for viewing dialogs (framework development only)
+html-viewer/
+
+# Internal developer guides (framework development docs)
+AGENT_SKILLS_GUIDE.md
+BUG_REPORT_FRAMEWORK.md
+
+# Internal planning/protocol artifacts (not for public distribution)
+GO_NO_GO_PROTOCOL*.md
+HOST_PROJECT_E2E_REPORT_*.md
+PARITY_SMOKE_REPORT_*.md
+PHASE*_INVENTORY_MAP*.md
+PHASE*_PARITY_REPORT_*.md
+MULTI_AGENT_PORTING_CONCEPT.md
+FRAMEWORK_IMPROVEMENTS.md
+
+# Local-only internal workspace (not for public repo)
+.internal/
+MULTI_AGENT_PORTING_CONCEPT.md
+
+# Archived historical files (old development docs)
+archive/
+
+# Node.js
+node_modules/
+
+# Build output (keep dist/claude-export for distribution)
+# dist/
+
+# TypeScript cache
+*.tsbuildinfo
+
+# ==========================================
+# SECURITY: Privacy & Credentials Protection
+# ==========================================
+
+# ==========================================
+# COMMIT_POLICY.md Patterns (v2.5.0+)
+# These files should NEVER be committed
+# ==========================================
+
+# Internal development (personal notes, drafts, experiments)
+notes/
+scratch/
+experiments/
+WIP_*
+INTERNAL_*
+DRAFT_*
+
+# Framework logs and dialogs (CRITICAL!)
+# CRITICAL: These files may contain SSH keys, API tokens, passwords, DB URLs
+# mentioned during conversations. NEVER commit to git.
+dialog/
+dialog/**/*.md
+dialog/**/*.jsonl
+
+# Bug reports and improvements (may contain credentials in examples)
+# These files may include code snippets with secrets
+reports/
+reports/**/*.md
+FRAMEWORK_IMPROVEMENTS.md
+
+# Production credentials (CRITICAL: production SSH keys, API tokens)
+.production-credentials
+.production-credentials.*
+*.production-credentials
+
+# Security scan reports (contain detected credentials)
+security/reports/
+security/reports/**/*
+
+# Claude dialogs
+dialog/2026-01-20_session-102f3d5a.md
+dialog/2026-01-20_session-a9d9e77f.md
+dialog/2026-01-20_session-98235975.md
+dialog/2026-01-20_session-7cb183da.md
+dialog/2026-01-20_session-02336f57.md
+dialog/2026-01-20_session-4eb92a5a.md
+dialog/2026-01-20_session-bd15aa64.md
+dialog/2026-01-20_session-2fd378a1.md
+dialog/2026-01-20_session-f19ad632.md
+dialog/2026-01-20_session-4c38f4f4.md
+dialog/2026-01-20_session-e4e18a01.md
+dialog/2026-01-20_session-ac70b6ef.md
+dialog/2026-01-20_session-58e824b4.md
+dialog/2026-01-20_session-92bfdbef.md
+dialog/2026-01-20_session-c22311a4.md
+dialog/2026-01-20_session-23a0a3a7.md
+dialog/2026-01-20_session-2dde320c.md
+dialog/2026-01-20_session-9417b210.md
+dialog/2026-01-20_session-295622e1.md
+dialog/2026-01-20_session-ba76ff9e.md
+dialog/2026-01-20_session-7bd13318.md
+dialog/2026-01-20_session-ee4850ab.md
+dialog/2026-01-20_session-8ec650fd.md
+dialog/2026-01-20_session-47996410.md
+dialog/2026-01-20_session-ff6a4002.md
+dialog/2026-01-20_session-40a38ffe.md
+dialog/2026-01-20_session-7f7391e4.md
+dialog/2026-01-20_session-747e64a7.md
+dialog/2026-01-20_session-4a773ebf.md
+dialog/2026-01-20_session-1879d6c8.md
+dialog/2026-01-20_session-ce209dc9.md
+dialog/2026-01-20_session-634dc0e8.md
+dialog/2026-01-20_session-f61fcb71.md
+dialog/2026-01-20_session-7bba6098.md
+dialog/2026-01-20_session-0ad44b08.md
+dialog/2026-01-20_session-022dd0f8.md
+dialog/2026-01-20_session-d5a7aec5.md
+dialog/2026-01-20_session-f47aed4f.md
+dialog/2026-01-20_session-923c3f1e.md
+dialog/2026-01-20_session-e163a4d4.md
+dialog/2026-01-20_session-3fd7d653.md
+dialog/2026-01-20_session-9f95fc7e.md
+dialog/2026-01-20_session-f8301cdc.md
+dialog/2026-01-20_session-bb4c7c82.md
+dialog/2026-01-20_session-2762ec75.md
+dialog/2026-01-20_session-1d7fc9d3.md
+dialog/2026-01-20_session-21cd0d89.md
+dialog/2026-01-20_session-47c5ecd2.md
+dialog/2026-01-20_session-d11d3215.md
+dialog/2026-01-20_session-098b0b4f.md
+dialog/2026-01-20_session-0af562fd.md
+dialog/2026-01-20_session-c4a24faf.md
+dialog/2026-01-20_session-5f3b7733.md
+dialog/2026-01-17_session-6eda8814.md
+dialog/2026-01-17_session-4a4db389.md
+dialog/2026-01-17_session-d4ab0fb4.md
+dialog/2026-01-17_session-be491a47.md
+dialog/2026-01-17_session-1990bf7a.md
+dialog/2026-01-17_session-86bb270f.md
+dialog/2026-01-17_session-9b84e8b9.md
+dialog/2026-01-17_session-67435cc9.md
+dialog/2026-01-17_session-8ecba3aa.md
+dialog/2026-01-17_session-38aa8ab7.md
+dialog/2026-01-17_session-e591d788.md
+dialog/2026-01-17_session-a02b1d62.md
+dialog/2026-01-17_session-64736505.md
+dialog/2026-01-17_session-d3916e30.md
+dialog/2026-01-17_session-36ac36b2.md
+dialog/2026-01-17_session-10192f3a.md
+dialog/2026-01-20_session-5cb35cca.md
+dialog/2026-01-17_session-2b8b92eb.md
+dialog/2026-01-17_session-a4bb680c.md
+dialog/2026-01-17_session-4ad5a09a.md
+dialog/2026-01-17_session-cde2635a.md
+dialog/2026-01-17_session-a54e5fa0.md
+dialog/2026-01-17_session-81a65834.md
+dialog/2026-01-17_session-a5f0e573.md
+dialog/2026-01-17_session-945b92a6.md
+dialog/2026-01-17_session-6a85689a.md
+dialog/2026-01-17_session-febaf0bc.md
+dialog/2026-01-17_session-e455d53d.md
+dialog/2026-01-17_session-2b78839b.md
+dialog/2026-01-17_session-85fe0d4e.md
+dialog/2026-01-17_session-cbe5e39b.md
+dialog/2026-01-17_session-0f3d1168.md
+.claude/.last_session
+.claude/.session-owner
+
+.env.*
+*credentials*

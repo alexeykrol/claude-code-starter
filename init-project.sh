@@ -1,27 +1,50 @@
 #!/bin/bash
 #
-# Claude Code Starter Framework — Installer
-# Version: 4.0.2
+# Claude Code Starter — Installer
+# Version: 5.0.0
 #
-# Downloads and installs the framework from GitHub Releases
+# Public entrypoint for every installation scenario:
+# - new project bootstrap
+# - existing project integration
+# - legacy framework migration
+# - top-up upgrade for partially installed v5 projects
+#
+# Usage:
+#   bash init-project.sh
+#   bash init-project.sh --name "My Project"
+#   bash init-project.sh --mode init
+#   bash init-project.sh --mode migrate
+#   bash init-project.sh --template /path/to/local/framework
 #
 
-set -e  # Exit on error
+set -euo pipefail
 
-VERSION="${FRAMEWORK_VERSION:-4.0.2}"
+VERSION="${FRAMEWORK_VERSION:-5.0.0}"
 REPO="${FRAMEWORK_REPO:-alexeykrol/claude-code-starter}"
 ARCHIVE_URL="${FRAMEWORK_ARCHIVE_URL:-https://github.com/${REPO}/releases/download/v${VERSION}/framework.tar.gz}"
-PROJECT_DIR="$(pwd)"
-TEMP_DIR="/tmp/claude-framework-$$"
+FALLBACK_URL="${FRAMEWORK_FALLBACK_URL:-https://codeload.github.com/${REPO}/tar.gz/refs/heads/main}"
+GIT_URL="${FRAMEWORK_GIT_URL:-https://github.com/${REPO}.git}"
 
-# Colors
+PROJECT_DIR="$(pwd)"
+SCRIPT_PATH="${BASH_SOURCE[0]}"
+SCRIPT_DIR="$(cd "$(dirname "$SCRIPT_PATH")" && pwd)"
+TEMP_DIR="$(mktemp -d "/tmp/claude-code-starter-XXXXXX")"
+
+PROJECT_NAME=""
+FORCE_MODE=""
+TEMPLATE_PATH=""
+
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m'
 
-# Cleanup on exit
+log_info()    { echo -e "${BLUE}ℹ${NC} $1"; }
+log_success() { echo -e "${GREEN}✓${NC} $1"; }
+log_warning() { echo -e "${YELLOW}⚠${NC} $1"; }
+log_error()   { echo -e "${RED}✗${NC} $1"; }
+
 cleanup() {
     if [ -d "$TEMP_DIR" ]; then
         rm -rf "$TEMP_DIR"
@@ -29,800 +52,214 @@ cleanup() {
 }
 trap cleanup EXIT
 
-# Output functions
-log_info() { echo -e "${BLUE}ℹ${NC} $1"; }
-log_success() { echo -e "${GREEN}✓${NC} $1"; }
-log_warning() { echo -e "${YELLOW}⚠${NC} $1"; }
-log_error() { echo -e "${RED}✗${NC} $1"; }
+usage() {
+    cat <<'EOF'
+Claude Code Starter — Installer
 
-is_interactive_mode() {
-    [ "${FRAMEWORK_INTERACTIVE:-0}" = "1" ]
+Usage:
+  bash init-project.sh [options]
+
+Options:
+  --name "Project Name"     Set the project name for fresh bootstrap
+  --mode init               Force bootstrap mode
+  --mode migrate            Force additive migration mode
+  --template /path          Use a local framework checkout instead of downloading
+  --help                    Show this help
+EOF
 }
 
-normalize_project_profile() {
-    local raw="${1:-}"
-    raw="$(printf "%s" "$raw" | tr '[:upper:]' '[:lower:]' | tr -d '[:space:]')"
-    case "$raw" in
-        "content"|"software")
-            echo "$raw"
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        --name)
+            PROJECT_NAME="${2:-}"
+            shift 2
+            ;;
+        --mode)
+            FORCE_MODE="${2:-}"
+            shift 2
+            ;;
+        --template)
+            TEMPLATE_PATH="${2:-}"
+            shift 2
+            ;;
+        --help|-h)
+            usage
+            exit 0
             ;;
         *)
-            echo ""
+            log_error "Unknown argument: $1"
+            usage
+            exit 1
             ;;
     esac
-}
+done
 
-detect_existing_project_profile() {
-    local config_file=".claude/.framework-config"
-    if [ ! -f "$config_file" ]; then
-        echo ""
-        return
-    fi
+download_file() {
+    local url="$1"
+    local out="$2"
 
-    python3 - "$config_file" <<'PY' 2>/dev/null || true
-import json
-import sys
-from pathlib import Path
-
-path = Path(sys.argv[1])
-try:
-    data = json.loads(path.read_text(encoding="utf-8"))
-except Exception:
-    print("")
-    raise SystemExit(0)
-
-profile = str(data.get("project_type", "")).strip().lower()
-if profile in {"software", "content"}:
-    print(profile)
-else:
-    print("")
-PY
-}
-
-detect_project_profile_guess() {
-    local text_count code_count
-
-    text_count=$(find . -maxdepth 3 -type f \
-        \( -name "*.md" -o -name "*.txt" -o -name "*.rst" -o -name "*.docx" \) \
-        ! -path "./.git/*" \
-        ! -path "./.claude/*" \
-        ! -path "./.codex/*" \
-        ! -path "./node_modules/*" \
-        ! -path "./dist/*" \
-        ! -path "./build/*" \
-        ! -path "./archive/*" \
-        ! -path "./reports/*" \
-        2>/dev/null | wc -l | tr -d '[:space:]')
-    code_count=$(find . -maxdepth 3 -type f \
-        \( -name "*.js" -o -name "*.ts" -o -name "*.tsx" -o -name "*.jsx" -o -name "*.py" -o -name "*.go" -o -name "*.rs" -o -name "*.java" -o -name "*.c" -o -name "*.cpp" -o -name "*.h" -o -name "*.php" -o -name "*.rb" \) \
-        ! -path "./.git/*" \
-        ! -path "./.claude/*" \
-        ! -path "./.codex/*" \
-        ! -path "./node_modules/*" \
-        ! -path "./dist/*" \
-        ! -path "./build/*" \
-        ! -path "./archive/*" \
-        ! -path "./reports/*" \
-        2>/dev/null | wc -l | tr -d '[:space:]')
-
-    if [ -z "$text_count" ]; then
-        text_count=0
-    fi
-    if [ -z "$code_count" ]; then
-        code_count=0
-    fi
-
-    if [ "$text_count" -ge 8 ] && [ "$text_count" -gt "$((code_count * 2 + 3))" ]; then
-        echo "content"
+    if command -v curl >/dev/null 2>&1; then
+        curl -fsSL "$url" -o "$out"
+    elif command -v wget >/dev/null 2>&1; then
+        wget -qO "$out" "$url"
     else
-        echo "software"
+        log_error "curl or wget is required to download the framework payload"
+        exit 1
     fi
 }
 
-select_project_profile() {
-    local scenario="${1:-}"
-    local existing_profile env_profile guessed_profile input selected
-    local require_profile_prompt=0
+resolve_source_dir() {
+    local source_dir=""
+    local archive_path=""
 
-    existing_profile="$(detect_existing_project_profile)"
-    if [ -n "$existing_profile" ]; then
-        PROJECT_PROFILE="$existing_profile"
-        log_info "Using existing project profile from .framework-config: $PROJECT_PROFILE"
-        return
+    if [ -n "$TEMPLATE_PATH" ]; then
+        if [ ! -d "$TEMPLATE_PATH" ]; then
+            log_error "Template path not found: $TEMPLATE_PATH"
+            exit 1
+        fi
+        source_dir="$TEMPLATE_PATH"
+    elif [ -f "$SCRIPT_DIR/scripts/init-project.sh" ] && [ -f "$SCRIPT_DIR/scripts/migrate.sh" ] && [ -d "$SCRIPT_DIR/.claude/rules" ]; then
+        source_dir="$SCRIPT_DIR"
+    else
+        archive_path="$TEMP_DIR/framework.tar.gz"
+        log_info "Standalone launcher detected. Downloading Claude Code Starter payload..." >&2
+
+        if download_file "$ARCHIVE_URL" "$archive_path"; then
+            log_success "Downloaded release payload" >&2
+            tar -xzf "$archive_path" -C "$TEMP_DIR"
+            source_dir="$(find "$TEMP_DIR" -mindepth 1 -maxdepth 2 -type d -exec test -f '{}/scripts/init-project.sh' ';' -print | head -1)"
+        elif git clone --depth 1 "$GIT_URL" "$TEMP_DIR/payload" >/dev/null 2>&1; then
+            log_success "Cloned framework payload via git" >&2
+            source_dir="$TEMP_DIR/payload"
+        else
+            log_warning "Release payload unavailable. Falling back to repository snapshot." >&2
+            download_file "$FALLBACK_URL" "$archive_path"
+            tar -xzf "$archive_path" -C "$TEMP_DIR"
+            source_dir="$(find "$TEMP_DIR" -mindepth 1 -maxdepth 2 -type d -exec test -f '{}/scripts/init-project.sh' ';' -print | head -1)"
+        fi
     fi
 
-    env_profile="$(normalize_project_profile "${FRAMEWORK_PROJECT_TYPE:-}")"
-    if [ -n "$env_profile" ]; then
-        PROJECT_PROFILE="$env_profile"
-        log_info "Using project profile from FRAMEWORK_PROJECT_TYPE: $PROJECT_PROFILE"
-        return
+    if [ -z "$source_dir" ] || [ ! -f "$source_dir/scripts/init-project.sh" ] || [ ! -f "$source_dir/scripts/migrate.sh" ]; then
+        log_error "Framework payload is incomplete. Expected scripts/init-project.sh and scripts/migrate.sh."
+        exit 1
     fi
 
-    guessed_profile="$(detect_project_profile_guess)"
-    PROJECT_PROFILE="$guessed_profile"
+    if [ "$PROJECT_DIR" = "$source_dir" ]; then
+        log_error "You are in the framework repository itself."
+        echo "Run this launcher from a target project directory, or copy the file there."
+        exit 1
+    fi
 
-    case "$scenario" in
-        framework-upgrade:*|framework-current:*)
-            require_profile_prompt=1
-            ;;
-    esac
+    echo "$source_dir"
+}
 
-    if [ "$require_profile_prompt" -eq 1 ]; then
-        if [ -t 0 ]; then
-            echo ""
-            echo "Project profile is required for upgrade from older framework versions."
-            echo "Select project profile:"
-            echo "  1) software (application/service development)"
-            echo "  2) content  (course/book/article/research production)"
-            echo ""
-            if [ "$guessed_profile" = "content" ]; then
-                read -r -p "Choose profile [1/2] (default: 2): " input
-            else
-                read -r -p "Choose profile [1/2] (default: 1): " input
-            fi
+has_legacy_markers() {
+    [ -d "$PROJECT_DIR/.claude/commands" ] || \
+    [ -d "$PROJECT_DIR/.claude/protocols" ] || \
+    [ -f "$PROJECT_DIR/.claude/.framework-config" ] || \
+    [ -d "$PROJECT_DIR/.codex" ]
+}
 
-            case "$(printf "%s" "$input" | tr -d '[:space:]')" in
-                "2"|"content")
-                    selected="content"
-                    ;;
-                "1"|"software"|"")
-                    if [ "$guessed_profile" = "content" ] && [ -z "$(printf "%s" "$input" | tr -d '[:space:]')" ]; then
-                        selected="content"
-                    else
-                        selected="software"
-                    fi
-                    ;;
-                *)
-                    selected="$guessed_profile"
-                    ;;
-            esac
-            PROJECT_PROFILE="$selected"
-            log_info "Selected project profile: $PROJECT_PROFILE"
+has_v5_markers() {
+    [ -f "$PROJECT_DIR/manifest.md" ] || \
+    [ -d "$PROJECT_DIR/.claude/rules" ] || \
+    [ -d "$PROJECT_DIR/.claude/skills" ] || \
+    [ -d "$PROJECT_DIR/.claude/agents" ] || \
+    [ -f "$PROJECT_DIR/scripts/framework-state-mode.sh" ] || \
+    [ -f "$PROJECT_DIR/scripts/switch-repo-access.sh" ]
+}
+
+has_host_files() {
+    find "$PROJECT_DIR" -mindepth 1 -maxdepth 2 \
+        ! -path "$PROJECT_DIR/.git" \
+        ! -path "$PROJECT_DIR/.git/*" \
+        ! -path "$PROJECT_DIR/init-project.sh" \
+        ! -path "$PROJECT_DIR/.DS_Store" \
+        -print -quit | grep -q .
+}
+
+detect_scenario() {
+    case "$FORCE_MODE" in
+        init)
+            echo "new"
             return
-        fi
-
-        log_warning "Cannot prompt for project profile in non-interactive mode."
-        log_warning "Using auto-detected profile: $PROJECT_PROFILE (override with FRAMEWORK_PROJECT_TYPE=software|content)"
-        return
-    fi
-
-    if is_interactive_mode; then
-        echo ""
-        echo "Select project profile:"
-        echo "  1) software (application/service development)"
-        echo "  2) content  (course/book/article/research production)"
-        echo ""
-        if [ "$guessed_profile" = "content" ]; then
-            read -r -p "Choose profile [1/2] (default: 2): " input
-        else
-            read -r -p "Choose profile [1/2] (default: 1): " input
-        fi
-
-        case "$(printf "%s" "$input" | tr -d '[:space:]')" in
-            "2"|"content")
-                selected="content"
-                ;;
-            "1"|"software"|"")
-                if [ "$guessed_profile" = "content" ] && [ -z "$(printf "%s" "$input" | tr -d '[:space:]')" ]; then
-                    selected="content"
-                else
-                    selected="software"
-                fi
-                ;;
-            *)
-                selected="$guessed_profile"
-                ;;
-        esac
-        PROJECT_PROFILE="$selected"
-        log_info "Selected project profile: $PROJECT_PROFILE"
-    else
-        log_info "Auto-selected project profile: $PROJECT_PROFILE (set FRAMEWORK_PROJECT_TYPE to override)"
-    fi
-}
-
-get_state_dir_for_profile() {
-    local profile="$1"
-    if [ "$profile" = "content" ]; then
-        echo ".claude/content"
-    else
-        echo ".claude"
-    fi
-}
-
-render_template_file() {
-    local template_path="$1"
-    local target_path="$2"
-    local project_name="$3"
-    local date_value="$4"
-    local branch_value="$5"
-    local profile="$6"
-    local project_description="$7"
-    local project_structure="$8"
-
-    python3 - "$template_path" "$target_path" "$project_name" "$date_value" "$branch_value" "$profile" "$project_description" "$project_structure" <<'PY'
-import sys
-from pathlib import Path
-
-template_path = Path(sys.argv[1])
-target_path = Path(sys.argv[2])
-project_name = sys.argv[3]
-date_value = sys.argv[4]
-branch_value = sys.argv[5]
-project_type = sys.argv[6]
-project_description = sys.argv[7]
-project_structure = sys.argv[8]
-
-replacements = {
-    "PROJECT_NAME": project_name,
-    "DATE": date_value,
-    "CURRENT_BRANCH": branch_value,
-    "PROJECT_TYPE": project_type,
-    "PROJECT_DESCRIPTION": project_description,
-    "PROJECT_STRUCTURE": project_structure,
-}
-
-content = template_path.read_text(encoding="utf-8")
-for key, value in replacements.items():
-    content = content.replace("{{" + key + "}}", value)
-
-target_path.parent.mkdir(parents=True, exist_ok=True)
-target_path.write_text(content, encoding="utf-8")
-PY
-}
-
-confirm_step() {
-    local prompt="$1"
-
-    if is_interactive_mode; then
-        read -p "$prompt (y/N) " -n 1 -r
-        echo
-        [[ $REPLY =~ ^[Yy]$ ]]
-        return
-    fi
-
-    log_info "$prompt -> auto-confirmed (set FRAMEWORK_INTERACTIVE=1 to enable prompts)"
-    return 0
-}
-
-install_codex_adapter() {
-    if [ -d "$TEMP_DIR/framework/.codex" ]; then
-        mkdir -p .codex
-        cp -r "$TEMP_DIR/framework/.codex/"* .codex/ 2>/dev/null || true
-        log_success "Installed .codex/ directory"
-    else
-        log_warning "Codex adapter directory (.codex) not found in framework archive"
-    fi
-
-    if [ -f "$TEMP_DIR/framework/AGENTS.md" ]; then
-        cp "$TEMP_DIR/framework/AGENTS.md" AGENTS.md
-        log_success "Installed AGENTS.md (Codex adapter entry)"
-    else
-        log_warning "AGENTS.md not found in framework archive"
-    fi
-}
-
-install_shared_runtime() {
-    if [ -d "$TEMP_DIR/framework/src/framework-core" ]; then
-        mkdir -p src/framework-core
-        cp -r "$TEMP_DIR/framework/src/framework-core/"* src/framework-core/ 2>/dev/null || true
-        chmod +x src/framework-core/main.py 2>/dev/null || true
-        log_success "Installed shared core runtime (src/framework-core)"
-    else
-        log_warning "Shared core runtime (src/framework-core) not found in framework archive"
-    fi
-
-    if [ -d "$TEMP_DIR/framework/security" ]; then
-        mkdir -p security
-        cp -r "$TEMP_DIR/framework/security/"* security/ 2>/dev/null || true
-        chmod +x security/*.sh 2>/dev/null || true
-        log_success "Installed security scripts"
-    else
-        log_warning "Security scripts directory not found in framework archive"
-    fi
-}
-
-# Header
-echo ""
-echo "════════════════════════════════════════════════════════════"
-echo "  Claude Code Starter Framework Installer"
-echo "  Version: $VERSION"
-echo "════════════════════════════════════════════════════════════"
-echo ""
-
-# Check if running in a project directory
-if [ ! -d ".git" ] && [ ! -f "package.json" ] && [ ! -f "README.md" ]; then
-    log_warning "This doesn't look like a project directory"
-    if ! confirm_step "Continue anyway?"; then
-        log_info "Installation cancelled"
-        exit 0
-    fi
-fi
-
-# Download framework archive
-log_info "Downloading framework from GitHub Releases..."
-mkdir -p "$TEMP_DIR"
-
-if command -v curl &> /dev/null; then
-    curl -L -f "$ARCHIVE_URL" -o "$TEMP_DIR/framework.tar.gz" || {
-        log_error "Failed to download framework archive"
-        log_info "URL: $ARCHIVE_URL"
-        log_info "Make sure the release exists on GitHub"
-        exit 1
-    }
-elif command -v wget &> /dev/null; then
-    wget -q "$ARCHIVE_URL" -O "$TEMP_DIR/framework.tar.gz" || {
-        log_error "Failed to download framework archive"
-        exit 1
-    }
-else
-    log_error "Neither curl nor wget found. Please install one of them."
-    exit 1
-fi
-
-log_success "Downloaded framework archive"
-
-# Extract archive
-log_info "Extracting framework files..."
-tar -xzf "$TEMP_DIR/framework.tar.gz" -C "$TEMP_DIR" || {
-    log_error "Failed to extract archive"
-    exit 1
-}
-log_success "Extracted framework files"
-
-# ============================================
-# Project Type Detection & Qualification
-# ============================================
-
-detect_project_type() {
-    # Check for existing Framework markers.
-    # Note: some projects may have a local `.claude/` from Claude app settings
-    # without framework installation. Treat as framework only if real markers exist.
-    FRAMEWORK_MARKERS=0
-    if [ -f "CLAUDE.md" ] || [ -f "AGENTS.md" ] || [ -d ".codex" ]; then
-        FRAMEWORK_MARKERS=1
-    elif [ -d ".claude" ] && { [ -d ".claude/commands" ] || [ -d ".claude/protocols" ] || [ -d ".claude/templates" ] || [ -f ".claude/migration-context.json" ]; }; then
-        FRAMEWORK_MARKERS=1
-    fi
-
-    # Check for existing Framework
-    if [ "$FRAMEWORK_MARKERS" -eq 1 ]; then
-        # Scenario 3: Has Framework - detect version
-        if [ -f ".claude/SNAPSHOT.md" ]; then
-            VERSION_LINE=$(grep -i "framework:" .claude/SNAPSHOT.md 2>/dev/null | head -1)
-            if [ -n "$VERSION_LINE" ]; then
-                FW_VERSION=$(echo "$VERSION_LINE" | awk '{print $NF}' | sed 's/[^0-9.]//g')
-                echo "framework-upgrade:$FW_VERSION"
+            ;;
+        migrate)
+            if has_legacy_markers; then
+                echo "legacy"
+            elif has_v5_markers; then
+                echo "upgrade"
             else
-                echo "framework-upgrade:v1.x"
+                echo "existing"
             fi
-        elif [ -f ".claude/BACKLOG.md" ]; then
-            # v2.0 if BACKLOG exists but no ROADMAP/IDEAS
-            if [ ! -f ".claude/ROADMAP.md" ]; then
-                echo "framework-upgrade:v2.0"
-            else
-                # Already v2.1+
-                echo "framework-current:v2.1"
-            fi
-        else
-            echo "framework-upgrade:v1.x"
-        fi
-    # Check for legacy v1.x structure (Init/ folder)
-    elif [ -d "Init" ] && [ -f "Init/PROJECT_SNAPSHOT.md" ]; then
-        echo "framework-upgrade:v1.x"
-    # Check for explicit code markers (legacy without Framework)
-    elif [ -d "src" ] || [ -d "lib" ] || [ -f "package.json" ] || [ -f "pom.xml" ] || [ -f "Cargo.toml" ] || [ -f "go.mod" ] || [ -f "pyproject.toml" ]; then
-        echo "legacy-migration"
+            return
+            ;;
+        "" ) ;;
+        *)
+            log_error "Unsupported mode: $FORCE_MODE"
+            echo "Use --mode init or --mode migrate"
+            exit 1
+            ;;
+    esac
+
+    if has_legacy_markers; then
+        echo "legacy"
+    elif has_v5_markers; then
+        echo "upgrade"
+    elif has_host_files; then
+        echo "existing"
     else
-        # Heuristic: if project already has meaningful user files, treat as legacy.
-        NON_FRAMEWORK_CONTENT=$(find . -mindepth 1 -maxdepth 2 \
-            ! -path "./.git*" \
-            ! -path "./.claude*" \
-            ! -path "./.codex*" \
-            ! -path "./node_modules*" \
-            ! -path "./dist*" \
-            ! -path "./build*" \
-            ! -path "./archive*" \
-            ! -path "./reports*" \
-            ! -path "./.DS_Store" \
-            ! -name "init-project.sh" \
-            ! -name "quick-update.sh" \
-            ! -name "framework.tar.gz" \
-            ! -name "framework-commands.tar.gz" \
-            ! -name "CLAUDE.md" \
-            ! -name "AGENTS.md" \
-            ! -name "FRAMEWORK_GUIDE.md" \
-            -print -quit 2>/dev/null || true)
-
-        if [ -n "$NON_FRAMEWORK_CONTENT" ]; then
-            echo "legacy-migration"
-        else
-            # New empty project
-            echo "new-project"
-        fi
+        echo "new"
     fi
 }
 
-estimate_analysis_cost() {
-    log_info "Estimating analysis cost..."
+run_internal_init() {
+    local source_dir="$1"
+    local args=("--template" "$source_dir")
 
-    # Count lines in code files
-    TOTAL_LINES=0
-    if command -v find &> /dev/null && command -v wc &> /dev/null; then
-        TOTAL_LINES=$(find . -type f \( \
-            -name "*.js" -o -name "*.ts" -o -name "*.tsx" -o -name "*.jsx" \
-            -o -name "*.py" -o -name "*.java" -o -name "*.go" -o -name "*.rs" \
-            -o -name "*.c" -o -name "*.cpp" -o -name "*.h" \
-            -o -name "*.md" -o -name "*.txt" \
-        \) ! -path "*/node_modules/*" ! -path "*/.git/*" ! -path "*/dist/*" ! -path "*/build/*" \
-        2>/dev/null | xargs wc -l 2>/dev/null | tail -1 | awk '{print $1}' || echo "0")
+    if [ -n "$PROJECT_NAME" ]; then
+        args=("--name" "$PROJECT_NAME" "${args[@]}")
     fi
 
-    # Rough estimate: ~2 tokens per line
-    ESTIMATED_TOKENS=$((TOTAL_LINES * 2))
-
-    # Add overhead for analysis (~20k)
-    ESTIMATED_TOKENS=$((ESTIMATED_TOKENS + 20000))
-
-    # Calculate cost (Sonnet: $3 per 1M input tokens)
-    ESTIMATED_COST=$(printf "%.2f" $(echo "$ESTIMATED_TOKENS * 0.000003" | bc -l 2>/dev/null || echo "0.15"))
-
-    echo ""
-    echo "════════════════════════════════════════════════════════════"
-    echo "  📊 Deep Analysis Cost Estimate"
-    echo "════════════════════════════════════════════════════════════"
-    echo ""
-    echo "  Project size: ~$TOTAL_LINES lines of code"
-    echo "  Estimated tokens: ~$ESTIMATED_TOKENS"
-    echo "  Estimated cost: ~\$$ESTIMATED_COST USD"
-    echo ""
-    echo "  What will be analyzed:"
-    echo "    • Project structure and modules"
-    echo "    • Existing documentation (README, TODO, etc)"
-    echo "    • Git history (recent commits)"
-    echo "    • Package metadata"
-    echo ""
-    echo "════════════════════════════════════════════════════════════"
-    echo ""
+    bash "$source_dir/scripts/init-project.sh" "${args[@]}"
 }
 
-# Detect project type
-PROJECT_TYPE=$(detect_project_type)
-select_project_profile "$PROJECT_TYPE"
+run_internal_migrate() {
+    local source_dir="$1"
+    bash "$source_dir/scripts/migrate.sh" --template "$source_dir"
+}
 
-# ============================================
-# Route to Appropriate Scenario
-# ============================================
+SOURCE_DIR="$(resolve_source_dir)"
+SCENARIO="$(detect_scenario)"
 
-case $PROJECT_TYPE in
-    "new-project")
-        log_info "📦 Scenario: New Project"
-        log_info "Simple installation with template files"
-        log_info "Project profile: $PROJECT_PROFILE"
+echo ""
+echo -e "${BLUE}Claude Code Starter v5.0${NC}"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo ""
+log_info "Target project: $(basename "$PROJECT_DIR")"
+
+case "$SCENARIO" in
+    new)
+        log_info "Scenario detected: new project bootstrap"
         echo ""
-
-        # Mark as new project mode
-        MIGRATION_MODE="new"
-        # Continue with simple installation below
+        run_internal_init "$SOURCE_DIR"
         ;;
-
-    "legacy-migration")
-        log_warning "🔍 Scenario: Legacy Project (No Framework)"
-        log_info "Project profile: $PROJECT_PROFILE"
+    existing)
+        log_info "Scenario detected: existing project without framework"
+        log_info "Running additive integration."
         echo ""
-        echo "This project has code but no Framework installed."
-        echo "Deep analysis is recommended to generate accurate Framework files."
-        echo ""
-
-        estimate_analysis_cost
-
-        echo "Legacy migration will:"
-        echo "  1. Analyze your project structure"
-        echo "  2. Find existing docs (README, TODO, ARCHITECTURE, etc)"
-        echo "  3. Generate Framework files based on analysis"
-        echo "  4. ❌ NOT modify your existing files"
-        echo ""
-
-        if ! confirm_step "Proceed with deep analysis?"; then
-            log_info "Installation cancelled"
-            log_info "You can install Framework later with: ./init-project.sh"
-            exit 0
-        fi
-
-        # Mark as legacy migration mode
-        MIGRATION_MODE="legacy"
-
-        # Will create migration context after installation
+        run_internal_migrate "$SOURCE_DIR"
         ;;
-
-    framework-upgrade:*)
-        OLD_VERSION=$(echo "$PROJECT_TYPE" | cut -d: -f2)
-        log_warning "🔄 Scenario: Framework Upgrade (from $OLD_VERSION)"
-        log_info "Project profile: $PROJECT_PROFILE"
+    legacy)
+        log_info "Scenario detected: legacy framework installation"
+        log_info "Running additive migration."
         echo ""
-        echo "This project has Framework $OLD_VERSION installed."
-        echo "Migration to v$VERSION will preserve all your data."
-        echo ""
-        echo "Migration will:"
-
-        if [[ "$OLD_VERSION" == "v1.x" ]]; then
-            echo "  • Move Init/ → .claude/ structure"
-            echo "  • Add ROADMAP.md and IDEAS.md"
-            echo "  • Archive old Init/ folder"
-        elif [[ "$OLD_VERSION" == "v2.0" ]]; then
-            echo "  • Add ROADMAP.md (extract from BACKLOG)"
-            echo "  • Add IDEAS.md (new template)"
-            echo "  • Restructure BACKLOG.md"
-        else
-            echo "  • Update Framework files"
-        fi
-
-        echo "  • ✅ Preserve ALL existing data"
-        echo "  • 💾 Create backup before changes"
-        echo ""
-
-        if ! confirm_step "Proceed with migration?"; then
-            log_info "Migration cancelled"
-            exit 0
-        fi
-
-        MIGRATION_MODE="upgrade"
-        OLD_FW_VERSION="$OLD_VERSION"
-
-        # Will create migration context after installation
+        run_internal_migrate "$SOURCE_DIR"
         ;;
-
-    "framework-current:v2.1")
-        if [ -f "AGENTS.md" ] && [ -d ".codex" ]; then
-            log_success "✅ Framework v2.1+ already installed"
-            echo ""
-            echo "Claude and Codex adapters are already present."
-            echo "No installation needed."
-            echo ""
-            exit 0
-        fi
-
-        log_warning "🧩 Framework is current, but Codex adapter is missing"
-        log_info "Project profile: $PROJECT_PROFILE"
+    upgrade)
+        log_info "Scenario detected: existing v5 or partial installation"
+        log_info "Filling missing files and normalizing operational layer."
         echo ""
-        echo "This run will add Codex adapter files (AGENTS.md + .codex/)."
-        echo "Existing Claude adapter files will be preserved."
-        echo ""
-
-        if ! confirm_step "Proceed with Codex adapter installation?"; then
-            log_info "Installation cancelled"
-            exit 0
-        fi
-
-        MIGRATION_MODE="upgrade"
-        OLD_FW_VERSION="v2.1"
+        run_internal_migrate "$SOURCE_DIR"
         ;;
 esac
-
-# ============================================
-# Install Framework Files (mode-dependent)
-# ============================================
-
-log_info "Installing framework to current directory..."
-
-if [ "$MIGRATION_MODE" = "new" ]; then
-    # NEW PROJECT: Copy everything, generate meta files
-
-    # Copy full .claude directory
-    if [ -d "$TEMP_DIR/framework/.claude" ]; then
-        mkdir -p .claude
-        cp -r "$TEMP_DIR/framework/.claude/"* .claude/ 2>/dev/null || true
-        log_success "Installed .claude/ directory"
-    fi
-
-    # Install Codex adapter files
-    install_codex_adapter
-
-    # Install shared runtime utilities used by both adapters
-    install_shared_runtime
-
-    # Install npm dependencies for framework CLI
-    if [ -f ".claude/dist/claude-export/package.json" ]; then
-        log_info "Installing framework dependencies..."
-        if command -v npm &> /dev/null; then
-            (cd .claude/dist/claude-export && npm install --silent 2>&1 | grep -v "^npm WARN" || true) && \
-                log_success "Framework dependencies installed" || {
-                log_warning "Failed to install dependencies automatically"
-                log_info "You can install them later with: cd .claude/dist/claude-export && npm install"
-            }
-        else
-            log_warning "npm not found - skipping dependency installation"
-            log_info "Install npm, then run: cd .claude/dist/claude-export && npm install"
-        fi
-    fi
-
-    # Copy CLAUDE.production.md as CLAUDE.md (no migration needed)
-    if [ ! -f "CLAUDE.md" ] && [ -f "$TEMP_DIR/framework/CLAUDE.production.md" ]; then
-        cp "$TEMP_DIR/framework/CLAUDE.production.md" CLAUDE.md
-        log_success "Installed CLAUDE.md (production)"
-    fi
-
-    # Copy FRAMEWORK_GUIDE.md
-    if [ -f "$TEMP_DIR/framework/FRAMEWORK_GUIDE.md" ]; then
-        cp "$TEMP_DIR/framework/FRAMEWORK_GUIDE.md" .
-        log_success "Installed FRAMEWORK_GUIDE.md"
-    fi
-
-    # Generate memory and config files from templates
-    if [ -d ".claude/templates" ]; then
-        log_info "Generating framework files from templates..."
-
-        PROJECT_NAME=$(basename "$PROJECT_DIR")
-        DATE=$(date +%Y-%m-%d)
-        BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null | tr -d '\n' || echo "main")
-        [ -z "$BRANCH" ] && BRANCH="main"
-        STATE_DIR="$(get_state_dir_for_profile "$PROJECT_PROFILE")"
-        TEMPLATE_DIR=".claude/templates"
-        if [ "$PROJECT_PROFILE" = "content" ]; then
-            if [ -d ".claude/templates/content" ]; then
-                TEMPLATE_DIR=".claude/templates/content"
-            else
-                log_warning "Content templates not found in archive, falling back to software templates"
-            fi
-        fi
-
-        if [ "$PROJECT_PROFILE" = "content" ]; then
-            PROJECT_DESCRIPTION="Content project focused on producing high-quality textual assets."
-        else
-            PROJECT_DESCRIPTION="Software project initialized with dual-agent framework lifecycle."
-        fi
-
-        PROJECT_STRUCTURE=$(find . -mindepth 1 -maxdepth 2 \
-            ! -path "./.git*" \
-            ! -path "./.claude*" \
-            ! -path "./.codex*" \
-            ! -path "./node_modules*" \
-            ! -path "./dist*" \
-            ! -path "./build*" \
-            ! -path "./archive*" \
-            ! -path "./reports*" \
-            -print 2>/dev/null | sed 's|^\./||' | head -10 | paste -sd ', ' -)
-        [ -z "$PROJECT_STRUCTURE" ] && PROJECT_STRUCTURE="<project files>"
-
-        mkdir -p "$STATE_DIR"
-
-        if [ -f "$TEMPLATE_DIR/SNAPSHOT.template.md" ]; then
-            render_template_file "$TEMPLATE_DIR/SNAPSHOT.template.md" "$STATE_DIR/SNAPSHOT.md" "$PROJECT_NAME" "$DATE" "$BRANCH" "$PROJECT_PROFILE" "$PROJECT_DESCRIPTION" "$PROJECT_STRUCTURE"
-            log_success "Generated $STATE_DIR/SNAPSHOT.md"
-        fi
-
-        if [ -f "$TEMPLATE_DIR/BACKLOG.template.md" ]; then
-            render_template_file "$TEMPLATE_DIR/BACKLOG.template.md" "$STATE_DIR/BACKLOG.md" "$PROJECT_NAME" "$DATE" "$BRANCH" "$PROJECT_PROFILE" "$PROJECT_DESCRIPTION" "$PROJECT_STRUCTURE"
-            log_success "Generated $STATE_DIR/BACKLOG.md"
-        fi
-
-        if [ -f "$TEMPLATE_DIR/ARCHITECTURE.template.md" ]; then
-            render_template_file "$TEMPLATE_DIR/ARCHITECTURE.template.md" "$STATE_DIR/ARCHITECTURE.md" "$PROJECT_NAME" "$DATE" "$BRANCH" "$PROJECT_PROFILE" "$PROJECT_DESCRIPTION" "$PROJECT_STRUCTURE"
-            log_success "Generated $STATE_DIR/ARCHITECTURE.md"
-        fi
-
-        if [ "$PROJECT_PROFILE" = "content" ] && [ -f "$TEMPLATE_DIR/EDITORIAL_CALENDAR.template.md" ]; then
-            render_template_file "$TEMPLATE_DIR/EDITORIAL_CALENDAR.template.md" "$STATE_DIR/EDITORIAL_CALENDAR.md" "$PROJECT_NAME" "$DATE" "$BRANCH" "$PROJECT_PROFILE" "$PROJECT_DESCRIPTION" "$PROJECT_STRUCTURE"
-            log_success "Generated $STATE_DIR/EDITORIAL_CALENDAR.md"
-        fi
-
-        if [ "$PROJECT_PROFILE" = "content" ] && [ -f "$TEMPLATE_DIR/SOURCES.template.md" ]; then
-            render_template_file "$TEMPLATE_DIR/SOURCES.template.md" "$STATE_DIR/SOURCES.md" "$PROJECT_NAME" "$DATE" "$BRANCH" "$PROJECT_PROFILE" "$PROJECT_DESCRIPTION" "$PROJECT_STRUCTURE"
-            log_success "Generated $STATE_DIR/SOURCES.md"
-        fi
-
-        # Generate .framework-config from template
-        if [ -f ".claude/templates/.framework-config.template.json" ]; then
-            render_template_file ".claude/templates/.framework-config.template.json" ".claude/.framework-config" "$PROJECT_NAME" "$DATE" "$BRANCH" "$PROJECT_PROFILE" "$PROJECT_DESCRIPTION" "$PROJECT_STRUCTURE"
-            log_success "Generated .claude/.framework-config"
-        elif [ ! -f ".claude/.framework-config" ]; then
-            cat > .claude/.framework-config <<EOF
-{
-  "bug_reporting_enabled": false,
-  "dialog_export_enabled": false,
-  "project_name": "$PROJECT_NAME",
-  "project_type": "$PROJECT_PROFILE",
-  "first_run_completed": false,
-  "consent_version": "1.0",
-  "cold_start": {
-    "silent_mode": true,
-    "show_ready": false,
-    "auto_update": true
-  },
-  "completion": {
-    "silent_mode": true,
-    "auto_commit": false,
-    "show_commit_message": true
-  }
-}
-EOF
-            log_success "Generated .claude/.framework-config (fallback)"
-        fi
-
-        # Generate COMMIT_POLICY.md from template (NEW in v2.5.0)
-        if [ -f ".claude/templates/COMMIT_POLICY.template.md" ]; then
-            render_template_file ".claude/templates/COMMIT_POLICY.template.md" ".claude/COMMIT_POLICY.md" "$PROJECT_NAME" "$DATE" "$BRANCH" "$PROJECT_PROFILE" "$PROJECT_DESCRIPTION" "$PROJECT_STRUCTURE"
-            log_success "Generated .claude/COMMIT_POLICY.md"
-        fi
-    fi
-
-else
-    # LEGACY or UPGRADE: Copy full framework structure
-    # Meta files will be created/updated by Claude after analysis
-
-    # Copy full .claude directory (commands, dist, protocols, scripts, templates)
-    if [ -d "$TEMP_DIR/framework/.claude" ]; then
-        mkdir -p .claude
-        cp -r "$TEMP_DIR/framework/.claude/"* .claude/ 2>/dev/null || true
-        log_success "Installed .claude/ directory"
-    fi
-
-    # Install Codex adapter files
-    install_codex_adapter
-
-    # Install shared runtime utilities used by both adapters
-    install_shared_runtime
-
-    # Install npm dependencies for framework CLI
-    if [ -f ".claude/dist/claude-export/package.json" ]; then
-        log_info "Installing framework dependencies..."
-        if command -v npm &> /dev/null; then
-            (cd .claude/dist/claude-export && npm install --silent 2>&1 | grep -v "^npm WARN" || true) && \
-                log_success "Framework dependencies installed" || {
-                log_warning "Failed to install dependencies automatically"
-                log_info "You can install them later with: cd .claude/dist/claude-export && npm install"
-            }
-        else
-            log_warning "npm not found - skipping dependency installation"
-            log_info "Install npm, then run: cd .claude/dist/claude-export && npm install"
-        fi
-    fi
-
-    # Copy CLAUDE.migration.md as CLAUDE.md (temporary, will be replaced after migration)
-    if [ -f "$TEMP_DIR/framework/CLAUDE.migration.md" ]; then
-        cp "$TEMP_DIR/framework/CLAUDE.migration.md" CLAUDE.md
-        log_success "Installed CLAUDE.md (migration mode)"
-    fi
-
-    # Store CLAUDE.production.md for swap after migration completes
-    if [ -f "$TEMP_DIR/framework/CLAUDE.production.md" ]; then
-        cp "$TEMP_DIR/framework/CLAUDE.production.md" .claude/CLAUDE.production.md
-        log_info "Staged CLAUDE.production.md for post-migration swap"
-    fi
-fi
-
-# Create migration context for all scenarios
-if [ "$MIGRATION_MODE" = "legacy" ]; then
-    echo "{\"mode\": \"legacy\", \"project_type\": \"$PROJECT_PROFILE\", \"timestamp\": \"$(date -Iseconds)\"}" > .claude/migration-context.json
-    log_success "Created migration context"
-elif [ "$MIGRATION_MODE" = "upgrade" ]; then
-    echo "{\"mode\": \"upgrade\", \"old_version\": \"$OLD_FW_VERSION\", \"project_type\": \"$PROJECT_PROFILE\", \"timestamp\": \"$(date -Iseconds)\"}" > .claude/migration-context.json
-    log_success "Created migration context"
-elif [ "$MIGRATION_MODE" = "new" ]; then
-    echo "{\"mode\": \"new\", \"project_type\": \"$PROJECT_PROFILE\", \"timestamp\": \"$(date -Iseconds)\"}" > .claude/migration-context.json
-    log_success "Created migration context"
-fi
-
-# Success summary
-echo ""
-echo "════════════════════════════════════════════════════════════"
-log_success "Installation complete!"
-echo "════════════════════════════════════════════════════════════"
-echo ""
-log_info "Project profile configured: $PROJECT_PROFILE"
-if [ "$PROJECT_PROFILE" = "content" ]; then
-    log_info "Primary memory files: .claude/content/{SNAPSHOT,BACKLOG,ARCHITECTURE}.md"
-else
-    log_info "Primary memory files: .claude/{SNAPSHOT,BACKLOG,ARCHITECTURE}.md"
-fi
-echo ""
-
-echo "🚀 Next steps:"
-echo ""
-echo "  Option A (Codex):"
-echo "    1. Run: codex"
-echo "    2. Type: start"
-echo ""
-echo "  Option B (Claude Code):"
-echo "    1. Run: claude"
-echo "    2. Type: start"
-echo ""
