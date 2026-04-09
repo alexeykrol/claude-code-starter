@@ -138,8 +138,58 @@ copy_if_missing "$TEMPLATE_DIR/scripts/framework-state-mode.sh" "scripts/framewo
 copy_if_missing "$TEMPLATE_DIR/scripts/switch-repo-access.sh" "scripts/switch-repo-access.sh"
 chmod +x scripts/*.sh 2>/dev/null || true
 
-# Settings
-copy_if_missing "$TEMPLATE_DIR/.claude/settings.json" ".claude/settings.json"
+# Settings — merge hooks if file already exists
+if [ ! -f ".claude/settings.json" ]; then
+    if [ -f "$TEMPLATE_DIR/.claude/settings.json" ]; then
+        cp "$TEMPLATE_DIR/.claude/settings.json" ".claude/settings.json"
+        log_success "Created: .claude/settings.json"
+    fi
+else
+    # File exists — check if hooks section needs merging from template
+    merge_needed=$(python3 -c "
+import json, sys
+try:
+    with open('.claude/settings.json') as f:
+        existing = json.load(f)
+    with open('$TEMPLATE_DIR/.claude/settings.json') as f:
+        template = json.load(f)
+    t_hooks = template.get('hooks', {})
+    e_hooks = existing.get('hooks', {})
+    # Check if any template hook key is missing from existing
+    missing = [k for k in t_hooks if k not in e_hooks]
+    print('yes' if missing else 'no')
+except Exception as e:
+    print('error:' + str(e), file=sys.stderr)
+    print('no')
+" 2>/dev/null)
+
+    if [ "$merge_needed" = "yes" ]; then
+        python3 -c "
+import json, sys
+with open('.claude/settings.json') as f:
+    existing = json.load(f)
+with open('$TEMPLATE_DIR/.claude/settings.json') as f:
+    template = json.load(f)
+t_hooks = template.get('hooks', {})
+e_hooks = existing.get('hooks', {})
+# Add missing hook keys from template (don't overwrite existing ones)
+for key, val in t_hooks.items():
+    if key not in e_hooks:
+        e_hooks[key] = val
+existing['hooks'] = e_hooks
+with open('.claude/settings.json', 'w') as f:
+    json.dump(existing, f, indent=2)
+    f.write('\n')
+" 2>/dev/null
+        if [ $? -eq 0 ]; then
+            log_success "Updated: .claude/settings.json (merged missing hooks from template)"
+        else
+            log_error "Failed to merge hooks into .claude/settings.json"
+        fi
+    else
+        log_warning "Exists:  .claude/settings.json (hooks up to date)"
+    fi
+fi
 # settings.local.json is NOT auto-copied (opt-in only)
 # To enable full autonomy, manually create .claude/settings.local.json with:
 #   {"permissions": {"bypassPermissions": true}}
