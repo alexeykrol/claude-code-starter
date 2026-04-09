@@ -10,5 +10,6 @@
       "WebSearch",
       "WebFetch"
     ]
-  }
+  },
+  "thinkingBudget": "max"
 }
