@@ -1,198 +1,201 @@
 #!/bin/bash
 #
 # Claude Code Starter — Migration Payload
-# Version: 5.0.0
+# Version: 6.0.0 (content-aware additive migration)
 #
 # Internal migration used by the public root launcher.
-# Интегрирует управляющую среду в существующий проект.
+# Аддитивная интеграция framework в существующий проект.
 #
 # Принцип: НИЧЕГО НЕ ТРОГАТЬ, ТОЛЬКО ДОБАВЛЯТЬ.
-# - Существующий код остаётся как есть
-# - Существующая документация остаётся как есть
-# - Существующие метафайлы остаются как есть
-# - Старые commands/, protocols/, .codex/ — остаются (это документация проекта)
-# - Добавляются только отсутствующие файлы управления фреймворка
+# - Существующий код, документация, метафайлы остаются как есть
+# - Добавляются только отсутствующие framework files (rules/skills/agents/hooks)
+# - CLAUDE.md merge'ится аддитивно через scripts/lib/merge_claude_md.py
+# - При hard conflict — стоп + конкретное предложение в .claude/CLAUDE.md.merge-proposal.md
+# - Backup всегда создаётся перед любыми изменениями
+# - Rollback восстанавливает последний backup
 #
 # Использование:
-#   bash migrate.sh                                # Автоматический режим
-#   bash migrate.sh --template /path/to/template   # С указанием шаблона
+#   bash migrate.sh                                # Авто-определение типа
+#   bash migrate.sh --name "My Project"
+#   bash migrate.sh --type code|content|hybrid|auto
+#   bash migrate.sh --content-type book|course|knowledge-base|documents|transcripts|mixed
+#   bash migrate.sh --template /path/to/framework
+#   bash migrate.sh --rollback                     # Восстановить из последнего backup
+#   bash migrate.sh --apply-proposal               # Применить CLAUDE.md merge proposal
+#   bash migrate.sh --force                        # Перезаписать существующее
 #
 
 set -e
 
+# === Config (caller responsibilities) ===
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 TEMPLATE_DIR="${SCRIPT_DIR}/.."
 PROJECT_DIR="$(pwd)"
-PROJECT_NAME=$(basename "$PROJECT_DIR")
-TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 
-# Colors
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-BLUE='\033[0;34m'
-NC='\033[0m'
+# Подключаем общую библиотеку.
+# shellcheck source=lib/install_common.sh
+source "$SCRIPT_DIR/lib/install_common.sh"
 
-log_info()    { echo -e "${BLUE}ℹ${NC} $1"; }
-log_success() { echo -e "${GREEN}✓${NC} $1"; }
-log_warning() { echo -e "${YELLOW}⚠${NC} $1"; }
+# === Defaults ===
+PROJECT_NAME=""
+TEMPLATE_PATH=""
+PROJECT_TYPE="auto"
+CONTENT_TYPE=""
+MODE="migrate"
+FORCE=0
 
 # === Parse Arguments ===
 while [[ $# -gt 0 ]]; do
     case $1 in
-        --template) TEMPLATE_DIR="$2"; shift 2 ;;
-        *)          shift ;;
+        --name)            PROJECT_NAME="$2"; shift 2 ;;
+        --template)        TEMPLATE_PATH="$2"; shift 2 ;;
+        --type)            PROJECT_TYPE="$2"; shift 2 ;;
+        --content-type)    CONTENT_TYPE="$2"; shift 2 ;;
+        --rollback)        MODE="rollback"; shift ;;
+        --apply-proposal)  MODE="apply-proposal"; shift ;;
+        --force)           FORCE=1; shift ;;
+        *)                 shift ;;
     esac
 done
 
-echo ""
-echo -e "${BLUE}Claude Code Starter v5.0 — Integration${NC}"
-echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo ""
-
-# === Analyze Existing Project ===
-log_info "Project: $PROJECT_NAME"
-log_info "Analyzing existing structure..."
-echo ""
-
-# Count existing documentation
-DOC_COUNT=0
-DOC_LIST=""
-for ext in md txt rst; do
-    while IFS= read -r -d '' f; do
-        DOC_COUNT=$((DOC_COUNT + 1))
-        DOC_LIST="${DOC_LIST}\n    $(echo "$f" | sed "s|^\./||")"
-    done < <(find . -maxdepth 3 -name "*.${ext}" -not -path './node_modules/*' -not -path './.venv/*' -not -path './.git/*' -print0 2>/dev/null)
-done
-
-if [ "$DOC_COUNT" -gt 0 ]; then
-    log_info "Found $DOC_COUNT documentation files (untouched):"
-    echo -e "$DOC_LIST" | head -20
-    [ "$DOC_COUNT" -gt 20 ] && echo "    ... and $((DOC_COUNT - 20)) more"
-    echo ""
-fi
-
-# Check for existing framework elements
-EXISTING=""
-[ -f "CLAUDE.md" ]                    && EXISTING="${EXISTING} CLAUDE.md"
-[ -f ".claude/SNAPSHOT.md" ]          && EXISTING="${EXISTING} SNAPSHOT.md"
-[ -f ".claude/settings.json" ]        && EXISTING="${EXISTING} settings.json"
-[ -d ".claude/rules" ]                && EXISTING="${EXISTING} rules/"
-[ -d ".claude/skills" ]               && EXISTING="${EXISTING} skills/"
-[ -d ".claude/agents" ]               && EXISTING="${EXISTING} agents/"
-[ -d ".claude/commands" ]             && EXISTING="${EXISTING} commands/"
-[ -d ".claude/protocols" ]            && EXISTING="${EXISTING} protocols/"
-[ -d ".codex" ]                       && EXISTING="${EXISTING} .codex/"
-
-if [ -n "$EXISTING" ]; then
-    log_info "Existing framework elements (kept as-is):${EXISTING}"
-    echo ""
-fi
-
-# === Add Missing Framework Files ===
-log_info "Adding missing framework files..."
-echo ""
-bash "$SCRIPT_DIR/init-project.sh" --name "$PROJECT_NAME" --template "$TEMPLATE_DIR"
-
-# === Enrich CLAUDE.md with Operations Section ===
-# If CLAUDE.md exists but doesn't have the v5 operations block, append it.
-# The existing project description is preserved entirely.
-if [ -f "CLAUDE.md" ]; then
-    if ! grep -q "Операционный режим" "CLAUDE.md" 2>/dev/null; then
-        if [ -f "$TEMPLATE_DIR/CLAUDE.md" ]; then
-            OPERATIONS_BLOCK=$(awk '/^## Операционный режим/,0' "$TEMPLATE_DIR/CLAUDE.md")
-            if [ -n "$OPERATIONS_BLOCK" ]; then
-                echo "" >> "CLAUDE.md"
-                echo "$OPERATIONS_BLOCK" >> "CLAUDE.md"
-                log_success "Enriched: CLAUDE.md — appended operations section (existing content preserved)"
-            fi
-        fi
+# === Determine Template Source ===
+if [ -n "$TEMPLATE_PATH" ] && [ -d "$TEMPLATE_PATH" ]; then
+    TEMPLATE_DIR="$TEMPLATE_PATH"
+elif [ -d "$SCRIPT_DIR/../.claude/rules" ]; then
+    TEMPLATE_DIR="$SCRIPT_DIR/.."
+else
+    if [ "$MODE" = "migrate" ]; then
+        log_error "Template not found. Provide --template path or run from a framework checkout with scripts/"
+        exit 1
     fi
 fi
 
-# === Upgrade settings.json Hook Schema (if needed) ===
-# Strategy: MERGE hooks from template into existing file, preserving all other keys.
-# Never replace the whole file — that destroys custom permissions and user keys.
-if [ -f ".claude/settings.json" ]; then
-    HAS_HOOKS=$(grep -c '"hooks"' ".claude/settings.json" 2>/dev/null) || HAS_HOOKS=0
-    HAS_MATCHER=$(grep -c '"matcher"' ".claude/settings.json" 2>/dev/null) || HAS_MATCHER=0
-    HAS_PRECOMPACT=$(grep -c '"PreCompact"' ".claude/settings.json" 2>/dev/null) || HAS_PRECOMPACT=0
+# ============================================================================
+# Migration logging
+# ============================================================================
 
-    NEEDS_UPGRADE=false
-    if [ "$HAS_HOOKS" -gt 0 ] && [ "$HAS_MATCHER" -eq 0 ]; then
-        NEEDS_UPGRADE=true  # Old hook format
-    elif [ "$HAS_HOOKS" -eq 0 ] && [ "$HAS_PRECOMPACT" -eq 0 ]; then
-        NEEDS_UPGRADE=true  # No hooks at all
-    fi
+# Пишет JSON-лог миграции в .claude/logs/migrations/.
+write_migration_log() {
+    local end_ts
+    end_ts=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+    local log_file
+    log_file=".claude/logs/migrations/$(date +%Y-%m-%d_%H-%M).json"
+    mkdir -p .claude/logs/migrations
 
-    if [ "$NEEDS_UPGRADE" = true ]; then
-        cp ".claude/settings.json" ".claude/settings.json.bak"
+    local doc_count
+    doc_count=$(find . -maxdepth 3 -type f \( -name '*.md' -o -name '*.txt' -o -name '*.rst' \) \
+        -not -path './node_modules/*' -not -path './.venv/*' -not -path './.git/*' \
+        -not -path './.claude/*' 2>/dev/null | wc -l | tr -d ' ')
 
-        # Merge: take existing file, replace/add only the "hooks" key from template.
-        # Uses Python (available on virtually all systems) for safe JSON merge.
-        if command -v python3 &>/dev/null; then
-            python3 -c "
-import json, sys
-with open('.claude/settings.json.bak') as f:
-    existing = json.load(f)
-with open('$TEMPLATE_DIR/.claude/settings.json') as f:
-    template = json.load(f)
-existing['hooks'] = template['hooks']
-with open('.claude/settings.json', 'w') as f:
-    json.dump(existing, f, indent=2)
-    f.write('\n')
-" 2>/dev/null
-            if [ $? -eq 0 ]; then
-                log_success "Merged: v5 hooks into .claude/settings.json (existing keys preserved, backup: settings.json.bak)"
-            else
-                # Python merge failed — fall back to full copy (with warning)
-                cp "$TEMPLATE_DIR/.claude/settings.json" ".claude/settings.json"
-                log_warning "Replaced: .claude/settings.json (JSON merge failed, backup: settings.json.bak)"
-            fi
-        else
-            # No python3 — fall back to full copy (with warning)
-            cp "$TEMPLATE_DIR/.claude/settings.json" ".claude/settings.json"
-            log_warning "Replaced: .claude/settings.json (python3 not found for merge, backup: settings.json.bak)"
-        fi
-    fi
-fi
+    local claude_enriched="false"
+    grep -q "Операционный режим" "CLAUDE.md" 2>/dev/null && claude_enriched="true"
 
-# === Write Migration Log ===
-MIGRATION_END=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
-LOG_FILE=".claude/logs/migrations/$(date +%Y-%m-%d_%H-%M).json"
-mkdir -p .claude/logs/migrations
-
-# Collect created files (from init-project.sh output)
-CREATED_FILES=$(git status --porcelain 2>/dev/null | grep "^?" | awk '{print $2}' | head -50)
-CLAUDE_ENRICHED="false"
-grep -q "Операционный режим" "CLAUDE.md" 2>/dev/null && CLAUDE_ENRICHED="true"
-SETTINGS_UPGRADED="false"
-[ -f ".claude/settings.json.bak" ] && SETTINGS_UPGRADED="true"
-
-cat > "$LOG_FILE" << LOGEOF
+    cat > "$log_file" <<LOGEOF
 {
   "timestamp": "$TIMESTAMP",
-  "completed": "$MIGRATION_END",
+  "completed": "$end_ts",
   "project": "$PROJECT_NAME",
-  "doc_files_found": $DOC_COUNT,
-  "claude_md_enriched": $CLAUDE_ENRICHED,
-  "settings_upgraded": $SETTINGS_UPGRADED,
+  "project_type": "$PROJECT_TYPE",
+  "content_type": "$CONTENT_TYPE",
+  "doc_files_found": $doc_count,
+  "claude_md_enriched": $claude_enriched,
+  "backup_dir": "$BACKUP_DIR",
   "errors": []
 }
 LOGEOF
 
-log_success "Migration log: $LOG_FILE"
+    log_success "Migration log: $log_file"
+}
 
-# === Summary ===
+# ============================================================================
+# Mode dispatcher
+# ============================================================================
+
+# Header
 echo ""
+echo -e "${BLUE}Claude Code Starter v6.0 — Migration${NC}"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo -e "${GREEN}Claude Code Starter integrated: $PROJECT_NAME${NC}"
-echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo ""
-echo "What was done:"
-echo "  - Added missing management files (rules, skills, agents, hooks)"
-echo "  - Existing code, docs, and configs left untouched"
-[ "$DOC_COUNT" -gt 0 ] && echo "  - $DOC_COUNT documentation files preserved in place"
-echo ""
-echo "Open in Claude Code and run: /start"
-echo ""
+
+case "$MODE" in
+    rollback)
+        rollback
+        exit 0
+        ;;
+    apply-proposal)
+        apply_proposal
+        exit 0
+        ;;
+    migrate)
+        # Resolve project name
+        if [ -z "$PROJECT_NAME" ]; then
+            PROJECT_NAME=$(basename "$PROJECT_DIR")
+        fi
+
+        log_info "Project: $PROJECT_NAME"
+        log_info "Analyzing existing structure..."
+        analyze_existing_project
+        echo ""
+
+        # Project type detection (если auto)
+        if [ "$PROJECT_TYPE" = "auto" ]; then
+            log_info "Detecting project type..."
+            PROJECT_TYPE=$(detect_project_type)
+            log_info "Detected project type: $PROJECT_TYPE"
+        fi
+
+        # Content type detection (если применимо)
+        if [ "$PROJECT_TYPE" = "content" ] || [ "$PROJECT_TYPE" = "hybrid" ]; then
+            if [ -z "$CONTENT_TYPE" ]; then
+                CONTENT_TYPE=$(detect_content_type)
+                log_info "Detected content type: $CONTENT_TYPE"
+            fi
+        fi
+
+        # Unknown → fallback на code (безопасный выбор для существующего кодового проекта)
+        if [ "$PROJECT_TYPE" = "unknown" ]; then
+            log_warning "Could not detect project type. Defaulting to 'code'. Use --type to override."
+            PROJECT_TYPE="code"
+        fi
+
+        # Backup до любых изменений
+        backup_existing
+
+        # Установка (аддитивно — все функции используют copy_if_missing внутри)
+        install_common
+
+        case "$PROJECT_TYPE" in
+            code)
+                install_code
+                ;;
+            content)
+                install_content
+                ;;
+            hybrid)
+                install_hybrid
+                ;;
+            *)
+                log_error "Unknown project type: $PROJECT_TYPE"
+                exit 1
+                ;;
+        esac
+
+        # CLAUDE.md merge — с детекцией конфликтов
+        merge_claude_md "CLAUDE.md" "$(claude_md_template_for_type)"
+
+        # Manifest (с расширенными полями)
+        generate_manifest
+
+        # Git init не делаем в migrate — у существующего проекта уже есть свой git
+
+        # Migration log
+        write_migration_log
+
+        # Final summary
+        print_migration_summary
+        ;;
+    *)
+        log_error "Unknown mode: $MODE"
+        exit 1
+        ;;
+esac
