@@ -1,0 +1,10 @@
+title: "[Course Name]"
+type: "course"
+status: "draft"
+audience: "beginner|intermediate|advanced|mixed"
+author: "[Author]"
+updated: "YYYY-MM-DD"
+sources: []
+tags: []
+
+# Это шаблон. Заполни под конкретный курс.
