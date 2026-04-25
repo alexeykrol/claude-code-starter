@@ -51,3 +51,5 @@ coverage/
 *.db
 *.sqlite
 *.sqlite3
+.handoffs/local/
+.handoffs/*.local.md
