@@ -1,25 +1,34 @@
 #!/bin/bash
 #
 # Claude Code Starter — Installer
-# Version: 5.0.0
+# Version: 6.0.0 (content-aware)
 #
 # Public entrypoint for every installation scenario:
-# - new project bootstrap
-# - existing project integration
+# - new project bootstrap (code, content, or hybrid)
+# - existing project integration with auto-detection
 # - legacy framework migration
-# - top-up upgrade for partially installed v5 projects
+# - top-up upgrade for partially installed projects
+#
+# Default behaviour: just run `bash init-project.sh` — no flags needed.
+# Project type (code/content/hybrid) and content type (book/course/...)
+# are auto-detected from existing files.
 #
 # Usage:
-#   bash init-project.sh
+#   bash init-project.sh                                     # Auto-detect everything
 #   bash init-project.sh --name "My Project"
-#   bash init-project.sh --mode init
-#   bash init-project.sh --mode migrate
+#   bash init-project.sh --type code|content|hybrid|auto
+#   bash init-project.sh --content-type book|course|knowledge-base|documents|transcripts|mixed
+#   bash init-project.sh --mode init                         # Force bootstrap mode
+#   bash init-project.sh --mode migrate                      # Force migration mode
 #   bash init-project.sh --template /path/to/local/framework
+#   bash init-project.sh --rollback                          # Restore latest backup
+#   bash init-project.sh --apply-proposal                    # Apply CLAUDE.md merge proposal
+#   bash init-project.sh --force                             # Overwrite existing files
 #
 
 set -euo pipefail
 
-VERSION="${FRAMEWORK_VERSION:-5.0.0}"
+VERSION="${FRAMEWORK_VERSION:-6.0.0}"
 REPO="${FRAMEWORK_REPO:-alexeykrol/claude-code-starter}"
 ARCHIVE_URL="${FRAMEWORK_ARCHIVE_URL:-https://github.com/${REPO}/releases/download/v${VERSION}/framework.tar.gz}"
 FALLBACK_URL="${FRAMEWORK_FALLBACK_URL:-https://codeload.github.com/${REPO}/tar.gz/refs/heads/main}"
@@ -33,6 +42,10 @@ TEMP_DIR="$(mktemp -d "/tmp/claude-code-starter-XXXXXX")"
 PROJECT_NAME=""
 FORCE_MODE=""
 TEMPLATE_PATH=""
+PROJECT_TYPE=""
+CONTENT_TYPE=""
+SPECIAL_MODE=""
+FORCE_FLAG=""
 
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -59,11 +72,19 @@ Claude Code Starter — Installer
 Usage:
   bash init-project.sh [options]
 
+Default: just run `bash init-project.sh` — type and scenario are auto-detected.
+
 Options:
   --name "Project Name"     Set the project name for fresh bootstrap
+  --type TYPE               Override project type: code, content, hybrid, auto (default: auto)
+  --content-type TYPE       Override content type: book, course, knowledge-base,
+                            documents, transcripts, mixed
   --mode init               Force bootstrap mode
   --mode migrate            Force additive migration mode
   --template /path          Use a local framework checkout instead of downloading
+  --rollback                Restore from the latest .claude/backup-*/ snapshot
+  --apply-proposal          Apply .claude/CLAUDE.md.merge-proposal.md
+  --force                   Overwrite existing files (developer use)
   --help                    Show this help
 EOF
 }
@@ -81,6 +102,26 @@ while [[ $# -gt 0 ]]; do
         --template)
             TEMPLATE_PATH="${2:-}"
             shift 2
+            ;;
+        --type)
+            PROJECT_TYPE="${2:-}"
+            shift 2
+            ;;
+        --content-type)
+            CONTENT_TYPE="${2:-}"
+            shift 2
+            ;;
+        --rollback)
+            SPECIAL_MODE="rollback"
+            shift
+            ;;
+        --apply-proposal)
+            SPECIAL_MODE="apply-proposal"
+            shift
+            ;;
+        --force)
+            FORCE_FLAG="--force"
+            shift
             ;;
         --help|-h)
             usage
@@ -213,30 +254,52 @@ detect_scenario() {
     fi
 }
 
+build_internal_args() {
+    local source_dir="$1"
+    INTERNAL_ARGS=("--template" "$source_dir")
+    [ -n "$PROJECT_NAME" ]  && INTERNAL_ARGS+=("--name" "$PROJECT_NAME")
+    [ -n "$PROJECT_TYPE" ]  && INTERNAL_ARGS+=("--type" "$PROJECT_TYPE")
+    [ -n "$CONTENT_TYPE" ]  && INTERNAL_ARGS+=("--content-type" "$CONTENT_TYPE")
+    [ -n "$FORCE_FLAG" ]    && INTERNAL_ARGS+=("$FORCE_FLAG")
+}
+
 run_internal_init() {
     local source_dir="$1"
-    local args=("--template" "$source_dir")
-
-    if [ -n "$PROJECT_NAME" ]; then
-        args=("--name" "$PROJECT_NAME" "${args[@]}")
-    fi
-
-    bash "$source_dir/scripts/init-project.sh" "${args[@]}"
+    build_internal_args "$source_dir"
+    bash "$source_dir/scripts/init-project.sh" "${INTERNAL_ARGS[@]}"
 }
 
 run_internal_migrate() {
     local source_dir="$1"
-    bash "$source_dir/scripts/migrate.sh" --template "$source_dir"
+    build_internal_args "$source_dir"
+    bash "$source_dir/scripts/migrate.sh" "${INTERNAL_ARGS[@]}"
+}
+
+run_special_mode() {
+    local source_dir="$1"
+    local mode="$2"
+    # Special modes (rollback, apply-proposal) operate on the project directory
+    # via migrate.sh which already supports them.
+    bash "$source_dir/scripts/migrate.sh" --template "$source_dir" "--$mode"
 }
 
 SOURCE_DIR="$(resolve_source_dir)"
-SCENARIO="$(detect_scenario)"
 
 echo ""
-echo -e "${BLUE}Claude Code Starter v5.0${NC}"
+echo -e "${BLUE}Claude Code Starter v${VERSION}${NC}"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo ""
 log_info "Target project: $(basename "$PROJECT_DIR")"
+
+# Handle special modes (rollback, apply-proposal) directly — no scenario detection.
+if [ -n "$SPECIAL_MODE" ]; then
+    log_info "Special mode: $SPECIAL_MODE"
+    echo ""
+    run_special_mode "$SOURCE_DIR" "$SPECIAL_MODE"
+    exit $?
+fi
+
+SCENARIO="$(detect_scenario)"
 
 case "$SCENARIO" in
     new)
@@ -257,7 +320,7 @@ case "$SCENARIO" in
         run_internal_migrate "$SOURCE_DIR"
         ;;
     upgrade)
-        log_info "Scenario detected: existing v5 or partial installation"
+        log_info "Scenario detected: existing installation"
         log_info "Filling missing files and normalizing operational layer."
         echo ""
         run_internal_migrate "$SOURCE_DIR"

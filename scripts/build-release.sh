@@ -29,7 +29,7 @@ STAGE_DIR="$OUT_DIR/stage/claude-code-starter"
 NOTES_FILE="$REPO_DIR/release-notes/v$VERSION.md"
 
 rm -rf "$OUT_DIR"
-mkdir -p "$STAGE_DIR/.claude" "$STAGE_DIR/scripts"
+mkdir -p "$STAGE_DIR/.claude" "$STAGE_DIR/scripts" "$STAGE_DIR/scripts/lib" "$STAGE_DIR/templates"
 
 copy_required() {
     local src="$1"
@@ -55,6 +55,16 @@ for script in init-project.sh migrate.sh switch-repo-access.sh framework-state-m
     copy_required "$REPO_DIR/scripts/$script" "$STAGE_DIR/scripts/$script"
 done
 
+# Shared install library (used by both init and migrate)
+cp -R "$REPO_DIR/scripts/lib/" "$STAGE_DIR/scripts/lib/"
+
+# Content framework templates (rules, skills, agents, content unit templates, starter)
+cp -R "$REPO_DIR/templates/content" "$STAGE_DIR/templates/content"
+
+# Strip Python caches and OS metadata that may have been copied
+find "$STAGE_DIR" -type d -name '__pycache__' -prune -exec rm -rf {} +
+find "$STAGE_DIR" -type f \( -name '*.pyc' -o -name '.DS_Store' \) -delete
+
 if [ -f "$NOTES_FILE" ]; then
     cp "$NOTES_FILE" "$OUT_DIR/RELEASE_NOTES.md"
 else
@@ -67,6 +77,8 @@ EOF
 fi
 
 chmod +x "$OUT_DIR/init-project.sh" "$STAGE_DIR/scripts/"*.sh "$STAGE_DIR/.claude/hooks/"*.sh
+# scripts/lib/install_common.sh is sourced (no chmod needed) and merge_claude_md.py
+# is invoked via `python3` (no chmod needed). Skip them in the chmod sweep.
 
 tar -czf "$OUT_DIR/framework.tar.gz" -C "$OUT_DIR/stage" claude-code-starter
 

@@ -1,6 +1,6 @@
-# Claude Code Starter v5
+# Claude Code Starter v6
 
-[![Version](https://img.shields.io/badge/version-v5.0.0-2563eb)](https://github.com/alexeykrol/claude-code-starter)
+[![Version](https://img.shields.io/badge/version-v6.0.0-2563eb)](https://github.com/alexeykrol/claude-code-starter)
 [![Status](https://img.shields.io/badge/status-active-16a34a)](https://github.com/alexeykrol/claude-code-starter)
 [![Installer](https://img.shields.io/badge/installer-single--file-f59e0b)](https://github.com/alexeykrol/claude-code-starter/blob/main/init-project.sh)
 [![Shell](https://img.shields.io/badge/shell-bash-111827?logo=gnubash)](https://www.gnu.org/software/bash/)
@@ -16,6 +16,8 @@
 - устойчивую проектную память через `.claude/SNAPSHOT.md`;
 - единый installer для нового, существующего и legacy-проекта;
 - явный контроль над тем, что framework state делает с git-историей.
+
+**Новое в v6:** автоматическое определение типа проекта (code / content / hybrid). Контентные проекты — книги, курсы, базы знаний, документы, транскрипты — получают свой набор правил, навыков и агентов (writer, editor, content-reviewer). Установка без флагов: `bash init-project.sh` сам поймёт, где находится, и поставит подходящий слой.
 
 ## Зачем Это Нужно
 
@@ -99,11 +101,28 @@ chmod +x init-project.sh
 ./init-project.sh
 ```
 
-Этот launcher сам определит сценарий:
+Никаких флагов не нужно. Launcher сам определит:
+
+**Сценарий установки:**
 - `new` — новый проект;
-- `existing` — существующий проект без framework;
+- `existing` — существующий без framework;
 - `legacy` — старый framework;
-- `upgrade` — частично установленный `v5`.
+- `upgrade` — частично установленный.
+
+**Тип проекта** (по содержимому файлов и папок):
+- `code` — обычный software-проект;
+- `content` — книги, курсы, KB, документы, транскрипты;
+- `hybrid` — и код, и контент.
+
+**Тип контента** для контентных проектов:
+- `book` — папки `chapters/`, `briefs/`, `bible/`;
+- `course` — папки `modules/`, `lessons/`;
+- `knowledge-base` — `articles/`, `INDEX.md`;
+- `documents` — `docs/`;
+- `transcripts` — `Section-*/`, `*-Lecture-*`;
+- `mixed` — несколько сразу.
+
+Если установка затрагивает существующий `CLAUDE.md`, он мержится **аддитивно** через `scripts/lib/merge_claude_md.py` — кастомные секции пользователя сохраняются, фреймворк добавляет только недостающее. При жёстком конфликте установка останавливается и в `.claude/CLAUDE.md.merge-proposal.md` пишется конкретное предложение разрешения.
 
 ### Вариант 2. Из локального checkout
 
@@ -116,16 +135,25 @@ bash /absolute/path/to/claude-code-starter/init-project.sh
 
 ```bash
 ./init-project.sh --name "My Project"
+./init-project.sh --type content --content-type book
 ./init-project.sh --mode init
 ./init-project.sh --mode migrate
 ./init-project.sh --template /path/to/local/framework
+./init-project.sh --rollback
+./init-project.sh --apply-proposal
+./init-project.sh --force
 ```
 
 Поддерживаются:
 - `--name` — имя проекта для свежего bootstrap;
+- `--type code|content|hybrid|auto` — override автодетекта типа проекта;
+- `--content-type book|course|knowledge-base|documents|transcripts|mixed` — override автодетекта типа контента;
 - `--mode init` — принудительный bootstrap;
 - `--mode migrate` — принудительная migration/integration;
-- `--template` — использовать локальный checkout framework вместо download.
+- `--template` — использовать локальный checkout framework вместо download;
+- `--rollback` — восстановить файлы из последнего `.claude/backup-*/` snapshot;
+- `--apply-proposal` — применить предложение из `.claude/CLAUDE.md.merge-proposal.md`;
+- `--force` — перезаписать существующие файлы (для разработчиков фреймворка).
 
 ## Что Делать После Установки
 
@@ -196,14 +224,16 @@ scripts/switch-repo-access.sh private-shared --commit
 - Посмотреть notes текущего релиза: [release-notes/v5.0.0.md](release-notes/v5.0.0.md)
 - Взять текст GitHub Release: [release-notes/GITHUB_RELEASE_v5.0.0.md](release-notes/GITHUB_RELEASE_v5.0.0.md)
 
-## v4 vs v5
+## v5 vs v6
 
-| Тема | v4 | v5 |
+| Тема | v5 | v6 |
 |------|----|----|
-| Installer UX | installer + старый runtime слой | один публичный `init-project.sh` |
-| Основная модель | commands + protocols + adapters | rules + skills + agents + hooks |
-| Проектная память | shared state, но тяжёлый operational overhead | компактный `CLAUDE.md` + `SNAPSHOT.md` |
-| Работа с git | менее явная модель framework state | явный `repo_access` и mode switching |
-| Текущий статус | архивирован внутри repo | основная активная версия |
+| Тип проекта | только code | code / content / hybrid с автодетектом |
+| Контентные проекты | нет | книги, курсы, KB, документы, транскрипты |
+| `CLAUDE.md` при миграции | merge только `settings.json` hooks | полный аддитивный merge секций через Python helper |
+| Конфликты | overwrite или skip | детектятся, останавливают установку, записывают конкретное предложение |
+| Backup | нет | автоматический `.claude/backup-TIMESTAMP/` перед каждым изменением |
+| Откат | manual | `init-project.sh --rollback` |
+| Шаблоны контента | нет | `templates/chapter.md`, `lesson.md`, `transcript.md`, `article.md`, `document.md` |
 
 Подробности по эволюции версий смотри в [CHANGELOG.md](CHANGELOG.md).
