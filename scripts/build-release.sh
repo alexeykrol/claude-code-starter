@@ -51,7 +51,7 @@ for dir in rules skills agents hooks; do
     cp -R "$REPO_DIR/.claude/$dir" "$STAGE_DIR/.claude/"
 done
 
-for script in init-project.sh migrate.sh switch-repo-access.sh framework-state-mode.sh; do
+for script in init-project.sh migrate.sh switch-repo-access.sh framework-state-mode.sh install-global.sh; do
     copy_required "$REPO_DIR/scripts/$script" "$STAGE_DIR/scripts/$script"
 done
 
@@ -60,6 +60,9 @@ cp -R "$REPO_DIR/scripts/lib/" "$STAGE_DIR/scripts/lib/"
 
 # Content framework templates (rules, skills, agents, content unit templates, starter)
 cp -R "$REPO_DIR/templates/content" "$STAGE_DIR/templates/content"
+
+# Global layer templates (CLAUDE.md addendum + /setup-project skill)
+cp -R "$REPO_DIR/templates/global" "$STAGE_DIR/templates/global"
 
 # Strip Python caches and OS metadata that may have been copied
 find "$STAGE_DIR" -type d -name '__pycache__' -prune -exec rm -rf {} +

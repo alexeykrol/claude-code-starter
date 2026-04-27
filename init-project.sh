@@ -1,7 +1,7 @@
 #!/bin/bash
 #
 # Claude Code Starter — Installer
-# Version: 6.0.0 (content-aware)
+# Version: 6.1.0 (content-aware + global layer)
 #
 # Public entrypoint for every installation scenario:
 # - new project bootstrap (code, content, or hybrid)
@@ -28,7 +28,7 @@
 
 set -euo pipefail
 
-VERSION="${FRAMEWORK_VERSION:-6.0.0}"
+VERSION="${FRAMEWORK_VERSION:-6.1.0}"
 REPO="${FRAMEWORK_REPO:-alexeykrol/claude-code-starter}"
 ARCHIVE_URL="${FRAMEWORK_ARCHIVE_URL:-https://github.com/${REPO}/releases/download/v${VERSION}/framework.tar.gz}"
 FALLBACK_URL="${FRAMEWORK_FALLBACK_URL:-https://codeload.github.com/${REPO}/tar.gz/refs/heads/main}"

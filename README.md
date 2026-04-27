@@ -1,6 +1,6 @@
 # Claude Code Starter v6
 
-[![Version](https://img.shields.io/badge/version-v6.0.0-2563eb)](https://github.com/alexeykrol/claude-code-starter)
+[![Version](https://img.shields.io/badge/version-v6.1.0-2563eb)](https://github.com/alexeykrol/claude-code-starter)
 [![Status](https://img.shields.io/badge/status-active-16a34a)](https://github.com/alexeykrol/claude-code-starter)
 [![Installer](https://img.shields.io/badge/installer-single--file-f59e0b)](https://github.com/alexeykrol/claude-code-starter/blob/main/init-project.sh)
 [![Shell](https://img.shields.io/badge/shell-bash-111827?logo=gnubash)](https://www.gnu.org/software/bash/)

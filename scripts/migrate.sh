@@ -1,7 +1,7 @@
 #!/bin/bash
 #
 # Claude Code Starter — Migration Payload
-# Version: 6.0.0 (content-aware additive migration)
+# Version: 6.1.0 (content-aware additive migration)
 #
 # Internal migration used by the public root launcher.
 # Аддитивная интеграция framework в существующий проект.

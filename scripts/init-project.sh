@@ -1,7 +1,7 @@
 #!/bin/bash
 #
 # Claude Code Starter — Bootstrap Payload
-# Version: 6.0.0 (content-aware)
+# Version: 6.1.0 (content-aware + global layer)
 #
 # Internal bootstrap used by the public root launcher.
 # Разворачивает управляющую среду Claude Code в новом проекте.
