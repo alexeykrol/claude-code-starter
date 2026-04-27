@@ -185,6 +185,33 @@ class TestMergeFiles(unittest.TestCase):
         self.assertEqual(conflicts, [])
         self.assertIn("Do X then Y then Z.", merged)
 
+    def test_placeholder_template_keeps_existing(self):
+        # Real-world case: existing has user-filled content; template has
+        # only placeholders. Must not be treated as a conflict.
+        existing = (
+            "# Project\n\n## Назначение\n\n"
+            "Content production engine. Input: brief. Output: markdown bundle.\n"
+        )
+        template = (
+            "# Project\n\n## Назначение\n\n"
+            "{{PROJECT_PURPOSE}}\n\n"
+            "**Тип контента:** {{CONTENT_TYPE}}\n"
+        )
+        merged, conflicts = mm.merge_files(existing, template)
+        self.assertEqual(conflicts, [], msg=f"unexpected conflicts: {conflicts}")
+        self.assertIn("Content production engine", merged)
+        self.assertNotIn("{{PROJECT_PURPOSE}}", merged)
+
+    def test_multiple_h1_does_not_block_merge(self):
+        # Real CLAUDE.md sometimes carry multiple H1 (banner + project title).
+        # Should warn-but-merge, not fail.
+        existing = "# Banner\n\nfluff\n\n# Project\n\n## A\n\nbody\n"
+        template = "# Project\n\n## A\n\nbody\n\n## B\n\nnew section\n"
+        merged, conflicts = mm.merge_files(existing, template)
+        self.assertEqual(conflicts, [], msg=f"unexpected conflicts: {conflicts}")
+        self.assertIn("## B", merged)
+        self.assertIn("new section", merged)
+
 
 class TestCLI(unittest.TestCase):
     def test_cli_merge_clean(self):

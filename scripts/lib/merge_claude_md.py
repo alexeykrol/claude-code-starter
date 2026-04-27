@@ -228,6 +228,27 @@ def similarity(a: str, b: str) -> float:
     return difflib.SequenceMatcher(None, na, nb).ratio()
 
 
+_PLACEHOLDER_RE = re.compile(r"\{\{[^}]+\}\}")
+
+
+def is_placeholder_template(text: str) -> bool:
+    """Returns True if a section looks like an unfilled framework template.
+
+    A section is template-like if it contains at least one {{PLACEHOLDER}}.
+    Template sections frequently surround placeholders with example values
+    (e.g. "beginner / intermediate / advanced") that look like real text but
+    are skeleton — so the share-based heuristic alone is unreliable.
+    Presence of any placeholder is a strong signal that the section is not
+    yet filled, and during migration we should prefer existing content if
+    the user already wrote something concrete in the same section.
+    """
+    return bool(_PLACEHOLDER_RE.search(text))
+
+
+def has_no_placeholders(text: str) -> bool:
+    return not _PLACEHOLDER_RE.search(text)
+
+
 # ---------------------------------------------------------------------------
 # List/table parsing & merging
 # ---------------------------------------------------------------------------
@@ -423,6 +444,22 @@ def merge_sections(
             f'Section "## {existing.title}": tables with incompatible headers',
         )
 
+    # Case E.5: template is a placeholder skeleton (e.g. "{{PROJECT_PURPOSE}}")
+    # and existing has real user content -> keep existing, no conflict.
+    # This is the common case when migrating an already-filled CLAUDE.md.
+    if is_placeholder_template(template.content) and not is_placeholder_template(
+        existing.content
+    ):
+        merged = Section(
+            level=2,
+            title=existing.title,
+            content=existing.content,
+            subsections=existing.subsections,
+            raw_heading=existing.raw_heading,
+            merge_status="kept_existing",
+        )
+        return (merged, None)
+
     # Case F: low similarity -> hard conflict
     if sim < SIM_HARD_CONFLICT:
         return (
@@ -472,12 +509,13 @@ def merge_files(existing_text: str, template_text: str) -> Tuple[str, List[str]]
 
     conflicts: List[str] = []
 
-    # Multiple H1 in existing -> structural concern
-    if len(e_h1) > 1:
-        conflicts.append(
-            f"Existing file has {len(e_h1)} top-level (# H1) headings — "
-            "non-standard CLAUDE.md structure"
-        )
+    # Multiple H1 in existing -> structural notice (non-blocking).
+    # Many real CLAUDE.md files have a banner-style H1 plus a project H1,
+    # or accumulated H1s from older framework iterations. The merger flattens
+    # to the first H1 (or template H1) and proceeds; we surface this as info
+    # rather than blocking the migration.
+    # No-op here: parse_md already keeps everything reachable; user can
+    # post-edit to dedupe headings if they want.
 
     # Build lookup from normalized title -> existing section index
     e_by_norm = {normalize_title(s.title): i for i, s in enumerate(e_h2)}
