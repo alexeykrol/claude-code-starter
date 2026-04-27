@@ -2,6 +2,31 @@
 
 All notable changes to `Claude Code Starter` are documented here.
 
+## [6.1.0] - 2026-04-26
+
+### Summary
+
+`v6.1.0` adds an opt-in **global layer**: framework rules / skills / agents can be installed into `~/.claude/` so they are available in every project, with a `/setup-project` skill that bootstraps a project from inside Claude Code (no manual installer download required).
+
+### Added
+
+- `scripts/install-global.sh` — additive installer for `~/.claude/`:
+  - Backups existing `~/.claude/` to `~/.claude/.backup-TIMESTAMP/`
+  - Adds 5 content rules, 6 content skills, 2 content agents (`writer`, `editor`)
+  - Adds `content-reviewer` as a separate agent (coexists with code `reviewer`)
+  - Replaces `housekeeping` skill with content-aware universal version (old version backed up)
+  - Adds code-only skills missing globally (`db-migrate`, `playwright`)
+  - Records framework checkout location in `~/.claude/framework-source-path`
+  - Additive merge of `~/.claude/CLAUDE.md` with framework addendum (preserves all custom user content)
+  - `--rollback` restores latest backup
+  - `--dry-run` previews changes
+- `templates/global/skills/setup-project/SKILL.md` — Claude Code skill for one-command project bootstrap; auto-detects type and runs `init-project.sh` from the cached source path
+- `templates/global/CLAUDE.addendum.md` — documentation block describing the global layer; merged into the user's existing global CLAUDE.md
+
+### Changed
+
+- README documents the new "global layer" install path (Variant 3)
+
 ## [6.0.0] - 2026-04-25
 
 ### Summary

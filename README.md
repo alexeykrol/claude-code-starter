@@ -131,6 +131,26 @@ cd /path/to/your/project
 bash /absolute/path/to/claude-code-starter/init-project.sh
 ```
 
+### Вариант 3. Глобальный слой + skill `/setup-project`
+
+Если хочешь, чтобы framework был доступен **в любой папке** без скачивания каждый раз — поставь его в `~/.claude/`:
+
+```bash
+bash /path/to/claude-code-starter/scripts/install-global.sh
+```
+
+Это аддитивно копирует rules / skills / agents в `~/.claude/`, не трогая существующие настройки. Делает backup в `~/.claude/.backup-TIMESTAMP/`. После этого:
+
+```bash
+mkdir my-new-project && cd my-new-project
+# Открой Claude Code в этой папке и скажи:
+# /setup-project   — или просто: «новый проект» / «поставь фреймворк»
+```
+
+Skill `/setup-project` сам найдёт checkout, определит тип проекта и поставит framework. Никакой ручной загрузки `init-project.sh` не требуется.
+
+Откат: `bash scripts/install-global.sh --rollback`.
+
 ### Полезные параметры
 
 ```bash
