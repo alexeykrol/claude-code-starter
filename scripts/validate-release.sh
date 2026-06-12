@@ -81,6 +81,20 @@ if ! grep -q "release-notes/v$VERSION.md" "$REPO_DIR/README.md"; then
     exit 1
 fi
 
+# Onboarding-file guard — see FRAMEWORK-CASE-ONBOARDING.md.
+# The framework must not ship a separate ONBOARDING.md template; the
+# constitution lives in CLAUDE.md (which the harness auto-loads). A
+# parallel onboarding file inevitably drifts from CLAUDE.md and reads
+# like a second source of truth.
+if find "$REPO_DIR/templates" -type f -name 'ONBOARDING.md' 2>/dev/null | grep -q .; then
+    echo "validate-release: templates/ contains an ONBOARDING.md; constitution must live only in CLAUDE.md (see FRAMEWORK-CASE-ONBOARDING.md)"
+    exit 1
+fi
+if [ -f "$REPO_DIR/.claude/ONBOARDING.md" ]; then
+    echo "validate-release: .claude/ONBOARDING.md exists in repo root; constitution must live only in CLAUDE.md"
+    exit 1
+fi
+
 # Internal script version comments — catch stale "Version: X.Y.Z" headers.
 for script in \
     "$REPO_DIR/init-project.sh" \

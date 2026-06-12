@@ -2,6 +2,42 @@
 
 All notable changes to `Claude Code Starter` are documented here.
 
+## [6.2.1] - 2026-06-12
+
+### Summary
+
+`v6.2.1` is a patch release driven by a second user case report (`FRAMEWORK-CASE-ONBOARDING.md`) from the Saved Downloader project. The report identifies three structural defects in any session-onboarding protocol that reads a fixed set of metafiles and asks the agent to "report briefly":
+
+1. **Duplicate of the auto-loaded CLAUDE.md** — two sources of truth, inevitable drift.
+2. **Cap on report length** ("doloji 3-5 strok") — read by the model as a ceiling on understanding depth, not a floor on brevity. Agent builds the smallest model sufficient for 5 lines and stops.
+3. **Map without territory** — reading only metafiles, without grounding probes against code, inherits the blind spots of the project's self-description and gives false confidence.
+
+Our `/start` skill had defects 2 and 3. This release fixes both, adds a guard against defect 1.
+
+### Fixed
+
+- `.claude/skills/start/SKILL.md` rewritten:
+  - "Доложить кратко, 3-5 строк" removed; report now scales to the user's request (routine start vs "разберись с проектом" vs concrete task)
+  - New mandatory step "Заземлить карту в территорию" — git log / wc / grep against the metafiles' claims, run before the report
+  - New explicit "карта ≠ территория" marker — after `/start` the agent knows the map, not the code; subsystem edits require reading that subsystem's code
+  - Three-kinds-of-constraints note in the header: action constraints hard, attention constraints helpful, depth/output constraints **never**
+  - Explicit ban on generating a separate ONBOARDING.md
+
+### Added
+
+- `CLAUDE.md` (code + content templates) — new "Назначение этого файла" section near the top, documenting the three-kinds-of-constraints model so future protocol edits can't quietly reintroduce a depth cap "for brevity"
+- `scripts/validate-release.sh` — onboarding-file guard: refuses to release if any `ONBOARDING.md` template ships with the framework
+- `methodology/draft/onboarding-protocols-must-not-cap-depth.md` — recorded the case as a draft methodology; linked to the v6.2 memory-axes draft (same reporter, same project, second observation — pattern in formation)
+
+### Why this matters
+
+This is the same shape of regression as v6.2: a structural framework choice that silently degraded agent quality across every downstream project. The user who reported it noticed only because they compared two parallel onboardings of the same codebase — one with our protocol, one without — and the contrast was "убогий vs подробный". Without this patch, every new project would inherit the cap.
+
+### Upgrade Notes
+
+- v6.2.0 → v6.2.1: the installer in v6.2.1 detects existing v6.2 installs as `upgrade` and patches `.claude/skills/start/SKILL.md` only if it has not been edited; manual edits are preserved.
+- The CLAUDE.md "Назначение" section is added via the additive merger; existing custom content is preserved.
+
 ## [6.2.0] - 2026-06-12
 
 ### Summary

@@ -1,7 +1,7 @@
 #!/bin/bash
 #
 # Claude Code Starter — Global Installer
-# Version: 6.2.0
+# Version: 6.2.1
 #
 # Устанавливает framework в глобальный ~/.claude/, чтобы он был доступен
 # во всех проектах без отдельного init.

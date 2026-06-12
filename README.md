@@ -1,6 +1,6 @@
 # Claude Code Starter v6
 
-[![Version](https://img.shields.io/badge/version-v6.2.0-2563eb)](https://github.com/alexeykrol/claude-code-starter)
+[![Version](https://img.shields.io/badge/version-v6.2.1-2563eb)](https://github.com/alexeykrol/claude-code-starter)
 [![Status](https://img.shields.io/badge/status-active-16a34a)](https://github.com/alexeykrol/claude-code-starter)
 [![Installer](https://img.shields.io/badge/installer-single--file-f59e0b)](https://github.com/alexeykrol/claude-code-starter/blob/main/init-project.sh)
 [![Shell](https://img.shields.io/badge/shell-bash-111827?logo=gnubash)](https://www.gnu.org/software/bash/)
@@ -19,7 +19,7 @@
 - единый installer для нового, существующего и legacy-проекта;
 - явный контроль над тем, что framework state делает с git-историей.
 
-**Новое в v6.2:** восстановлены слои памяти `ARCHITECTURE.md` и `BACKLOG.md`, добавлены `INVARIANTS.md` и каталог `methodology/` с лестницей зрелости. Добавлен механизм dialog preservation. См. [release-notes/v6.2.0.md](release-notes/v6.2.0.md).
+**Новое в v6.2:** восстановлены слои памяти `ARCHITECTURE.md` и `BACKLOG.md`, добавлены `INVARIANTS.md` и каталог `methodology/` с лестницей зрелости. Добавлен механизм dialog preservation. См. [release-notes/v6.2.1.md](release-notes/v6.2.1.md).
 
 **Новое в v6.0–6.1:** автоматическое определение типа проекта (code / content / hybrid). Контентные проекты — книги, курсы, базы знаний, документы, транскрипты — получают свой набор правил, навыков и агентов (writer, editor, content-reviewer). Опциональный глобальный слой `~/.claude/` с `/setup-project` skill. Установка без флагов: `bash init-project.sh` сам поймёт, где находится, и поставит подходящий слой.
 
@@ -243,8 +243,8 @@ scripts/switch-repo-access.sh private-shared --commit
 Документация:
 - [CHANGELOG.md](CHANGELOG.md) — история версий и изменений
 - [RELEASING.md](RELEASING.md) — как собирать и публиковать релиз
-- [release-notes/v6.2.0.md](release-notes/v6.2.0.md) — notes для текущего release
-- [release-notes/GITHUB_RELEASE_v6.2.0.md](release-notes/GITHUB_RELEASE_v6.2.0.md) — готовый body для GitHub Release
+- [release-notes/v6.2.1.md](release-notes/v6.2.1.md) — notes для текущего release
+- [release-notes/GITHUB_RELEASE_v6.2.1.md](release-notes/GITHUB_RELEASE_v6.2.1.md) — готовый body для GitHub Release
 
 Архив:
 - [archive/V4_ARCHIVE_NOTE.md](archive/V4_ARCHIVE_NOTE.md) — что именно сохранено от `v4`
@@ -262,8 +262,8 @@ scripts/switch-repo-access.sh private-shared --commit
 - Установить framework: [init-project.sh](init-project.sh)
 - Прочитать историю версий: [CHANGELOG.md](CHANGELOG.md)
 - Собрать release: [RELEASING.md](RELEASING.md)
-- Посмотреть notes текущего релиза: [release-notes/v6.2.0.md](release-notes/v6.2.0.md)
-- Взять текст GitHub Release: [release-notes/GITHUB_RELEASE_v6.2.0.md](release-notes/GITHUB_RELEASE_v6.2.0.md)
+- Посмотреть notes текущего релиза: [release-notes/v6.2.1.md](release-notes/v6.2.1.md)
+- Взять текст GitHub Release: [release-notes/GITHUB_RELEASE_v6.2.1.md](release-notes/GITHUB_RELEASE_v6.2.1.md)
 
 ## Эволюция версий
 
