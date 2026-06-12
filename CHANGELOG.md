@@ -2,6 +2,52 @@
 
 All notable changes to `Claude Code Starter` are documented here.
 
+## [6.2.0] - 2026-06-12
+
+### Summary
+
+`v6.2.0` restores the **two-axis memory model** the framework had in `v4` and lost in `v5`. Memory now lives on two distinct axes — **contracts** (what should be: `ARCHITECTURE.md`, `INVARIANTS.md`, `methodology/`) and **state** (what is now: `SNAPSHOT.md`, `BACKLOG.md`, `dialogs/`). Each axis has its own slot; collapsing them into a single SNAPSHOT — as v5 did — caused the agent to repeatedly violate project invariants because there was no place for the contract layer to live. A user regression report documented eight separate `DROP TABLE` antipattern reoccurrences directly caused by this collapse.
+
+Also new: a **methodology layer** with explicit maturity ladder (draft → pattern → mature → crystallized) for methodologies consumed by automated pipelines (router → adapter → executor chains), and **dialog preservation** that protects Claude Code session JSONLs from retention cleanup so valuable methodological evolution is never lost.
+
+### Added
+
+- **Memory layers (restored / new):**
+  - `.claude/ARCHITECTURE.md` (restored from v4) — system map: modules, layers, contracts, entry points, dependencies, open questions
+  - `.claude/BACKLOG.md` (restored from v4) — Next / Soon / Later / Won't do plan
+  - `.claude/INVARIANTS.md` (new) — hard rules whose violation is a bug, not a preference; categorized; example INV-001 pre-filled in both code and content variants
+  - Both code-flavored (root `.claude/`) and content-flavored (`templates/content/`) versions; hybrid inherits content
+- **Methodology layer (new):**
+  - `methodology/_HOW-THIS-GROWS.md` — explains maturity ladder draft → pattern → mature → crystallized and Router → Adapter → Executor composition
+  - `methodology/templates/{draft,pattern,mature,crystallized}.md` — format per stage; draft fillable in 2 minutes (low entry threshold by design)
+  - `methodology/00-example-llm-as-component.md` — canonical mature example adapted from existing global rule
+  - Subdirs `draft/ patterns/ mature/` with `.gitkeep`
+  - Global layer copy in `~/.claude/methodology/` via `install-global.sh`
+- **Dialog preservation (new):**
+  - `rules/dialog-preservation.md` — explains why Claude Code session JSONLs must be saved before retention cleanup
+  - `scripts/save-dialogs.sh` — idempotent copy of `~/.claude/projects/<encoded>/*.jsonl` into project `.claude/dialogs/<date>_<sid>.jsonl`, updates `INDEX.md`
+  - `/save-dialog` skill — interactive entry point with optional note
+  - `/finish` auto-calls `save-dialogs.sh` before commit
+  - Privacy-first `.gitignore` — raw JSONL never accidentally committed even in `private-solo`
+- **CLAUDE.md templates** — new "Слои памяти" section documenting the two-axis model so future "simplify" passes cannot quietly collapse it
+- **`/start` skill** — now reads both axes (SNAPSHOT, BACKLOG, INVARIANTS, ARCHITECTURE) at session start
+- **`/finish` skill** — updates all memory layers, not only SNAPSHOT; commits the whole bundle in `private-solo` mode
+- **Tests** — 3 new regression tests (`memory_layers_code`, `memory_layers_content`, `save_dialogs_idempotent`); 11/11 passing
+
+### Changed
+
+- `install_common.sh` — new `install_methodology_scaffold()` and `install_memory_layers()` helpers; universal rules list now includes `dialog-preservation`; `backup_existing`/`rollback` include new memory files; `install_gitignore` always appends dialog-archive rules
+- `install-global.sh` (6.2.0) — installs `templates/global/rules/`, `~/.claude/methodology/`, `/save-dialog` skill; backup/rollback include `methodology/`
+- `build-release.sh` — bundles `templates/methodology/` into release tarball
+
+### Why this matters
+
+The v5 regression was not architectural taste — it was the agent forgetting project contracts and re-violating them between sessions. SNAPSHOT alone cannot hold contracts because it changes every session. ARCHITECTURE and INVARIANTS live on a different time scale and need their own files. This release makes that distinction physical and documents it in every CLAUDE.md so it cannot be quietly undone again.
+
+### Upgrade Notes
+
+The v6.2 installer treats existing v6.1 installs as `upgrade` scenario and runs additive migration. Existing custom `CLAUDE.md` content is preserved through the same merger as in v6.1. New memory files are created only if they don't already exist — the installer never overwrites user content.
+
 ## [6.1.0] - 2026-04-26
 
 ### Summary
