@@ -13,11 +13,15 @@
 Он нужен не для генерации приложения, а для того, чтобы быстро добавить в любой проект:
 - понятный `CLAUDE.md` вместо мегадокумента;
 - модульные `rules`, `skills`, `agents`, `hooks`;
-- устойчивую проектную память через `.claude/SNAPSHOT.md`;
+- **двух-осевую проектную память** — контракты (`ARCHITECTURE.md`, `INVARIANTS.md`, `methodology/`) и state (`SNAPSHOT.md`, `BACKLOG.md`, `dialogs/`);
+- **methodology layer** с лестницей зрелости (draft → pattern → mature → crystallized) для пайплайнов с автоматическими LLM-вызовами;
+- **dialog preservation** — JSONL текущей сессии сохраняется в `.claude/dialogs/` до того, как Claude Code сделает retention cleanup;
 - единый installer для нового, существующего и legacy-проекта;
 - явный контроль над тем, что framework state делает с git-историей.
 
-**Новое в v6:** автоматическое определение типа проекта (code / content / hybrid). Контентные проекты — книги, курсы, базы знаний, документы, транскрипты — получают свой набор правил, навыков и агентов (writer, editor, content-reviewer). Установка без флагов: `bash init-project.sh` сам поймёт, где находится, и поставит подходящий слой.
+**Новое в v6.2:** восстановлены слои памяти `ARCHITECTURE.md` и `BACKLOG.md`, добавлены `INVARIANTS.md` и каталог `methodology/` с лестницей зрелости. Добавлен механизм dialog preservation. См. [release-notes/v6.2.0.md](release-notes/v6.2.0.md).
+
+**Новое в v6.0–6.1:** автоматическое определение типа проекта (code / content / hybrid). Контентные проекты — книги, курсы, базы знаний, документы, транскрипты — получают свой набор правил, навыков и агентов (writer, editor, content-reviewer). Опциональный глобальный слой `~/.claude/` с `/setup-project` skill. Установка без флагов: `bash init-project.sh` сам поймёт, где находится, и поставит подходящий слой.
 
 ## Зачем Это Нужно
 
@@ -42,29 +46,46 @@
 
 ```text
 .claude/
-  rules/
-  skills/
-  agents/
-  hooks/
-  logs/
-  SNAPSHOT.md
+  rules/                # операционные правила (autonomy, delegation, dialog-preservation, ...)
+  skills/               # /start, /finish, /save-dialog, /testing, ...
+  agents/               # researcher, implementer, reviewer (+ writer/editor для content)
+  hooks/                # фоновые guardrails (pre-compact, post-compact, ...)
+  logs/                 # сессии, миграции, ошибки (gitignored)
+  dialogs/              # архив JSONL сессий (по умолчанию gitignored)
+  SNAPSHOT.md           # state: текущая точка работы
+  BACKLOG.md            # state: Next / Soon / Later / Won't do
+  ARCHITECTURE.md       # contract: карта системы
+  INVARIANTS.md         # contract: жёсткие правила, нарушение = баг
   settings.json
+methodology/            # contract: методологии для пайплайнов
+  _HOW-THIS-GROWS.md
+  templates/            # draft / pattern / mature / crystallized
+  draft/ patterns/ mature/
+  00-example-llm-as-component.md
 scripts/
   framework-state-mode.sh
   switch-repo-access.sh
+  save-dialogs.sh
 CLAUDE.md
 manifest.md
 .gitignore
 ```
 
+**Двух-осевая память** (см. CLAUDE.md секция «Слои памяти»):
+- **Контракты — что должно быть** (медленно меняется): `ARCHITECTURE.md`, `INVARIANTS.md`, `methodology/`
+- **State — что есть сейчас** (быстро меняется): `SNAPSHOT.md`, `BACKLOG.md`, `dialogs/`
+
 Ключевые файлы:
 - `CLAUDE.md` — паспорт проекта;
-- `manifest.md` — `project_name` и `repo_access`;
-- `.claude/SNAPSHOT.md` — текущая память проекта;
-- `.claude/rules/` — постоянные operational правила;
-- `.claude/skills/` — стандартные workflows;
-- `.claude/agents/` — типовые subagent roles;
-- `.claude/hooks/` — фоновые guardrails;
+- `manifest.md` — `project_name`, `repo_access`, `project_type`, `content_type`;
+- `.claude/SNAPSHOT.md` — что в работе прямо сейчас;
+- `.claude/BACKLOG.md` — план: Next / Soon / Later / Won't do;
+- `.claude/ARCHITECTURE.md` — карта модулей, контрактов, зависимостей;
+- `.claude/INVARIANTS.md` — правила, нарушение которых — баг, не предпочтение;
+- `.claude/dialogs/` — архив сессионных JSONL для последующего анализа;
+- `methodology/` — методологии с лестницей зрелости (draft → pattern → mature → crystallized);
+- `.claude/rules/`, `.claude/skills/`, `.claude/agents/`, `.claude/hooks/` — operational слой;
+- `scripts/save-dialogs.sh` — идемпотентное сохранение JSONL сессии;
 - `scripts/switch-repo-access.sh` — безопасное переключение между `private-solo`, `private-shared`, `public`.
 
 ## Требования
@@ -222,8 +243,8 @@ scripts/switch-repo-access.sh private-shared --commit
 Документация:
 - [CHANGELOG.md](CHANGELOG.md) — история версий и изменений
 - [RELEASING.md](RELEASING.md) — как собирать и публиковать релиз
-- [release-notes/v5.0.0.md](release-notes/v5.0.0.md) — notes для текущего release
-- [release-notes/GITHUB_RELEASE_v5.0.0.md](release-notes/GITHUB_RELEASE_v5.0.0.md) — готовый body для GitHub Release
+- [release-notes/v6.2.0.md](release-notes/v6.2.0.md) — notes для текущего release
+- [release-notes/GITHUB_RELEASE_v6.2.0.md](release-notes/GITHUB_RELEASE_v6.2.0.md) — готовый body для GitHub Release
 
 Архив:
 - [archive/V4_ARCHIVE_NOTE.md](archive/V4_ARCHIVE_NOTE.md) — что именно сохранено от `v4`
@@ -241,19 +262,23 @@ scripts/switch-repo-access.sh private-shared --commit
 - Установить framework: [init-project.sh](init-project.sh)
 - Прочитать историю версий: [CHANGELOG.md](CHANGELOG.md)
 - Собрать release: [RELEASING.md](RELEASING.md)
-- Посмотреть notes текущего релиза: [release-notes/v5.0.0.md](release-notes/v5.0.0.md)
-- Взять текст GitHub Release: [release-notes/GITHUB_RELEASE_v5.0.0.md](release-notes/GITHUB_RELEASE_v5.0.0.md)
+- Посмотреть notes текущего релиза: [release-notes/v6.2.0.md](release-notes/v6.2.0.md)
+- Взять текст GitHub Release: [release-notes/GITHUB_RELEASE_v6.2.0.md](release-notes/GITHUB_RELEASE_v6.2.0.md)
 
-## v5 vs v6
+## Эволюция версий
 
-| Тема | v5 | v6 |
-|------|----|----|
-| Тип проекта | только code | code / content / hybrid с автодетектом |
-| Контентные проекты | нет | книги, курсы, KB, документы, транскрипты |
-| `CLAUDE.md` при миграции | merge только `settings.json` hooks | полный аддитивный merge секций через Python helper |
-| Конфликты | overwrite или skip | детектятся, останавливают установку, записывают конкретное предложение |
-| Backup | нет | автоматический `.claude/backup-TIMESTAMP/` перед каждым изменением |
-| Откат | manual | `init-project.sh --rollback` |
-| Шаблоны контента | нет | `templates/chapter.md`, `lesson.md`, `transcript.md`, `article.md`, `document.md` |
+| Тема | v5 | v6.0–6.1 | v6.2 |
+|------|----|----|------|
+| Тип проекта | только code | code / content / hybrid с автодетектом | + явная двух-осевая модель памяти |
+| Слои памяти | `SNAPSHOT.md` (всё в одном) | `SNAPSHOT.md` | `SNAPSHOT.md` + `BACKLOG.md` (state) + `ARCHITECTURE.md` + `INVARIANTS.md` (contracts) |
+| Контентные проекты | нет | книги, курсы, KB, документы, транскрипты | + content-flavored memory layers |
+| Methodology layer | нет | нет | `methodology/` с лестницей зрелости draft → pattern → mature → crystallized |
+| Dialog preservation | TypeScript-стек в v4, выкинут в v5 | нет | bash-скрипт + `/save-dialog` skill + auto-save при `/finish` |
+| `CLAUDE.md` при миграции | merge только `settings.json` hooks | полный аддитивный merge секций через Python helper | + документация двух-осевой памяти, чтобы не схлопывалась снова |
+| Конфликты | overwrite или skip | детектятся, останавливают установку, пишут конкретное предложение | то же |
+| Backup | нет | автоматический `.claude/backup-TIMESTAMP/` | + backup новых memory files |
+| Откат | manual | `init-project.sh --rollback` | + восстанавливает новые memory files |
+| Глобальный слой | нет | опциональный `~/.claude/` через `install-global.sh` | + глобальный `methodology/`, `/save-dialog` skill |
+| Шаблоны контента | нет | `chapter.md`, `lesson.md`, `transcript.md`, `article.md`, `document.md` | то же |
 
 Подробности по эволюции версий смотри в [CHANGELOG.md](CHANGELOG.md).

@@ -47,6 +47,24 @@ Claude Code пишет JSONL текущей сессии в `~/.claude/projects/
 - `editor` — проверка стиля/голоса/формата контента (находит проблемы, не переписывает)
 - `content-reviewer` — release review для контента (28-point checklist)
 
+### Methodology layer (`~/.claude/methodology/`)
+
+Глобальные методологии для пайплайнов (router → adapter → executor). Их потребители — автоматические LLM-цепочки, не интерактивный агент.
+
+- `_HOW-THIS-GROWS.md` — объясняет лестницу зрелости draft → pattern → mature → crystallized
+- `00-example-llm-as-component.md` — canonical mature example (LLM как ненадёжный компонент)
+
+Проектные методологии в `<project>/methodology/` могут ссылаться на глобальные и уточнять их под локальный контекст. Подробнее — `_HOW-THIS-GROWS.md`.
+
+### Слои памяти проекта
+
+Проекты с фреймворком держат память на двух осях:
+
+- **Контракты** (медленно меняются): `.claude/ARCHITECTURE.md`, `.claude/INVARIANTS.md`, `methodology/`
+- **State** (быстро меняется): `.claude/SNAPSHOT.md`, `.claude/BACKLOG.md`, `.claude/dialogs/`
+
+При старте сессии в проекте — читай обе оси. При завершении — обновляй обе. Не схлопывай контракты в SNAPSHOT (это известная регрессия v5).
+
 ## Поведение при старте сессии
 
 1. **Если в текущей папке нет проектного `.claude/`** — это вероятно новая папка. Предложи пользователю запустить `/setup-project`, который установит framework. Не запускай молча — это создаёт файлы в его проекте.

@@ -1,7 +1,7 @@
 ---
 title: Backlog
 type: backlog
-updated: YYYY-MM-DD
+updated: 2026-06-12
 ---
 
 # Backlog
@@ -31,6 +31,10 @@ id может быть произвольный (B-001, FEAT-12, или прос
 
 - [ ] B-001: пример пункта — что именно сделать и зачем (→ `src/example.ts`)
 
+## In flight
+
+- [x] B-002: v6.2.0 — two-axis memory model + methodology layer + dialog preservation. Released 2026-06-12.
+
 ## Soon
 
 <!--
@@ -40,6 +44,8 @@ id может быть произвольный (B-001, FEAT-12, или прос
 -->
 
 - [ ] B-010: пример — направление работы, без точного плана
+- [ ] B-011: subagent watchdog — в `delegation.md` зафиксировать hard timeout (если ожидаемые 10 мин превышены в 2×, активно проверять TaskOutput, иначе перезапускать). Реальный кейс: dialog-preservation subagent шёл 140 мин против ожидаемых 10–15, что выглядело как «зависание». (→ `~/.claude/rules/delegation.md`)
+- [ ] B-012: drift watchdog для description docs — расширить `housekeeping` skill, чтобы он проходил по README/RELEASING/CLAUDE.addendum при подготовке релиза и сверял версии. Сейчас `validate-release.sh` ловит drift по badge + ссылке + script headers, но не по содержательным разделам.
 
 ## Later
 

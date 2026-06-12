@@ -45,7 +45,7 @@ scripts/build-release.sh
 Or explicitly:
 
 ```bash
-scripts/build-release.sh 5.0.0
+scripts/build-release.sh 6.2.0
 ```
 
 Output:
@@ -61,18 +61,24 @@ dist-release/<version>/
 ## Publish Checklist
 
 1. Ensure `main` is clean.
-2. Run `scripts/validate-release.sh`.
-3. Run `scripts/build-release.sh`.
-4. Review `dist-release/<version>/RELEASE_NOTES.md`.
-5. Create tag `v<version>` if it does not already exist.
-6. Create GitHub Release from `v<version>`.
-7. Use [release-notes/GITHUB_RELEASE_v5.0.0.md](release-notes/GITHUB_RELEASE_v5.0.0.md) as the release body template and adjust the version if needed.
-8. Upload:
+2. **Refresh descriptive docs** so they don't drift behind the code:
+   - `README.md` — version badge, "Что устанавливается в проект", links to current release notes
+   - `RELEASING.md` — current version examples
+   - `templates/global/CLAUDE.addendum.md` — new global rules / skills / methodology
+   - `CHANGELOG.md` — entry for the new version
+   `scripts/validate-release.sh` enforces the version-badge + release-notes link checks and refuses to pass if a descriptive file is behind.
+3. Run `scripts/validate-release.sh`.
+4. Run `scripts/build-release.sh`.
+5. Review `dist-release/<version>/RELEASE_NOTES.md`.
+6. Create tag `v<version>` if it does not already exist.
+7. Create GitHub Release from `v<version>`.
+8. Use the latest versioned body — for example [release-notes/GITHUB_RELEASE_v6.2.0.md](release-notes/GITHUB_RELEASE_v6.2.0.md) — as the release body template, and adjust the version if needed.
+9. Upload:
    - `dist-release/<version>/init-project.sh`
    - `dist-release/<version>/framework.tar.gz`
    - `dist-release/<version>/checksums.txt`
    - `dist-release/<version>/RELEASE_NOTES.md`
-9. Verify a standalone install from the published release assets.
+10. Verify a standalone install from the published release assets.
 
 ## Asset Roles
 
@@ -83,8 +89,9 @@ The public single-file installer.
 ### `framework.tar.gz`
 
 The payload archive for standalone installs. It must contain one top-level folder named `claude-code-starter/` and include:
-- `.claude/`
-- `scripts/`
+- `.claude/` — rules, skills, agents, hooks, dialogs/, memory layers (SNAPSHOT, BACKLOG, ARCHITECTURE, INVARIANTS)
+- `scripts/` — `init-project.sh`, `migrate.sh`, `save-dialogs.sh`, `install-global.sh`, `framework-state-mode.sh`, `switch-repo-access.sh`, `lib/`
+- `templates/` — `content/`, `global/`, `methodology/`
 - `CLAUDE.md`
 - `manifest.md`
 - `.gitignore`
