@@ -61,8 +61,11 @@ cp -R "$REPO_DIR/scripts/lib/" "$STAGE_DIR/scripts/lib/"
 # Content framework templates (rules, skills, agents, content unit templates, starter)
 cp -R "$REPO_DIR/templates/content" "$STAGE_DIR/templates/content"
 
-# Global layer templates (CLAUDE.md addendum + /setup-project skill)
+# Global layer templates (CLAUDE.md addendum + /setup-project skill + global methodology)
 cp -R "$REPO_DIR/templates/global" "$STAGE_DIR/templates/global"
+
+# Methodology scaffold (project-level, copied into every install)
+cp -R "$REPO_DIR/templates/methodology" "$STAGE_DIR/templates/methodology"
 
 # Strip Python caches and OS metadata that may have been copied
 find "$STAGE_DIR" -type d -name '__pycache__' -prune -exec rm -rf {} +

@@ -1,7 +1,7 @@
 #!/bin/bash
 #
 # Claude Code Starter — Global Installer
-# Version: 6.1.0
+# Version: 6.2.0
 #
 # Устанавливает framework в глобальный ~/.claude/, чтобы он был доступен
 # во всех проектах без отдельного init.
@@ -86,7 +86,7 @@ do_rollback() {
     log_info "Rolling back from: $last_backup"
 
     # Restore each tracked subdir/file from backup, but only if backup contains it
-    for item in CLAUDE.md rules skills agents framework-source-path; do
+    for item in CLAUDE.md rules skills agents methodology framework-source-path; do
         local src="$last_backup/$item"
         local dst="$GLOBAL_DIR/$item"
         if [ -e "$src" ]; then
@@ -136,7 +136,7 @@ if [ "$DRY_RUN" = "0" ]; then
     mkdir -p "$BACKUP_DIR"
     [ -f "$GLOBAL_DIR/CLAUDE.md" ]            && cp "$GLOBAL_DIR/CLAUDE.md"   "$BACKUP_DIR/CLAUDE.md"
     [ -f "$GLOBAL_DIR/framework-source-path" ] && cp "$GLOBAL_DIR/framework-source-path" "$BACKUP_DIR/framework-source-path"
-    for d in rules skills agents; do
+    for d in rules skills agents methodology; do
         if [ -d "$GLOBAL_DIR/$d" ]; then
             cp -R "$GLOBAL_DIR/$d" "$BACKUP_DIR/$d"
         fi
@@ -145,7 +145,23 @@ if [ "$DRY_RUN" = "0" ]; then
 fi
 
 # === Ensure target dirs ===
-run mkdir -p "$GLOBAL_DIR/rules" "$GLOBAL_DIR/skills" "$GLOBAL_DIR/agents"
+run mkdir -p "$GLOBAL_DIR/rules" "$GLOBAL_DIR/skills" "$GLOBAL_DIR/agents" "$GLOBAL_DIR/methodology"
+
+# === Add global rules from templates/global/rules/ ===
+log_info "Installing global rules..."
+if [ -d "$FRAMEWORK_DIR/templates/global/rules" ]; then
+    for rf in "$FRAMEWORK_DIR/templates/global/rules"/*.md; do
+        [ -f "$rf" ] || continue
+        base=$(basename "$rf")
+        dst="$GLOBAL_DIR/rules/$base"
+        if [ -f "$dst" ]; then
+            log_warning "Exists:  rules/$base (not overwritten)"
+        else
+            run cp "$rf" "$dst"
+            log_success "Added:   rules/$base"
+        fi
+    done
+fi
 
 # === Add content rules (additive) ===
 log_info "Installing content rules..."
@@ -209,6 +225,36 @@ if [ -d "$src" ]; then
     fi
     run cp -R "$src" "$dst"
     log_success "Installed: skills/setup-project/ (framework bootstrap)"
+fi
+
+# === Install /save-dialog skill ===
+log_info "Installing /save-dialog skill..."
+src="$FRAMEWORK_DIR/templates/global/skills/save-dialog"
+dst="$GLOBAL_DIR/skills/save-dialog"
+if [ -d "$src" ]; then
+    if [ -d "$dst" ]; then
+        log_warning "Exists:  skills/save-dialog/ (not overwritten)"
+    else
+        run cp -R "$src" "$dst"
+        log_success "Installed: skills/save-dialog/"
+    fi
+fi
+
+# === Install global methodology layer ===
+log_info "Installing global methodology layer..."
+src="$FRAMEWORK_DIR/templates/global/methodology"
+if [ -d "$src" ]; then
+    for f in "$src"/*.md; do
+        [ -f "$f" ] || continue
+        base=$(basename "$f")
+        dst="$GLOBAL_DIR/methodology/$base"
+        if [ -f "$dst" ]; then
+            log_warning "Exists:  methodology/$base (not overwritten)"
+        else
+            run cp "$f" "$dst"
+            log_success "Added:   methodology/$base"
+        fi
+    done
 fi
 
 # Clean up old name if it was installed by an earlier version

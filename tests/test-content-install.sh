@@ -539,12 +539,122 @@ test_force() {
 }
 
 # ============================================================================
+# Test 9: v6.2 memory layers present after code install
+# ============================================================================
+test_memory_layers_code() {
+    local fx
+    fx="$(setup_fixture 9)"
+    cd "$fx" || return 1
+
+    bash "$REPO_DIR/scripts/init-project.sh" \
+        --type code \
+        --name "Test Memory" \
+        --template "$REPO_DIR" </dev/null >/tmp/test-cs-9.log 2>&1
+    local rc=$?
+    if [ "$rc" -ne 0 ]; then
+        tail -20 /tmp/test-cs-9.log
+        return 1
+    fi
+
+    local fail=0
+    assert_file_exists ".claude/SNAPSHOT.md"      "SNAPSHOT.md (state axis)"      || fail=1
+    assert_file_exists ".claude/ARCHITECTURE.md"  "ARCHITECTURE.md (contracts)"   || fail=1
+    assert_file_exists ".claude/BACKLOG.md"       "BACKLOG.md (plan)"             || fail=1
+    assert_file_exists ".claude/INVARIANTS.md"    "INVARIANTS.md (hard rules)"    || fail=1
+    assert_file_exists ".claude/rules/dialog-preservation.md" "dialog-preservation rule" || fail=1
+    assert_file_exists ".claude/skills/save-dialog/SKILL.md"  "/save-dialog skill"       || fail=1
+    assert_file_exists "scripts/save-dialogs.sh"  "save-dialogs.sh script"        || fail=1
+    assert_dir_exists  ".claude/dialogs"          ".claude/dialogs/ slot"         || fail=1
+    assert_dir_exists  "methodology"              "methodology/ scaffold"         || fail=1
+    assert_file_exists "methodology/_HOW-THIS-GROWS.md" "methodology onboarding"  || fail=1
+    assert_file_exists "methodology/templates/draft.md" "draft template"          || fail=1
+    assert_file_exists "methodology/00-example-llm-as-component.md" "canonical mature example" || fail=1
+
+    # CLAUDE.md should mention Memory Layers section
+    assert_file_contains "CLAUDE.md" "Слои памяти" "CLAUDE.md has Memory Layers section" || fail=1
+
+    return $fail
+}
+
+# ============================================================================
+# Test 10: v6.2 memory layers present after content install
+# ============================================================================
+test_memory_layers_content() {
+    local fx
+    fx="$(setup_fixture 10)"
+    cd "$fx" || return 1
+
+    bash "$REPO_DIR/scripts/init-project.sh" \
+        --type content \
+        --content-type book \
+        --name "Test Content Memory" \
+        --template "$REPO_DIR" </dev/null >/tmp/test-cs-10.log 2>&1
+    local rc=$?
+    if [ "$rc" -ne 0 ]; then
+        tail -20 /tmp/test-cs-10.log
+        return 1
+    fi
+
+    local fail=0
+    assert_file_exists ".claude/ARCHITECTURE.md"  "ARCHITECTURE.md (content)"   || fail=1
+    assert_file_exists ".claude/BACKLOG.md"       "BACKLOG.md (content)"        || fail=1
+    assert_file_exists ".claude/INVARIANTS.md"    "INVARIANTS.md (content)"     || fail=1
+    assert_file_exists ".claude/rules/dialog-preservation.md" "dialog-preservation in content" || fail=1
+    assert_file_exists ".claude/skills/save-dialog/SKILL.md"  "/save-dialog in content"        || fail=1
+    assert_dir_exists  "methodology"              "methodology/ in content"      || fail=1
+
+    return $fail
+}
+
+# ============================================================================
+# Test 11: save-dialogs.sh runs idempotently
+# ============================================================================
+test_save_dialogs_idempotent() {
+    local fx
+    fx="$(setup_fixture 11)"
+    cd "$fx" || return 1
+
+    bash "$REPO_DIR/scripts/init-project.sh" \
+        --type code \
+        --name "Test Save Dialogs" \
+        --template "$REPO_DIR" </dev/null >/tmp/test-cs-11.log 2>&1
+    local rc=$?
+    if [ "$rc" -ne 0 ]; then
+        tail -20 /tmp/test-cs-11.log
+        return 1
+    fi
+
+    local fail=0
+    # First run should not error even if no source jsonls exist
+    bash scripts/save-dialogs.sh >/tmp/test-cs-11-sd.log 2>&1
+    local sd_rc=$?
+    if [ "$sd_rc" -ne 0 ]; then
+        echo "  save-dialogs.sh exit code: $sd_rc"
+        tail -10 /tmp/test-cs-11-sd.log
+        fail=1
+    else
+        echo -e "  ${GREEN}OK${NC}   save-dialogs.sh exits 0 with no source jsonls"
+    fi
+
+    # Second run idempotent
+    bash scripts/save-dialogs.sh >/tmp/test-cs-11-sd2.log 2>&1
+    if [ "$?" -ne 0 ]; then
+        echo "  second run failed"
+        fail=1
+    else
+        echo -e "  ${GREEN}OK${NC}   second run idempotent"
+    fi
+
+    return $fail
+}
+
+# ============================================================================
 # Run all tests
 # ============================================================================
 
 echo ""
 echo "===================================="
-echo " Claude Code Starter v6.0 — smoke   "
+echo " Claude Code Starter v6.2 — smoke   "
 echo "===================================="
 echo " repo: $REPO_DIR"
 echo "===================================="
@@ -557,6 +667,9 @@ run_test "auto_detect_book_project"         5 test_auto_detect_book
 run_test "migrate_with_existing_claude_md"  6 test_migrate_existing_claude
 run_test "rollback_after_install"           7 test_rollback
 run_test "force_overwrite"                  8 test_force
+run_test "v6.2_memory_layers_code"          9 test_memory_layers_code
+run_test "v6.2_memory_layers_content"      10 test_memory_layers_content
+run_test "v6.2_save_dialogs_idempotent"    11 test_save_dialogs_idempotent
 
 # Final cleanup of any logs
 rm -f /tmp/test-cs-*.log /tmp/cs-snapshot-*.md 2>/dev/null || true

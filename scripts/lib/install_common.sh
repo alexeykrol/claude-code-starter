@@ -1,7 +1,7 @@
 #!/bin/bash
 #
 # Claude Code Starter — Shared install/migration library
-# Version: 6.1.0
+# Version: 6.2.0
 #
 # Общая библиотека функций для install (init-project.sh) и migration (migrate.sh).
 # Caller'ы делают `source` этого файла, парсят аргументы и вызывают функции.
@@ -387,6 +387,12 @@ backup_existing() {
         cp ".claude/SNAPSHOT.md" "$BACKUP_DIR/SNAPSHOT.md"
         files_backed_up+=(".claude/SNAPSHOT.md")
     fi
+    for layer in ARCHITECTURE BACKLOG INVARIANTS; do
+        if [ -f ".claude/${layer}.md" ]; then
+            cp ".claude/${layer}.md" "$BACKUP_DIR/${layer}.md"
+            files_backed_up+=(".claude/${layer}.md")
+        fi
+    done
     if [ -f "manifest.md" ]; then
         cp "manifest.md" "$BACKUP_DIR/manifest.md"
         files_backed_up+=("manifest.md")
@@ -451,6 +457,13 @@ rollback() {
         log_success "Restored: .claude/SNAPSHOT.md"
         restored=$((restored + 1))
     fi
+    for layer in ARCHITECTURE BACKLOG INVARIANTS; do
+        if [ -f "$last_backup/${layer}.md" ]; then
+            cp "$last_backup/${layer}.md" ".claude/${layer}.md"
+            log_success "Restored: .claude/${layer}.md"
+            restored=$((restored + 1))
+        fi
+    done
     if [ -f "$last_backup/manifest.md" ]; then
         cp "$last_backup/manifest.md" "manifest.md"
         log_success "Restored: manifest.md"
@@ -607,6 +620,7 @@ install_common() {
     # Helper scripts
     copy_if_missing "$TEMPLATE_DIR/scripts/framework-state-mode.sh" "scripts/framework-state-mode.sh"
     copy_if_missing "$TEMPLATE_DIR/scripts/switch-repo-access.sh"   "scripts/switch-repo-access.sh"
+    copy_if_missing "$TEMPLATE_DIR/scripts/save-dialogs.sh"         "scripts/save-dialogs.sh"
     chmod +x scripts/*.sh 2>/dev/null || true
 
     # settings.json — copy / merge hooks
@@ -616,8 +630,69 @@ install_common() {
     install_gitignore
 
     # Universal rules (всегда)
-    for rule in autonomy delegation context-management production-safety local-first logging; do
+    for rule in autonomy delegation context-management production-safety local-first logging dialog-preservation; do
         copy_if_missing "$TEMPLATE_DIR/.claude/rules/${rule}.md" ".claude/rules/${rule}.md"
+    done
+
+    # Dialog archive slot
+    create_dir ".claude/dialogs"
+    if [ ! -f ".claude/dialogs/.gitkeep" ]; then
+        touch ".claude/dialogs/.gitkeep"
+        log_success "Created: .claude/dialogs/.gitkeep"
+    fi
+    if [ -f "$TEMPLATE_DIR/.claude/dialogs/README.md" ]; then
+        copy_if_missing "$TEMPLATE_DIR/.claude/dialogs/README.md" ".claude/dialogs/README.md"
+    fi
+
+    # Methodology scaffold (универсальный для всех типов проектов)
+    install_methodology_scaffold
+}
+
+# Копирует каркас methodology/ (templates + draft/patterns/mature subdirs).
+# Не перезаписывает существующие пользовательские файлы.
+install_methodology_scaffold() {
+    local src="$TEMPLATE_DIR/templates/methodology"
+    if [ ! -d "$src" ]; then
+        log_warning "Methodology scaffold not found at $src (skipping)"
+        return 0
+    fi
+
+    create_dir "methodology"
+    create_dir "methodology/templates"
+    create_dir "methodology/draft"
+    create_dir "methodology/patterns"
+    create_dir "methodology/mature"
+
+    # Onboarding doc + canonical example
+    copy_if_missing "$src/_HOW-THIS-GROWS.md"            "methodology/_HOW-THIS-GROWS.md"
+    copy_if_missing "$src/00-example-llm-as-component.md" "methodology/00-example-llm-as-component.md"
+
+    # Stage templates
+    for tpl in draft pattern mature crystallized; do
+        copy_if_missing "$src/templates/${tpl}.md" "methodology/templates/${tpl}.md"
+    done
+
+    # Keep subdirs alive in git
+    for sub in draft patterns mature; do
+        [ -f "methodology/${sub}/.gitkeep" ] || touch "methodology/${sub}/.gitkeep"
+    done
+}
+
+# Копирует слои памяти (ARCHITECTURE / BACKLOG / INVARIANTS) — два варианта:
+# из root .claude/ для code, из templates/content/ для content. Не перезаписывает.
+install_memory_layers() {
+    local src_dir="$1"  # каталог-источник, например $TEMPLATE_DIR/.claude или $ct
+    if [ ! -d "$src_dir" ]; then
+        return 0
+    fi
+
+    for layer in ARCHITECTURE BACKLOG INVARIANTS; do
+        if [ -f "$src_dir/${layer}.md" ] && [ ! -f ".claude/${layer}.md" ]; then
+            substitute_placeholders "$src_dir/${layer}.md" ".claude/${layer}.md"
+            log_success "Created: .claude/${layer}.md"
+        elif [ -f ".claude/${layer}.md" ]; then
+            log_warning "Exists:  .claude/${layer}.md (not overwritten)"
+        fi
     done
 }
 
@@ -698,6 +773,15 @@ install_gitignore() {
             added=$((added + 1))
         fi
     done < "$TEMPLATE_DIR/.gitignore"
+
+    # Privacy-first: dialog JSONLs never accidentally committed, even in private-solo.
+    for entry in ".claude/dialogs/*.jsonl" ".claude/dialogs/INDEX.md"; do
+        if ! grep -qF "$entry" ".gitignore" 2>/dev/null; then
+            echo "$entry" >> ".gitignore"
+            added=$((added + 1))
+        fi
+    done
+
     if [ "$added" -gt 0 ]; then
         log_success "Updated: .gitignore (+$added entries)"
     else
@@ -720,6 +804,7 @@ install_code() {
     create_dir ".claude/skills/playwright"
     create_dir ".claude/skills/db-migrate"
     create_dir ".claude/skills/housekeeping"
+    create_dir ".claude/skills/save-dialog"
 
     # Code agents
     create_dir ".claude/agents/researcher"
@@ -730,7 +815,7 @@ install_code() {
     copy_if_missing "$TEMPLATE_DIR/.claude/rules/commit-policy.md" ".claude/rules/commit-policy.md"
 
     # Skills
-    for skill in start finish testing playwright db-migrate housekeeping; do
+    for skill in start finish testing playwright db-migrate housekeeping save-dialog; do
         copy_if_missing "$TEMPLATE_DIR/.claude/skills/${skill}/SKILL.md" \
                         ".claude/skills/${skill}/SKILL.md"
     done
@@ -750,6 +835,9 @@ install_code() {
     else
         log_warning "Exists:  .claude/SNAPSHOT.md (not overwritten)"
     fi
+
+    # Memory layers — contracts axis (ARCHITECTURE, BACKLOG, INVARIANTS)
+    install_memory_layers "$TEMPLATE_DIR/.claude"
 }
 
 # ============================================================================
@@ -772,8 +860,14 @@ install_content() {
     fi
 
     # Skills и agents — структура
-    for skill in research outline write-content review-content enrich content-index housekeeping; do
+    for skill in research outline write-content review-content enrich content-index housekeeping save-dialog start finish; do
         create_dir ".claude/skills/${skill}"
+    done
+
+    # Code-side skills (start, finish, save-dialog) приходят из root шаблона
+    for skill in start finish save-dialog; do
+        copy_if_missing "$TEMPLATE_DIR/.claude/skills/${skill}/SKILL.md" \
+                        ".claude/skills/${skill}/SKILL.md"
     done
 
     for agent in researcher writer editor reviewer; do
@@ -865,6 +959,9 @@ install_content() {
     else
         log_warning "Exists:  .claude/SNAPSHOT.md (not overwritten)"
     fi
+
+    # Memory layers — contracts axis (content-flavored ARCHITECTURE/BACKLOG/INVARIANTS)
+    install_memory_layers "$ct"
 }
 
 # Копирует starter-структуру для конкретного content_type, если её ещё нет.

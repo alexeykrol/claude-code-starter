@@ -45,27 +45,49 @@ git diff --stat
 3. Сформировать описательное commit message
 4. git commit
 
-### 4. Обновить SNAPSHOT.md
+### 4. Обновить слои памяти
 
-Обновить `.claude/SNAPSHOT.md`:
+**SNAPSHOT.md** — что есть сейчас:
 - **Что сделано** — добавить записи о работе этой сессии
 - **В процессе** — очистить или обновить
 - **Следующие шаги** — что осталось
 - **Известные проблемы** — если обнаружены
 - **Дата** — обновить timestamp
 
-### 5. Закоммитить обновлённый SNAPSHOT
+**BACKLOG.md** (если есть) — что планируется:
+- Перенести закрытые задачи из Next в done
+- Добавить новые обнаруженные задачи (Next/Soon/Later)
+- Если решение «не делаем» — переместить в Won't do с одной строкой причины
+
+**INVARIANTS.md** (если есть) — если в сессии возник новый инвариант или нашли нарушение существующего:
+- Добавить новый INV-NNN с описанием правила, причины, проверки
+- Это сигнал зрелости — не пропускать
+
+**ARCHITECTURE.md** (если есть) — если в сессии изменилась карта системы (новый модуль, новые границы):
+- Обновить соответствующую секцию
+
+### 4b. Сохранить диалог сессии
+
+Защита от retention cleanup Claude Code — диалог может содержать ценные методологические находки:
+```bash
+[ -f scripts/save-dialogs.sh ] && bash scripts/save-dialogs.sh || true
+```
+Без note (быстрый автосейв). Если в сессии было что-то особенно ценное — пользователь может вручную запустить `/save-dialog` с note до или после `/finish`.
+
+### 5. Закоммитить обновлённые слои
 
 ```bash
 # Проверить режим framework state
 scripts/framework-state-mode.sh check-safe-mode
 
-# Только private-solo коммитит SNAPSHOT в git-историю.
+# Только private-solo коммитит memory layers в git-историю.
 if [ "$(scripts/framework-state-mode.sh should-commit-framework-state)" = "true" ]; then
-  git add .claude/SNAPSHOT.md
-  git diff --cached --quiet || git commit -m "docs: update SNAPSHOT after session"
+  for f in .claude/SNAPSHOT.md .claude/BACKLOG.md .claude/INVARIANTS.md .claude/ARCHITECTURE.md; do
+    [ -f "$f" ] && git add "$f"
+  done
+  git diff --cached --quiet || git commit -m "docs: update memory layers after session"
 else
-  echo "SNAPSHOT kept local due repo_access=$(scripts/framework-state-mode.sh repo-access)"
+  echo "Memory layers kept local due repo_access=$(scripts/framework-state-mode.sh repo-access)"
 fi
 ```
 
