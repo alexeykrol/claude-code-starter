@@ -7,7 +7,7 @@
 ### Правила (`~/.claude/rules/`)
 
 Универсальные:
-- `autonomy.md`, `delegation.md`, `context-management.md`, `commit-policy.md`, `production-safety.md`, `logging.md`, `local-first.md`
+- `autonomy.md`, `delegation.md`, `context-management.md`, `commit-policy.md`, `production-safety.md`, `logging.md`, `local-first.md`, `dialog-preservation.md`
 
 Контентные (для проектов с текстами/курсами/книгами):
 - `content-pipeline.md` — Intake → Research → Outline → Write → Enrich → Review → Export
@@ -20,13 +20,23 @@
 
 ### Навыки (`~/.claude/skills/`)
 
-Общие: `/start`, `/finish`, `/testing`, `/handoff`, `/housekeeping` (универсальная — проверяет и код, и контент)
+Общие: `/start`, `/finish`, `/testing`, `/handoff`, `/housekeeping` (универсальная — проверяет и код, и контент), `/save-dialog` (архив сессионных JSONL)
 
 Code: `/db-migrate`, `/playwright`
 
 Content: `/research`, `/outline`, `/write-content`, `/review-content`, `/enrich`, `/content-index`
 
 Bootstrap: `/setup-project` — устанавливает framework в текущую папку (auto-detect type). Это самописный skill из Claude Code Starter; не путай со встроенной командой `/init`, которая просто генерирует CLAUDE.md документацию.
+
+### Dialog Preservation (`dialog-preservation.md` + `/save-dialog`)
+
+Claude Code пишет JSONL текущей сессии в `~/.claude/projects/<encoded-cwd>/`. Эти файлы со временем подчищаются retention'ом. Глобальная сетка включает:
+
+- правило `dialog-preservation.md` — куда копировать, как индексировать, политика по `repo_access`;
+- скилл `/save-dialog` — явное сохранение текущей сессии в `.claude/dialogs/`;
+- автоматическое сохранение при `/finish` (если в проекте установлен `scripts/save-dialogs.sh`).
+
+Архив `.claude/dialogs/` коммитится только в `repo_access=private-solo`; в shared/public — остаётся локальным.
 
 ### Агенты (`~/.claude/agents/`)
 

@@ -4,6 +4,11 @@
 .claude/.tool-counter
 CLAUDE.local.md
 
+# Dialog archive — raw JSONL stays local (privacy).
+# .gitkeep and README.md inside .claude/dialogs/ are tracked.
+.claude/dialogs/*.jsonl
+.claude/dialogs/INDEX.md
+
 # Framework metafiles — for public/shared repos (repo_access=public or private-shared)
 # Uncomment these lines if your project is shared with others:
 # >>> framework-public-ignore
