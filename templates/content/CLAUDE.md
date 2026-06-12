@@ -119,25 +119,37 @@ Severity:
 - Major — исправить до финала.
 - Minor — backlog.
 
-## Состояние проекта
+## Слои памяти
 
-`.claude/SNAPSHOT.md` хранит:
-- текущую фазу;
-- готовность content units;
-- последнюю точку работы;
-- открытые дефициты;
-- pending review;
-- важные решения по источникам, стилю, структуре.
+Память проекта живёт на **двух осях**. Не схлопывай их в один файл.
+
+**Ось 1. Контракты — что должно быть (медленно меняется):**
+
+| Файл | Что хранит |
+|------|-----------|
+| `.claude/ARCHITECTURE.md` | Карта проекта: chapters/lessons/sections, нарратив, иерархия источников, навигация |
+| `.claude/INVARIANTS.md` | Жёсткие правила продукта: сохранение голоса, иерархия источников, audience level |
+| `methodology/` | Методологии (например, для пайплайнов обработки транскриптов или research) |
+
+**Ось 2. State — что есть сейчас (быстро меняется):**
+
+| Файл | Что хранит |
+|------|-----------|
+| `.claude/SNAPSHOT.md` | Текущая фаза, готовность content units, дефициты, pending review |
+| `.claude/BACKLOG.md` | План: главы/уроки/research/enrichment — Next / Soon / Later / Won't do |
+| `.claude/dialogs/` | Архив сессионных диалогов (см. `rules/dialog-preservation.md`) |
+
+При старте сессии читай **обе оси**. При завершении — обновляй обе.
 
 ## Подсистемы
 
 | Слой | Путь | Назначение |
 |------|------|------------|
-| Правила | `.claude/rules/` | workflow, quality, sources, formats, commits |
-| Навыки | `.claude/skills/` | research, outline, write, review, enrich, index |
+| Правила | `.claude/rules/` | workflow, quality, sources, formats, commits, dialog-preservation |
+| Навыки | `.claude/skills/` | research, outline, write, review, enrich, index, save-dialog |
 | Агенты | `.claude/agents/` | researcher, writer, editor, reviewer |
 | Хуки | `.claude/hooks/` | checkpoints, compaction, reminders |
-| Состояние | `.claude/SNAPSHOT.md` | рабочая память проекта |
+| Методологии | `methodology/` | Спецификации для контент-пайплайнов |
 | Метаданные | `manifest.md` | project_name, repo_access, project_type, content_type |
 
 ## Агенты
