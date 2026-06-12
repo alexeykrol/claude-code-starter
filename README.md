@@ -19,7 +19,9 @@
 - единый installer для нового, существующего и legacy-проекта;
 - явный контроль над тем, что framework state делает с git-историей.
 
-**Новое в v6.2:** восстановлены слои памяти `ARCHITECTURE.md` и `BACKLOG.md`, добавлены `INVARIANTS.md` и каталог `methodology/` с лестницей зрелости. Добавлен механизм dialog preservation. См. [release-notes/v6.2.1.md](release-notes/v6.2.1.md).
+**Новое в v6.2.1:** `/start` skill переписан — убран кэп «доложи 3-5 строк» (он читался моделью как потолок глубины, а не пол краткости), добавлен обязательный шаг **заземления карты в территорию** (git log + wc + grep против заявлений метафайлов), пометка «карта ≠ территория». В шапке `CLAUDE.md` — новая секция «Назначение этого файла» с **тремя видами ограничений** (действия / внимание / глубина): первые два — нормальны, кэп на глубину — структурный баг. В `validate-release.sh` — запрет на параллельный `ONBOARDING.md` (конституция только в `CLAUDE.md`). См. [release-notes/v6.2.1.md](release-notes/v6.2.1.md).
+
+**Новое в v6.2.0:** восстановлены слои памяти `ARCHITECTURE.md` и `BACKLOG.md`, добавлены `INVARIANTS.md` и каталог `methodology/` с лестницей зрелости (draft → pattern → mature → crystallized). Добавлен механизм dialog preservation (`scripts/save-dialogs.sh`, skill `/save-dialog`, авто-сохранение при `/finish`).
 
 **Новое в v6.0–6.1:** автоматическое определение типа проекта (code / content / hybrid). Контентные проекты — книги, курсы, базы знаний, документы, транскрипты — получают свой набор правил, навыков и агентов (writer, editor, content-reviewer). Опциональный глобальный слой `~/.claude/` с `/setup-project` skill. Установка без флагов: `bash init-project.sh` сам поймёт, где находится, и поставит подходящий слой.
 
@@ -267,18 +269,21 @@ scripts/switch-repo-access.sh private-shared --commit
 
 ## Эволюция версий
 
-| Тема | v5 | v6.0–6.1 | v6.2 |
-|------|----|----|------|
-| Тип проекта | только code | code / content / hybrid с автодетектом | + явная двух-осевая модель памяти |
-| Слои памяти | `SNAPSHOT.md` (всё в одном) | `SNAPSHOT.md` | `SNAPSHOT.md` + `BACKLOG.md` (state) + `ARCHITECTURE.md` + `INVARIANTS.md` (contracts) |
-| Контентные проекты | нет | книги, курсы, KB, документы, транскрипты | + content-flavored memory layers |
-| Methodology layer | нет | нет | `methodology/` с лестницей зрелости draft → pattern → mature → crystallized |
-| Dialog preservation | TypeScript-стек в v4, выкинут в v5 | нет | bash-скрипт + `/save-dialog` skill + auto-save при `/finish` |
-| `CLAUDE.md` при миграции | merge только `settings.json` hooks | полный аддитивный merge секций через Python helper | + документация двух-осевой памяти, чтобы не схлопывалась снова |
-| Конфликты | overwrite или skip | детектятся, останавливают установку, пишут конкретное предложение | то же |
-| Backup | нет | автоматический `.claude/backup-TIMESTAMP/` | + backup новых memory files |
-| Откат | manual | `init-project.sh --rollback` | + восстанавливает новые memory files |
-| Глобальный слой | нет | опциональный `~/.claude/` через `install-global.sh` | + глобальный `methodology/`, `/save-dialog` skill |
-| Шаблоны контента | нет | `chapter.md`, `lesson.md`, `transcript.md`, `article.md`, `document.md` | то же |
+| Тема | v5 | v6.0–6.1 | v6.2.0 | v6.2.1 |
+|------|----|----|------|--------|
+| Тип проекта | только code | code / content / hybrid с автодетектом | + явная двух-осевая модель памяти | то же |
+| Слои памяти | `SNAPSHOT.md` (всё в одном) | `SNAPSHOT.md` | `SNAPSHOT.md` + `BACKLOG.md` (state) + `ARCHITECTURE.md` + `INVARIANTS.md` (contracts) | то же |
+| Контентные проекты | нет | книги, курсы, KB, документы, транскрипты | + content-flavored memory layers | то же |
+| Methodology layer | нет | нет | `methodology/` с лестницей зрелости draft → pattern → mature → crystallized | + canonical draft про onboarding-cap |
+| Dialog preservation | TypeScript-стек в v4, выкинут в v5 | нет | bash-скрипт + `/save-dialog` skill + auto-save при `/finish` | то же |
+| `/start` skill | базовый | базовый | читает обе оси памяти | + grounding (git log/wc/grep против метафайлов), масштабируемый доклад, «карта ≠ территория» |
+| `CLAUDE.md` шапка | passport-only | passport-only | + «Слои памяти» | + «Назначение» с тремя видами ограничений (действия / внимание / глубина), кэп глубины запрещён |
+| `CLAUDE.md` при миграции | merge только `settings.json` hooks | полный аддитивный merge секций через Python helper | + документация двух-осевой памяти | то же |
+| Конфликты | overwrite или skip | детектятся, останавливают установку, пишут конкретное предложение | то же | то же |
+| Backup | нет | автоматический `.claude/backup-TIMESTAMP/` | + backup новых memory files | то же |
+| Откат | manual | `init-project.sh --rollback` | + восстанавливает новые memory files | то же |
+| Глобальный слой | нет | опциональный `~/.claude/` через `install-global.sh` | + глобальный `methodology/`, `/save-dialog` skill | то же |
+| Drift guards | нет | нет | нет | `validate-release.sh` проверяет README badge + release-notes link + script headers, запрещает `ONBOARDING.md` |
+| Шаблоны контента | нет | `chapter.md`, `lesson.md`, `transcript.md`, `article.md`, `document.md` | то же | то же |
 
 Подробности по эволюции версий смотри в [CHANGELOG.md](CHANGELOG.md).

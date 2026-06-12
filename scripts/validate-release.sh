@@ -81,6 +81,37 @@ if ! grep -q "release-notes/v$VERSION.md" "$REPO_DIR/README.md"; then
     exit 1
 fi
 
+# Content drift — README must have a highlight paragraph for the current
+# version, not just a badge bump. Pattern: "**Новое в v6.2.1:**" or
+# "**What's new in v6.2.1:**". This catches the recurring "I bumped the
+# badge but the highlight still describes the prior release" failure mode.
+if ! grep -qE "\*\*(Новое в|What'?s new in) v$VERSION[^0-9.]" "$REPO_DIR/README.md"; then
+    echo "validate-release: README.md has no '**Новое в v$VERSION:**' highlight paragraph (content drift)"
+    echo "  Hint: add a one-paragraph highlight near the top describing what changed in this release."
+    exit 1
+fi
+
+# Evolution table — if a "## Эволюция версий" / "## Evolution" section
+# exists, it must include a column referencing the current minor/patch.
+if grep -qE "^## (Эволюция версий|Evolution|v[0-9]+ vs v[0-9]+)" "$REPO_DIR/README.md"; then
+    if ! grep -q "v$VERSION" "$REPO_DIR/README.md"; then
+        echo "validate-release: README.md has an evolution section but no v$VERSION column (content drift)"
+        exit 1
+    fi
+fi
+
+# Global layer addendum should mention the current major.minor — when /start
+# or core protocols change, the global addendum must be refreshed too.
+ADDENDUM="$REPO_DIR/templates/global/CLAUDE.addendum.md"
+MINOR_VERSION=$(echo "$VERSION" | cut -d. -f1-2)
+if [ -f "$ADDENDUM" ]; then
+    if ! grep -qE "v$MINOR_VERSION" "$ADDENDUM"; then
+        echo "validate-release: $ADDENDUM does not reference v$MINOR_VERSION (content drift)"
+        echo "  Hint: when core protocols change, the global addendum needs a note explaining the new behavior."
+        exit 1
+    fi
+fi
+
 # Onboarding-file guard — see FRAMEWORK-CASE-ONBOARDING.md.
 # The framework must not ship a separate ONBOARDING.md template; the
 # constitution lives in CLAUDE.md (which the harness auto-loads). A
