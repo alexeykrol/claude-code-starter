@@ -2,6 +2,38 @@
 
 All notable changes to `Claude Code Starter` are documented here.
 
+## [6.3.0] - 2026-07-25
+
+### Summary
+
+`v6.3.0` embeds the **orchestrator model** into the framework — a conceptual shift in who runs production:
+
+- **The owner is the product above production** — sets the goal, the authority envelope, reviews outcomes, decides at stop-points. The owner no longer opens worker sessions by hand, no longer carries context between threads, no longer plays integrator.
+- **The agent is the orchestrator and lead developer** — decomposes work into streams, spawns its own workers (subagents / isolated worktrees / deterministic workflows), integrates by dependency order, verifies independently, commits. It wakes the owner only at stop-points (production deploy, external effects, irreversible actions, runtime-data deletion).
+- **Handoff evolves**: from a manual context bridge the owner pastes into a new session into an internal **charter** the orchestrator issues to its workers. Cross-session continuity is carried by the bounded two-axis memory plus a thin handoff pointer — never by an ever-growing context megafile (a continuity file that grows without bound is a bug: it drowns the very session it was meant to save).
+
+The model is captured as a portable rule set (`orchestration-model.md`, principles O1–O12) that now **ships with the framework**, and the existing `autonomy`/`delegation` rules are evolved to carry it. This is the same evolution path the framework has followed since v6.2: field reports from real projects (Saved Downloader) distilled into structural framework changes.
+
+### Added
+
+- **`templates/global/rules/orchestration-model.md`** — portable orchestrator-model rule set, now installed into `~/.claude/rules/` by `install-global.sh`. Covers: the three-level frame (owner → orchestrator → workers); judgment-vs-bookkeeping split inside workers (O4); charter as the unit of worker control (O5); four evidence statuses `passed / failed / not_run / inconclusive` with an independent verifier that never fixes its own findings (O6); authority envelope with hard stops (O7); durability via commits + memory + journals (O8); intent→primitive mapping for Claude Code (Agent / Workflow / worktree isolation / remote / cron) (O9); fan-out vs solo judgment (O10); legacy adoption path — wrap, don't rewrite (O11); bounded cross-session continuity (O12).
+- **`templates/global/skills/handoff/`** — the `/handoff` skill now ships with the framework (previously it existed only in the author's global layer while the addendum referenced it — a dangling reference for fresh installs). It is the carrier of the continuity axis: role-typed session handoffs (orchestrator / executor / reviewer / owner / general), grounding discipline, verification-report handshake.
+- `install-global.sh` installs both additively (existing files are never overwritten).
+
+### Changed
+
+- **`.claude/rules/autonomy.md`** — new section «Оркестраторская модель: владелец над производством»: the working model is explicitly three-level (owner above orchestrator above workers), not the flat "agent-manager + subagents". "Don't pull the owner in" now covers the entire production layer: spawning workers, integration, commits need no confirmation.
+- **`.claude/rules/delegation.md`** — new section «Оркестрация: charter, веер/solo, один писатель, доказательства»: charters for writing workers; when to fan out vs when coherence-critical work must stay solo; single-writer rule for shared contracts enforced by worktree isolation rather than discipline; four evidence statuses without optimistic renaming; deterministic multi-worker graphs via saved workflows.
+
+### Why this matters
+
+Every prior version of the framework assumed the owner personally launches and glues worker sessions (paste a handoff, review, repeat). That was the correct model when sessions could only be launched by a human. It no longer is: the agent can spawn, isolate, budget and resume workers programmatically. v6.3.0 moves the framework's default to that reality — the owner stays in the product seat, and the expensive human attention goes only where it is genuinely needed: goals, priorities, risk, stop-points.
+
+### Upgrade Notes
+
+- All changes are additive. `install-global.sh` adds `orchestration-model.md` and `/handoff` only if absent; existing customized copies are never overwritten.
+- Existing projects keep working under the old flat model until their owner adopts the new default; the rule includes an explicit legacy path (O11: wrap the manual handoff model, don't tear it down — move "launch a worker" from owner to orchestrator one stream at a time).
+
 ## [6.2.1] - 2026-06-12
 
 ### Summary

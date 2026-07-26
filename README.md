@@ -1,6 +1,6 @@
 # Claude Code Starter v6
 
-[![Version](https://img.shields.io/badge/version-v6.2.1-2563eb)](https://github.com/alexeykrol/claude-code-starter)
+[![Version](https://img.shields.io/badge/version-v6.3.0-2563eb)](https://github.com/alexeykrol/claude-code-starter)
 [![Status](https://img.shields.io/badge/status-active-16a34a)](https://github.com/alexeykrol/claude-code-starter)
 [![Installer](https://img.shields.io/badge/installer-single--file-f59e0b)](https://github.com/alexeykrol/claude-code-starter/blob/main/init-project.sh)
 [![Shell](https://img.shields.io/badge/shell-bash-111827?logo=gnubash)](https://www.gnu.org/software/bash/)
@@ -16,8 +16,11 @@
 - **двух-осевую проектную память** — контракты (`ARCHITECTURE.md`, `INVARIANTS.md`, `methodology/`) и state (`SNAPSHOT.md`, `BACKLOG.md`, `dialogs/`);
 - **methodology layer** с лестницей зрелости (draft → pattern → mature → crystallized) для пайплайнов с автоматическими LLM-вызовами;
 - **dialog preservation** — JSONL текущей сессии сохраняется в `.claude/dialogs/` до того, как Claude Code сделает retention cleanup;
+- **оркестраторскую модель работы** — владелец остаётся продуктом над производством, агент сам поднимает и координирует воркеров;
 - единый installer для нового, существующего и legacy-проекта;
 - явный контроль над тем, что framework state делает с git-историей.
+
+**Новое в v6.3.0:** фреймворк переходит на **оркестраторскую модель**. Владелец — продукт/методолог **над** производством: даёт цель, границы полномочий, ревьюит результат и решает на стоп-точках. Агент — **оркестратор и главный девелопер**: сам режет работу на потоки, сам поднимает воркеров (субагенты / изолированные worktree / детерминированные workflows), интегрирует, независимо верифицирует и коммитит — не дёргая владельца на подтверждение каждого шага. Handoff эволюционирует из ручного «моста», который владелец переносил между сессиями, во внутренний **charter**, который оркестратор выдаёт воркерам; непрерывность контекста между сессиями держит **ограниченная двух-осевая память + тонкий указатель**, а не разрастающийся мегафайл. Модель поставляется как переносимый свод правил `orchestration-model.md` (принципы O1–O12), правила `autonomy`/`delegation` эволюционированы под неё, скилл `/handoff` теперь входит в поставку. См. [release-notes/v6.3.0.md](release-notes/v6.3.0.md).
 
 **Новое в v6.2.1:** `/start` skill переписан — убран кэп «доложи 3-5 строк» (он читался моделью как потолок глубины, а не пол краткости), добавлен обязательный шаг **заземления карты в территорию** (git log + wc + grep против заявлений метафайлов), пометка «карта ≠ территория». В шапке `CLAUDE.md` — новая секция «Назначение этого файла» с **тремя видами ограничений** (действия / внимание / глубина): первые два — нормальны, кэп на глубину — структурный баг. В `validate-release.sh` — запрет на параллельный `ONBOARDING.md` (конституция только в `CLAUDE.md`). См. [release-notes/v6.2.1.md](release-notes/v6.2.1.md).
 
@@ -49,6 +52,8 @@
 ```text
 .claude/
   rules/                # операционные правила (autonomy, delegation, dialog-preservation, ...)
+                        #   autonomy + delegation несут оркестраторскую модель (v6.3.0+):
+                        #   владелец над производством, агент сам поднимает воркеров
   skills/               # /start, /finish, /save-dialog, /testing, ...
   agents/               # researcher, implementer, reviewer (+ writer/editor для content)
   hooks/                # фоновые guardrails (pre-compact, post-compact, ...)
@@ -245,8 +250,8 @@ scripts/switch-repo-access.sh private-shared --commit
 Документация:
 - [CHANGELOG.md](CHANGELOG.md) — история версий и изменений
 - [RELEASING.md](RELEASING.md) — как собирать и публиковать релиз
-- [release-notes/v6.2.1.md](release-notes/v6.2.1.md) — notes для текущего release
-- [release-notes/GITHUB_RELEASE_v6.2.1.md](release-notes/GITHUB_RELEASE_v6.2.1.md) — готовый body для GitHub Release
+- [release-notes/v6.3.0.md](release-notes/v6.3.0.md) — notes для текущего release
+- [release-notes/GITHUB_RELEASE_v6.3.0.md](release-notes/GITHUB_RELEASE_v6.3.0.md) — готовый body для GitHub Release
 
 Архив:
 - [archive/V4_ARCHIVE_NOTE.md](archive/V4_ARCHIVE_NOTE.md) — что именно сохранено от `v4`
@@ -264,26 +269,29 @@ scripts/switch-repo-access.sh private-shared --commit
 - Установить framework: [init-project.sh](init-project.sh)
 - Прочитать историю версий: [CHANGELOG.md](CHANGELOG.md)
 - Собрать release: [RELEASING.md](RELEASING.md)
-- Посмотреть notes текущего релиза: [release-notes/v6.2.1.md](release-notes/v6.2.1.md)
-- Взять текст GitHub Release: [release-notes/GITHUB_RELEASE_v6.2.1.md](release-notes/GITHUB_RELEASE_v6.2.1.md)
+- Посмотреть notes текущего релиза: [release-notes/v6.3.0.md](release-notes/v6.3.0.md)
+- Взять текст GitHub Release: [release-notes/GITHUB_RELEASE_v6.3.0.md](release-notes/GITHUB_RELEASE_v6.3.0.md)
 
 ## Эволюция версий
 
-| Тема | v5 | v6.0–6.1 | v6.2.0 | v6.2.1 |
-|------|----|----|------|--------|
-| Тип проекта | только code | code / content / hybrid с автодетектом | + явная двух-осевая модель памяти | то же |
-| Слои памяти | `SNAPSHOT.md` (всё в одном) | `SNAPSHOT.md` | `SNAPSHOT.md` + `BACKLOG.md` (state) + `ARCHITECTURE.md` + `INVARIANTS.md` (contracts) | то же |
-| Контентные проекты | нет | книги, курсы, KB, документы, транскрипты | + content-flavored memory layers | то же |
-| Methodology layer | нет | нет | `methodology/` с лестницей зрелости draft → pattern → mature → crystallized | + canonical draft про onboarding-cap |
-| Dialog preservation | TypeScript-стек в v4, выкинут в v5 | нет | bash-скрипт + `/save-dialog` skill + auto-save при `/finish` | то же |
-| `/start` skill | базовый | базовый | читает обе оси памяти | + grounding (git log/wc/grep против метафайлов), масштабируемый доклад, «карта ≠ территория» |
-| `CLAUDE.md` шапка | passport-only | passport-only | + «Слои памяти» | + «Назначение» с тремя видами ограничений (действия / внимание / глубина), кэп глубины запрещён |
-| `CLAUDE.md` при миграции | merge только `settings.json` hooks | полный аддитивный merge секций через Python helper | + документация двух-осевой памяти | то же |
-| Конфликты | overwrite или skip | детектятся, останавливают установку, пишут конкретное предложение | то же | то же |
-| Backup | нет | автоматический `.claude/backup-TIMESTAMP/` | + backup новых memory files | то же |
-| Откат | manual | `init-project.sh --rollback` | + восстанавливает новые memory files | то же |
-| Глобальный слой | нет | опциональный `~/.claude/` через `install-global.sh` | + глобальный `methodology/`, `/save-dialog` skill | то же |
-| Drift guards | нет | нет | нет | `validate-release.sh` проверяет README badge + release-notes link + script headers, запрещает `ONBOARDING.md` |
-| Шаблоны контента | нет | `chapter.md`, `lesson.md`, `transcript.md`, `article.md`, `document.md` | то же | то же |
+| Тема | v5 | v6.0–6.1 | v6.2.0 | v6.2.1 | v6.3.0 |
+|------|----|----|------|--------|--------|
+| Модель работы | агент-менеджер + субагенты | то же | то же | то же | **оркестраторская модель**: владелец над производством, агент сам поднимает воркеров (`orchestration-model.md`, O1–O12) |
+| Роль владельца | даёт ТЗ, сам клеит сессии | то же | то же | то же | продукт/методолог: цель + границы + ревью + стоп-точки; поднятие воркеров и интеграция — у агента |
+| Handoff / континуитет | нет | нет | SNAPSHOT + hooks | то же | `/handoff` в поставке; charter для воркеров; ограниченная память вместо мегафайла |
+| Тип проекта | только code | code / content / hybrid с автодетектом | + явная двух-осевая модель памяти | то же | то же |
+| Слои памяти | `SNAPSHOT.md` (всё в одном) | `SNAPSHOT.md` | `SNAPSHOT.md` + `BACKLOG.md` (state) + `ARCHITECTURE.md` + `INVARIANTS.md` (contracts) | то же | то же |
+| Контентные проекты | нет | книги, курсы, KB, документы, транскрипты | + content-flavored memory layers | то же | то же |
+| Methodology layer | нет | нет | `methodology/` с лестницей зрелости draft → pattern → mature → crystallized | + canonical draft про onboarding-cap | то же |
+| Dialog preservation | TypeScript-стек в v4, выкинут в v5 | нет | bash-скрипт + `/save-dialog` skill + auto-save при `/finish` | то же | то же |
+| `/start` skill | базовый | базовый | читает обе оси памяти | + grounding (git log/wc/grep против метафайлов), масштабируемый доклад, «карта ≠ территория» | то же |
+| `CLAUDE.md` шапка | passport-only | passport-only | + «Слои памяти» | + «Назначение» с тремя видами ограничений (действия / внимание / глубина), кэп глубины запрещён | то же |
+| `CLAUDE.md` при миграции | merge только `settings.json` hooks | полный аддитивный merge секций через Python helper | + документация двух-осевой памяти | то же | то же |
+| Конфликты | overwrite или skip | детектятся, останавливают установку, пишут конкретное предложение | то же | то же | то же |
+| Backup | нет | автоматический `.claude/backup-TIMESTAMP/` | + backup новых memory files | то же | то же |
+| Откат | manual | `init-project.sh --rollback` | + восстанавливает новые memory files | то же | то же |
+| Глобальный слой | нет | опциональный `~/.claude/` через `install-global.sh` | + глобальный `methodology/`, `/save-dialog` skill | то же | + `orchestration-model.md`, `/handoff` skill |
+| Drift guards | нет | нет | нет | `validate-release.sh` проверяет README badge + release-notes link + script headers, запрещает `ONBOARDING.md` | то же |
+| Шаблоны контента | нет | `chapter.md`, `lesson.md`, `transcript.md`, `article.md`, `document.md` | то же | то же | то же |
 
 Подробности по эволюции версий смотри в [CHANGELOG.md](CHANGELOG.md).

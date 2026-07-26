@@ -1,7 +1,7 @@
 #!/bin/bash
 #
 # Claude Code Starter — Shared install/migration library
-# Version: 6.2.1
+# Version: 6.3.0
 #
 # Общая библиотека функций для install (init-project.sh) и migration (migrate.sh).
 # Caller'ы делают `source` этого файла, парсят аргументы и вызывают функции.

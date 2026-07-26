@@ -45,7 +45,7 @@ scripts/build-release.sh
 Or explicitly:
 
 ```bash
-scripts/build-release.sh 6.2.0
+scripts/build-release.sh 6.3.0
 ```
 
 Output:
@@ -72,7 +72,7 @@ dist-release/<version>/
 5. Review `dist-release/<version>/RELEASE_NOTES.md`.
 6. Create tag `v<version>` if it does not already exist.
 7. Create GitHub Release from `v<version>`.
-8. Use the latest versioned body — for example [release-notes/GITHUB_RELEASE_v6.2.0.md](release-notes/GITHUB_RELEASE_v6.2.0.md) — as the release body template, and adjust the version if needed.
+8. Use the latest versioned body — for example [release-notes/GITHUB_RELEASE_v6.3.0.md](release-notes/GITHUB_RELEASE_v6.3.0.md) — as the release body template, and adjust the version if needed.
 9. Upload:
    - `dist-release/<version>/init-project.sh`
    - `dist-release/<version>/framework.tar.gz`

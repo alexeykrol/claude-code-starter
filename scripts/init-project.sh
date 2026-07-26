@@ -1,7 +1,7 @@
 #!/bin/bash
 #
 # Claude Code Starter — Bootstrap Payload
-# Version: 6.2.1 (onboarding-cap fix + grounding step)
+# Version: 6.3.0 (orchestrator model: owner above production, agent runs workers)
 #
 # Internal bootstrap used by the public root launcher.
 # Разворачивает управляющую среду Claude Code в новом проекте.
