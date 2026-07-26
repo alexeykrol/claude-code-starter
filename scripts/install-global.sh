@@ -13,6 +13,7 @@
 #   - Добавляет content-reviewer как отдельного агента
 #   - Копирует code-only skills из framework (db-migrate, playwright)
 #   - Устанавливает skill /init для бутстрапа новых проектов
+#   - Устанавливает skill /handoff (континуитет между сессиями + оркестрация)
 #   - Аддитивно мёрджит ~/.claude/CLAUDE.md с framework addendum
 #   - Записывает путь к framework checkout в ~/.claude/framework-source-path
 #
@@ -237,6 +238,19 @@ if [ -d "$src" ]; then
     else
         run cp -R "$src" "$dst"
         log_success "Installed: skills/save-dialog/"
+    fi
+fi
+
+# === Install /handoff skill (cross-session continuity / orchestration) ===
+log_info "Installing /handoff skill..."
+src="$FRAMEWORK_DIR/templates/global/skills/handoff"
+dst="$GLOBAL_DIR/skills/handoff"
+if [ -d "$src" ]; then
+    if [ -d "$dst" ]; then
+        log_warning "Exists:  skills/handoff/ (not overwritten)"
+    else
+        run cp -R "$src" "$dst"
+        log_success "Installed: skills/handoff/"
     fi
 fi
 
